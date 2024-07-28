@@ -37,8 +37,6 @@ onValue(connectedRef, (snap) => {
     console.log("Not connected to Firebase");
   }
 });
-// Function to load data from Firebase
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
 function loadDataFromFirebase() {
     const dbRef = ref(window.firebaseDatabase, '/');
@@ -99,9 +97,6 @@ function renderMembers() {
         membersList.appendChild(memberItem);
     });
 }
-
-import { ref, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
 function addMember() {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
