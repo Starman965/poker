@@ -8,6 +8,15 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+const connectedRef = database.ref(".info/connected");
+connectedRef.on("value", (snap) => {
+  if (snap.val() === true) {
+    console.log("Connected to Firebase");
+  } else {
+    console.log("Not connected to Firebase");
+  }
+});
+
 // Get a reference to the database service
 const database = firebase.database();
 
