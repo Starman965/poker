@@ -3,14 +3,14 @@ import { getDatabase, ref, onValue, set, push, update, remove } from "https://ww
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
 // Import the functions you need from the SDKs you need
-import { 
-    ref, 
-    onValue, 
-    set, 
-    push, 
-    update, 
-    remove 
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+// import { 
+ //    ref, 
+//     onValue, 
+//     set, 
+//     push, 
+ //    update, 
+ //    remove 
+// } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
