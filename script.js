@@ -265,21 +265,7 @@ function addEvent() {
         alert('Please fill in all fields for the new event.');
     }
 }
-function loadEventForEditing() {
-    const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
-    
-    if (selectedIndex !== "") {
-        const event = schedule[selectedIndex];
-        document.getElementById('editEventDate').value = event.date;
-        document.getElementById('editEventHost').value = event.host;
-        document.getElementById('editEventLocation').value = event.location;
-    } else {
-        document.getElementById('editEventDate').value = '';
-        document.getElementById('editEventHost').value = '';
-        document.getElementById('editEventLocation').value = '';
-    }
-}
+
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedIndex = editEventSelect.value;
@@ -613,6 +599,21 @@ function toggleEventList() {
     } else {
         scheduleContainer.style.display = 'none';
         headerElement.textContent = '▼';
+    }
+}
+function loadEventForEditing() {
+    const editEventSelect = document.getElementById('editEventSelect');
+    const selectedIndex = editEventSelect.value;
+    
+    if (selectedIndex !== "") {
+        const event = schedule[selectedIndex];
+        document.getElementById('editEventDate').value = event.date;
+        document.getElementById('editEventHost').value = event.host;
+        document.getElementById('editEventLocation').value = event.location;
+    } else {
+        document.getElementById('editEventDate').value = '';
+        document.getElementById('editEventHost').value = '';
+        document.getElementById('editEventLocation').value = '';
     }
 }
 
