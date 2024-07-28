@@ -1,27 +1,41 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
+  authDomain: "poker-a2e1c.firebaseapp.com",
+  databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
+  projectId: "poker-a2e1c",
+  storageBucket: "poker-a2e1c.appspot.com",
+  messagingSenderId: "813172723871",
+  appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
+  measurementId: "G-NSL5SLKE5H"
+};
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Get a reference to the database service
-const database = firebase.database();
-
-// Function to check connection status
-function checkFirebaseConnection() {
-  const connectedRef = database.ref(".info/connected");
-  connectedRef.on("value", (snap) => {
-    if (snap.val() === true) {
-      console.log("Connected to Firebase");
-    } else {
-      console.log("Not connected to Firebase");
-    }
-  });
-}
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const database = getDatabase(app);
 
 let members = [];
 let schedule = [];
 
+// Check connection
+const connectedRef = ref(database, ".info/connected");
+onValue(connectedRef, (snap) => {
+  if (snap.val() === true) {
+    console.log("Connected to Firebase");
+  } else {
+    console.log("Not connected to Firebase");
+  }
+});
 // Function to load data from Firebase
 function loadDataFromFirebase() {
-  database.ref('/').once('value').then((snapshot) => {
+  const dbRef = ref(database, '/');
+  onValue(dbRef, (snapshot) => {
     const data = snapshot.val();
     members = data.members || [];
     schedule = data.schedule || [];
@@ -29,14 +43,14 @@ function loadDataFromFirebase() {
     renderSchedule();
     populateHostDropdowns();
     console.log('Data loaded successfully from Firebase!');
-  }).catch((error) => {
+  }, (error) => {
     console.error('Error loading data from Firebase:', error);
   });
 }
 
 // Function to save data to Firebase
 function saveDataToFirebase() {
-  database.ref('/').set({
+  set(ref(database, '/'), {
     members: members,
     schedule: schedule
   }).then(() => {
@@ -46,12 +60,8 @@ function saveDataToFirebase() {
   });
 }
 
-// Wait for DOM content to be loaded before initializing Firebase-dependent functions
-document.addEventListener('DOMContentLoaded', () => {
-  checkFirebaseConnection();
-  loadDataFromFirebase();
-});
-
+// Load data when the page is ready
+document.addEventListener('DOMContentLoaded', loadDataFromFirebase);
 function renderMembers() {
     const membersList = document.getElementById('membersList');
     const memberCount = document.getElementById('memberCount');
@@ -84,11 +94,14 @@ function addMember() {
     const location = document.getElementById('newMemberLocation').value.trim();
 
     if (name && email && location) {
-        members.push({ name, email, location });
-        renderMembers();
-        populateHostDropdowns();
-        saveDataToFirebase();
-        
+        const newMember = { name, email, location };
+        push(ref(database, 'members'), newMember)
+            .then(() => {
+                console.log('Member added successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+            })
+            .catch((error) => console.error('Error adding member:', error));
+
         // Clear input fields
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
@@ -119,11 +132,14 @@ function updateMember(index) {
     const location = document.getElementById('newMemberLocation').value.trim();
 
     if (name && email && location) {
-        members[index] = { name, email, location };
-        renderMembers();
-        populateHostDropdowns();
-        saveDataToFirebase();
-        
+        const updatedMember = { name, email, location };
+        update(ref(database, `members/${index}`), updatedMember)
+            .then(() => {
+                console.log('Member updated successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+            })
+            .catch((error) => console.error('Error updating member:', error));
+
         // Reset the form
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
@@ -138,10 +154,12 @@ function updateMember(index) {
 
 function confirmDeleteMember(index) {
     if (confirm('Are you sure you want to delete this member?')) {
-        members.splice(index, 1);
-        renderMembers();
-        populateHostDropdowns();
-        saveDataToFirebase();
+        remove(ref(database, `members/${index}`))
+            .then(() => {
+                console.log('Member deleted successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+            })
+            .catch((error) => console.error('Error deleting member:', error));
     }
 }
 
@@ -152,7 +170,6 @@ function composeMemberEmail(email) {
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
-
 function renderSchedule() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const editEventSelect = document.getElementById('editEventSelect');
@@ -223,10 +240,13 @@ function addEvent() {
             location,
             rsvps: {}
         };
-        schedule.push(newEvent);
-        renderSchedule();
-        saveDataToFirebase();
-        
+        push(ref(database, 'schedule'), newEvent)
+            .then(() => {
+                console.log('Event added successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+            })
+            .catch((error) => console.error('Error adding event:', error));
+
         // Clear input fields
         document.getElementById('newEventDate').value = '';
         document.getElementById('newEventHost').value = '';
@@ -250,13 +270,19 @@ function saveEventEdits() {
     const newLocation = document.getElementById('editEventLocation').value.trim();
 
     if (newDate && newHost && newLocation) {
-        schedule[selectedIndex].date = newDate;
-        schedule[selectedIndex].host = newHost;
-        schedule[selectedIndex].location = newLocation;
-        
-        renderSchedule();
-        saveDataToFirebase();
-        alert("Event updated successfully!");
+        const updatedEvent = {
+            date: newDate,
+            host: newHost,
+            location: newLocation,
+            rsvps: schedule[selectedIndex].rsvps || {}
+        };
+        update(ref(database, `schedule/${selectedIndex}`), updatedEvent)
+            .then(() => {
+                console.log('Event updated successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+                alert("Event updated successfully!");
+            })
+            .catch((error) => console.error('Error updating event:', error));
     } else {
         alert("Please fill in all fields.");
     }
@@ -272,17 +298,23 @@ function deleteEvent() {
     }
 
     if (confirm('Are you sure you want to delete this event?')) {
-        schedule.splice(selectedIndex, 1);
-        renderSchedule();
-        saveDataToFirebase();
-        alert("Event deleted successfully!");
+        remove(ref(database, `schedule/${selectedIndex}`))
+            .then(() => {
+                console.log('Event deleted successfully');
+                loadDataFromFirebase(); // Reload data to reflect changes
+                alert("Event deleted successfully!");
+            })
+            .catch((error) => console.error('Error deleting event:', error));
     }
 }
 
 function updateRSVP(eventIndex, memberName, status) {
-    schedule[eventIndex].rsvps[memberName] = status;
-    updateTotalAttending(eventIndex);
-    saveDataToFirebase();
+    update(ref(database, `schedule/${eventIndex}/rsvps/${memberName}`), status)
+        .then(() => {
+            console.log('RSVP updated successfully');
+            loadDataFromFirebase(); // Reload data to reflect changes
+        })
+        .catch((error) => console.error('Error updating RSVP:', error));
 }
 
 function updateTotalAttending(eventIndex) {
@@ -306,7 +338,6 @@ function toggleEventDetails(eventIndex) {
         headerElement.textContent = '▼';
     }
 }
-
 function loadEventForEditing() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedIndex = editEventSelect.value;
@@ -344,7 +375,6 @@ function updateHostLocation() {
         document.getElementById(locationInput).value = member.location;
     }
 }
-
 function composeInvitationEmail(eventIndex) {
     const event = schedule[eventIndex];
     const subject = encodeURIComponent(`Poker Night Invitation - ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
@@ -468,7 +498,6 @@ Nasser`);
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
-
 function showPastEventsReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -539,7 +568,6 @@ function showAttendanceReport() {
     reportHTML += '</table>';
     reportContainer.innerHTML = reportHTML;
 }
-
 function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -585,3 +613,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
     document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
 });
+
+// Export functions that need to be globally accessible
+window.addMember = addMember;
+window.startEditMember = startEditMember;
+window.confirmDeleteMember = confirmDeleteMember;
+window.composeMemberEmail = composeMemberEmail;
+window.addEvent = addEvent;
+window.saveEventEdits = saveEventEdits;
+window.deleteEvent = deleteEvent;
+window.updateRSVP = updateRSVP;
+window.toggleEventDetails = toggleEventDetails;
+window.composeInvitationEmail = composeInvitationEmail;
+window.composeReminderEmail = composeReminderEmail;
+window.composeFinalConfirmationEmail = composeFinalConfirmationEmail;
+window.showPastEventsReport = showPastEventsReport;
+window.showAttendanceReport = showAttendanceReport;
+window.togglePastEventDetails = togglePastEventDetails;
+window.toggleMemberList = toggleMemberList;
+window.toggleEventList = toggleEventList;
