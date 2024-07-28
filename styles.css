@@ -1,0 +1,200 @@
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #50e3c2;
+    --background-color: #f5f7fa;
+    --text-color: #333;
+    --card-background: #ffffff;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: var(--primary-color);
+}
+
+.card {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.member-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: var(--card-background);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.member-info {
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.member-name {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.member-email {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.member-actions {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.member-actions button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #3a7bc8;
+}
+
+input[type="text"], input[type="email"], input[type="date"], select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.admin-panel {
+    background-color: #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.admin-panel h2 {
+    color: var(--text-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.save-load-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.save-load-buttons button {
+    margin-left: 10px;
+}
+
+.section-header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+.expand-icon {
+    font-size: 12px;
+}
+
+.section-content {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+}
+
+.event-item {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.event-header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-header h3 {
+    margin: 0;
+}
+
+.event-details {
+    padding: 15px;
+}
+
+.event-details button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}

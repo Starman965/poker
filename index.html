@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danville Poker Group Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Danville Poker Group Manager</h1>
+        <div class="save-load-buttons">
+            <button id="saveDataButton" onclick="saveDataToFile()">Save Data</button>
+            <button id="loadDataButton" onclick="handleLoadDataClick()">Load Data</button>
+        </div>
+        <div class="card">
+            <div class="section-header" onclick="toggleMemberList()">
+                <h2>Members (<span id="memberCount">0</span>)</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div id="memberListContainer" class="section-content" style="display: none;">
+                <div id="membersList" class="members-grid"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header" onclick="toggleEventList()">
+                <h2>Events</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div id="scheduleContainer" class="section-content" style="display: none;"></div>
+        </div>
+
+        <div class="admin-panel">
+            <h2>Member and Event Manager</h2>
+
+            <div id="addEditMemberCard" class="card">
+                <h3 id="addEditMemberTitle">Add New Member</h3>
+                <input type="text" id="newMemberName" placeholder="Name">
+                <input type="email" id="newMemberEmail" placeholder="Email">
+                <input type="text" id="newMemberLocation" placeholder="Location">
+                <button onclick="addMember()">Add Member</button>
+            </div>
+
+            <div class="card">
+                <h3>Add New Event</h3>
+                <input type="date" id="newEventDate">
+                <select id="newEventHost"></select>
+                <input type="text" id="newEventLocation" placeholder="Location">
+                <button onclick="addEvent()">Add Event</button>
+            </div>
+
+            <div class="card">
+                <h3>Edit/Delete Event</h3>
+                <select id="editEventSelect" onchange="loadEventForEditing()">
+                    <option value="">Select an event</option>
+                </select>
+                <input type="date" id="editEventDate">
+                <select id="editEventHost"></select>
+                <input type="text" id="editEventLocation" placeholder="Location">
+                <button onclick="saveEventEdits()">Save Edits</button>
+                <button onclick="deleteEvent()">Delete Event</button>
+            </div>
+
+            <div class="card">
+                <h3>Reports</h3>
+                <button onclick="showPastEventsReport()">Past Events Report</button>
+                <button onclick="showAttendanceReport()">12-Month Attendance Report</button>
+            </div>
+
+            <div id="reportContainer" class="report card"></div>
+        </div>
+    </div>
+    <p>Created by <a href="https://www.shutterstock.com/search/beautiful-woman-nice-breast" target="_blank">Nice Cans Software 2024</a></p>
+</body>
+</html>

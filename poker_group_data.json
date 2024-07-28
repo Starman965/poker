@@ -1,0 +1,129 @@
+{
+  "members": [
+    {
+      "name": "Bobby Carp",
+      "email": "bobby.carp@gmail.com",
+      "location": "130 Summerfield Street, Danville, CA 94506"
+    },
+    {
+      "name": "Brad Goldblatt",
+      "email": "bradgoldblatt@me.com",
+      "location": "110 Deer Ridge Place, Blackhawk, CA 94506"
+    },
+    {
+      "name": "Charlie Steffen",
+      "email": "chuckie904@comcast.net",
+      "location": "56 Van Gordon Place, Danville, CA 94526"
+    },
+    {
+      "name": "Damon Casatico",
+      "email": "damon@charitybenefitauctions.com",
+      "location": "TBD"
+    },
+    {
+      "name": "Dan Evans",
+      "email": "dan@evansbrothers.com",
+      "location": "4330 Quail Run Lane, Danville CA 94506"
+    },
+    {
+      "name": "Dave Williams",
+      "email": "davew102@yahoo.com",
+      "location": "102 Creighton Way, Danville, CA 94506"
+    },
+    {
+      "name": "David Lewis",
+      "email": "demandgendave@gmail.com",
+      "location": "405 Natalie Lane, Danville, CA 94506"
+    },
+    {
+      "name": "Don Gardner",
+      "email": "dfgardner@spkassociates.com",
+      "location": "528 Blackhawk Club Drive, Danville, CA 94506"
+    },
+    {
+      "name": "Doug Smith",
+      "email": "fullerpm@pacbell.net",
+      "location": "15 East Ridge Court, Danville CA 94506"
+    },
+    {
+      "name": "Greg Narvick",
+      "email": "gregn@nibbi.com",
+      "location": "132 Alta Vista Way, Danville, 94506"
+    },
+    {
+      "name": "Jeff Lambertson",
+      "email": "jlambertson@streivor.com",
+      "location": "39 Hidden Hills Place, Danville, CA 94506"
+    },
+    {
+      "name": "Jim Larsen",
+      "email": "j.d.larsen77@gmail.com",
+      "location": "39 Stone Creek Place, Alamo, CA 94507"
+    },
+    {
+      "name": "Mark Sanchez",
+      "email": "Mark.goldenypa@gmail.com",
+      "location": "3055 Stonegate Drive,  Alamo, CA, 94507"
+    },
+    {
+      "name": "Nasser Gaemi",
+      "email": "nasser@gcuniverse.com",
+      "location": "525 Garrigan Court, Danville, CA 94506"
+    },
+    {
+      "name": "Rob Thomas",
+      "email": "robtpersonal@gmail.com",
+      "location": "5 Trish Court, Danville, CA 94506"
+    },
+    {
+      "name": "Russell Hyzen",
+      "email": "russell@hyzen.com",
+      "location": "TBD"
+    },
+    {
+      "name": "Tim Bender",
+      "email": "mrtimbender@gmail.com",
+      "location": "8161 East Alameda Road, Scottsdale, AZ 85255"
+    }
+  ],
+  "schedule": [
+    {
+      "date": "2024-07-25",
+      "location": "130 Summerfield Street, Danville, CA 94506",
+      "host": "Bobby Carp",
+      "rsvps": {
+        "Bobby Carp": "attending",
+        "Brad Goldblatt": "attending",
+        "Charlie Steffen": "not-attending",
+        "Damon Casatico": "not-attending",
+        "Dan Evans": "attending",
+        "Dave Williams": "attending",
+        "David Lewis": "attending",
+        "Don Gardner": "attending",
+        "Doug Smith": "not-attending",
+        "Greg Narvick": "attending",
+        "Jeff Lambertson": "not-attending",
+        "Jim Larsen": "attending",
+        "Mark Sanchez": "not-attending",
+        "Nasser Gaemi": "attending",
+        "Rob Thomas": "attending",
+        "Russell Hyzen": "not-attending",
+        "Tim Bender": "not-attending"
+      }
+    },
+    {
+      "date": "2024-08-15",
+      "host": "Doug Smith",
+      "location": "15 East Ridge Court, Danville CA 94506",
+      "rsvps": {
+        "David Lewis": "no-response"
+      }
+    },
+    {
+      "date": "2024-09-19",
+      "host": "Rob Thomas",
+      "location": "5 Trish Court, Danville, CA 94506",
+      "rsvps": {}
+    }
+  ]
+}
