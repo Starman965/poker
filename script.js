@@ -1,16 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-
-// Import the functions you need from the SDKs you need
-// import { 
- //    ref, 
-//     onValue, 
-//     set, 
-//     push, 
- //    update, 
- //    remove 
-// } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+// David
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
