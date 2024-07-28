@@ -35,15 +35,22 @@ onValue(connectedRef, (snap) => {
 // Function to load data from Firebase
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
 function loadDataFromFirebase() {
     const dbRef = ref(window.firebaseDatabase, '/');
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
-        members = data.members || [];
-        schedule = data.schedule || [];
+        
+        // Convert members object to array
+        members = data.members ? Object.values(data.members) : [];
+        
+        // Convert schedule object to array if it's not already
+        schedule = data.schedule ? (Array.isArray(data.schedule) ? data.schedule : Object.values(data.schedule)) : [];
+        
         renderMembers();
         renderSchedule();
-        populateHostDropdowns(); // Add this line
+        populateHostDropdowns();
         console.log('Data loaded successfully from Firebase!');
     }, (error) => {
         console.error('Error loading data from Firebase:', error);
@@ -90,6 +97,8 @@ function renderMembers() {
     });
 }
 
+import { ref, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
 function addMember() {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
@@ -97,7 +106,8 @@ function addMember() {
 
     if (name && email && location) {
         const newMember = { name, email, location };
-        push(ref(database, 'members'), newMember)
+        const membersRef = ref(window.firebaseDatabase, 'members');
+        push(membersRef, newMember)
             .then(() => {
                 console.log('Member added successfully');
                 loadDataFromFirebase(); // Reload data to reflect changes
@@ -112,7 +122,6 @@ function addMember() {
         alert('Please fill in all fields for the new member.');
     }
 }
-
 function startEditMember(index) {
     const member = members[index];
     document.getElementById('newMemberName').value = member.name;
