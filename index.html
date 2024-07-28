@@ -6,10 +6,6 @@
     <title>Danville Poker Group Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="container">
@@ -72,7 +68,38 @@
         </div>
     </div>
 
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
+            authDomain: "poker-a2e1c.firebaseapp.com",
+            databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
+            projectId: "poker-a2e1c",
+            storageBucket: "poker-a2e1c.appspot.com",
+            messagingSenderId: "813172723871",
+            appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
+            measurementId: "G-NSL5SLKE5H"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Make Firebase services available globally (if needed)
+        window.firebaseApp = app;
+        window.firebaseDatabase = database;
+    </script>
+
+    <!-- Load Moment.js for date handling -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="script.js"></script>
+
+    <!-- Your main JavaScript file -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
