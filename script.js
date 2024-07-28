@@ -1,7 +1,12 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+import { 
+    ref, 
+    onValue, 
+    set, 
+    push, 
+    update, 
+    remove 
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -609,7 +614,6 @@ function togglePastEventDetails(index) {
         headerElement.textContent = '▼';
     }
 }
-
 function toggleMemberList() {
     const memberListContainer = document.getElementById('memberListContainer');
     const headerElement = memberListContainer.previousElementSibling.querySelector('.expand-icon');
@@ -622,7 +626,6 @@ function toggleMemberList() {
         headerElement.textContent = '▼';
     }
 }
-
 function toggleEventList() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const headerElement = scheduleContainer.previousElementSibling.querySelector('.expand-icon');
@@ -643,7 +646,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
 });
 
-// Export functions that need to be globally accessible
+// Export functions to global scope
+window.toggleMemberList = toggleMemberList;
+window.toggleEventList = toggleEventList;
 window.addMember = addMember;
 window.startEditMember = startEditMember;
 window.confirmDeleteMember = confirmDeleteMember;
@@ -658,6 +663,3 @@ window.composeReminderEmail = composeReminderEmail;
 window.composeFinalConfirmationEmail = composeFinalConfirmationEmail;
 window.showPastEventsReport = showPastEventsReport;
 window.showAttendanceReport = showAttendanceReport;
-window.togglePastEventDetails = togglePastEventDetails;
-window.toggleMemberList = toggleMemberList;
-window.toggleEventList = toggleEventList;
