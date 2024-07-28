@@ -33,19 +33,21 @@ onValue(connectedRef, (snap) => {
   }
 });
 // Function to load data from Firebase
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
 function loadDataFromFirebase() {
-  const dbRef = ref(database, '/');
-  onValue(dbRef, (snapshot) => {
-    const data = snapshot.val();
-    members = data.members || [];
-    schedule = data.schedule || [];
-    renderMembers();
-    renderSchedule();
-    populateHostDropdowns();
-    console.log('Data loaded successfully from Firebase!');
-  }, (error) => {
-    console.error('Error loading data from Firebase:', error);
-  });
+    const dbRef = ref(window.firebaseDatabase, '/');
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        members = data.members || [];
+        schedule = data.schedule || [];
+        renderMembers();
+        renderSchedule();
+        populateHostDropdowns(); // Add this line
+        console.log('Data loaded successfully from Firebase!');
+    }, (error) => {
+        console.error('Error loading data from Firebase:', error);
+    });
 }
 
 // Function to save data to Firebase
@@ -229,6 +231,7 @@ function renderSchedule() {
 }
 
 function addEvent() {
+    populateHostDropdowns(); // Add this line
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
     const location = document.getElementById('newEventLocation').value.trim();
@@ -255,7 +258,22 @@ function addEvent() {
         alert('Please fill in all fields for the new event.');
     }
 }
-
+function loadEventForEditing() {
+    populateHostDropdowns(); // Add this line
+    const editEventSelect = document.getElementById('editEventSelect');
+    const selectedIndex = editEventSelect.value;
+    
+    if (selectedIndex !== "") {
+        const event = schedule[selectedIndex];
+        document.getElementById('editEventDate').value = event.date;
+        document.getElementById('editEventHost').value = event.host;
+        document.getElementById('editEventLocation').value = event.location;
+    } else {
+        document.getElementById('editEventDate').value = '';
+        document.getElementById('editEventHost').value = '';
+        document.getElementById('editEventLocation').value = '';
+    }
+}
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedIndex = editEventSelect.value;
@@ -358,6 +376,8 @@ function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
     const editEventHost = document.getElementById('editEventHost');
     
+    if (!newEventHost || !editEventHost) return;
+
     const hostOptions = members.map(member => `<option value="${member.name}">${member.name}</option>`).join('');
     
     newEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
