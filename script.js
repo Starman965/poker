@@ -1,5 +1,8 @@
 // David
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
     ref, 
     onValue, 
@@ -8,7 +11,6 @@ import {
     update, 
     remove 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
