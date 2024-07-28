@@ -1,24 +1,20 @@
-// Firebase configuration
-const firebaseConfig = {
-  // Your web app's Firebase configuration
-  // You can find this in your Firebase project settings
-  databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
-};
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-const connectedRef = database.ref(".info/connected");
-connectedRef.on("value", (snap) => {
-  if (snap.val() === true) {
-    console.log("Connected to Firebase");
-  } else {
-    console.log("Not connected to Firebase");
-  }
-});
-
 // Get a reference to the database service
 const database = firebase.database();
+
+// Function to check connection status
+function checkFirebaseConnection() {
+  const connectedRef = database.ref(".info/connected");
+  connectedRef.on("value", (snap) => {
+    if (snap.val() === true) {
+      console.log("Connected to Firebase");
+    } else {
+      console.log("Not connected to Firebase");
+    }
+  });
+}
 
 let members = [];
 let schedule = [];
@@ -50,7 +46,11 @@ function saveDataToFirebase() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', loadDataFromFirebase);
+// Wait for DOM content to be loaded before initializing Firebase-dependent functions
+document.addEventListener('DOMContentLoaded', () => {
+  checkFirebaseConnection();
+  loadDataFromFirebase();
+});
 
 function renderMembers() {
     const membersList = document.getElementById('membersList');
