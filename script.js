@@ -1,208 +1,47 @@
+// Firebase configuration
+const firebaseConfig = {
+  // Your web app's Firebase configuration
+  // You can find this in your Firebase project settings
+  databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Get a reference to the database service
+const database = firebase.database();
+
 let members = [];
 let schedule = [];
-let fileInput;
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Create file input element
-    fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = 'fileInput';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
-
-    // Set up file input change event
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            loadDataFromFile(file);
-        }
-    });
-
-    // Find the load data button and set its onclick handler
-    const loadButton = document.getElementById('loadDataButton');
-    if (loadButton) {
-        loadButton.onclick = handleLoadDataClick;
-    }
-
-    // Find the save data button and set its onclick handler
-    const saveButton = document.getElementById('saveDataButton');
-    if (saveButton) {
-        saveButton.onclick = saveDataToFile;
-    }
-
-    // Load data from localStorage if available
-    const savedData = localStorage.getItem('pokerGroupData');
-    if (savedData) {
-        try {
-            const data = JSON.parse(savedData);
-            members = data.members;
-            schedule = data.schedule;
-            renderMembers();
-            renderSchedule();
-            populateHostDropdowns();
-            console.log('Data loaded successfully from localStorage!');
-        } catch (error) {
-            console.error('Error parsing data from localStorage:', error);
-        }
-    }
-
-    // Add event listeners for host selection
-    document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
-    document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
-});
-
-function handleLoadDataClick() {
-    fileInput.click();
+// Function to load data from Firebase
+function loadDataFromFirebase() {
+  database.ref('/').once('value').then((snapshot) => {
+    const data = snapshot.val();
+    members = data.members || [];
+    schedule = data.schedule || [];
+    renderMembers();
+    renderSchedule();
+    populateHostDropdowns();
+    console.log('Data loaded successfully from Firebase!');
+  }).catch((error) => {
+    console.error('Error loading data from Firebase:', error);
+  });
 }
 
-function loadDataFromFile(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const contents = e.target.result;
-        try {
-            const data = JSON.parse(contents);
-            members = data.members;
-            schedule = data.schedule;
-            renderMembers();
-            renderSchedule();
-            populateHostDropdowns();
-            // Save to localStorage (optional, for persistence across sessions)
-            localStorage.setItem('pokerGroupData', JSON.stringify(data));
-            console.log('Data loaded and saved to localStorage successfully!');
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
-            alert('Error loading data. Please make sure the file is valid JSON.');
-        }
-    };
-    reader.readAsText(file);
+// Function to save data to Firebase
+function saveDataToFirebase() {
+  database.ref('/').set({
+    members: members,
+    schedule: schedule
+  }).then(() => {
+    console.log('Data saved successfully to Firebase!');
+  }).catch((error) => {
+    console.error('Error saving data to Firebase:', error);
+  });
 }
 
-async function saveDataToFile() {
-    const data = JSON.stringify({ members, schedule }, null, 2);
-    
-    // Save to localStorage (optional, for persistence across sessions)
-    localStorage.setItem('pokerGroupData', data);
-    
-    try {
-        // Ask user to select where to save the file
-        const fileHandle = await window.showSaveFilePicker({
-            suggestedName: 'poker_group_data.json',
-            types: [{
-                description: 'JSON File',
-                accept: {'application/json': ['.json']},
-            }],
-        });
-        const writable = await fileHandle.createWritable();
-        await writable.write(data);
-        await writable.close();
-        
-        console.log('Data saved successfully!');
-    } catch (err) {
-        console.error('Failed to save the file:', err);
-        // Fallback to the original method if File System Access API is not supported
-        const blob = new Blob([data], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'poker_group_data.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-}
-
-function composeMemberEmail(email) {
-    const subject = encodeURIComponent("Poker Night");
-    const body = encodeURIComponent("Hello,\n\nI hope this email finds you well. I'm reaching out regarding our upcoming poker night.\n\nBest regards,\nNasser");
-    
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${subject}&body=${body}`;
-    window.open(gmailUrl, '_blank');
-}
-
-function saveEventEdits() {
-    const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
-    
-    if (selectedIndex === "") {
-        alert("Please select an event to edit.");
-        return;
-    }
-
-    const newDate = document.getElementById('editEventDate').value;
-    const newHost = document.getElementById('editEventHost').value;
-    const newLocation = document.getElementById('editEventLocation').value.trim();
-
-    if (newDate && newHost && newLocation) {
-        schedule[selectedIndex].date = newDate;
-        schedule[selectedIndex].host = newHost;
-        schedule[selectedIndex].location = newLocation;
-        
-        renderSchedule();
-        alert("Event updated successfully!");
-    } else {
-        alert("Please fill in all fields.");
-    }
-}
-
-function loadEventForEditing() {
-    const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
-    
-    if (selectedIndex !== "") {
-        const event = schedule[selectedIndex];
-        document.getElementById('editEventDate').value = event.date;
-        document.getElementById('editEventHost').value = event.host;
-        document.getElementById('editEventLocation').value = event.location;
-    } else {
-        document.getElementById('editEventDate').value = '';
-        document.getElementById('editEventHost').value = '';
-        document.getElementById('editEventLocation').value = '';
-    }
-}
-
-function deleteEvent() {
-    const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
-    
-    if (selectedIndex === "") {
-        alert("Please select an event to delete.");
-        return;
-    }
-
-    if (confirm('Are you sure you want to delete this event?')) {
-        schedule.splice(selectedIndex, 1);
-        renderSchedule();
-        alert("Event deleted successfully!");
-    }
-}
-
-function toggleEventList() {
-    const scheduleContainer = document.getElementById('scheduleContainer');
-    const headerElement = scheduleContainer.previousElementSibling.querySelector('.expand-icon');
-    
-    if (scheduleContainer.style.display === 'none') {
-        scheduleContainer.style.display = 'block';
-        headerElement.textContent = '▲';
-    } else {
-        scheduleContainer.style.display = 'none';
-        headerElement.textContent = '▼';
-    }
-}
-
-function toggleMemberList() {
-    const memberListContainer = document.getElementById('memberListContainer');
-    const headerElement = memberListContainer.previousElementSibling.querySelector('.expand-icon');
-    
-    if (memberListContainer.style.display === 'none') {
-        memberListContainer.style.display = 'block';
-        headerElement.textContent = '▲';
-    } else {
-        memberListContainer.style.display = 'none';
-        headerElement.textContent = '▼';
-    }
-}
+document.addEventListener('DOMContentLoaded', loadDataFromFirebase);
 
 function renderMembers() {
     const membersList = document.getElementById('membersList');
@@ -230,6 +69,26 @@ function renderMembers() {
     });
 }
 
+function addMember() {
+    const name = document.getElementById('newMemberName').value.trim();
+    const email = document.getElementById('newMemberEmail').value.trim();
+    const location = document.getElementById('newMemberLocation').value.trim();
+
+    if (name && email && location) {
+        members.push({ name, email, location });
+        renderMembers();
+        populateHostDropdowns();
+        saveDataToFirebase();
+        
+        // Clear input fields
+        document.getElementById('newMemberName').value = '';
+        document.getElementById('newMemberEmail').value = '';
+        document.getElementById('newMemberLocation').value = '';
+    } else {
+        alert('Please fill in all fields for the new member.');
+    }
+}
+
 function startEditMember(index) {
     const member = members[index];
     document.getElementById('newMemberName').value = member.name;
@@ -254,6 +113,7 @@ function updateMember(index) {
         members[index] = { name, email, location };
         renderMembers();
         populateHostDropdowns();
+        saveDataToFirebase();
         
         // Reset the form
         document.getElementById('newMemberName').value = '';
@@ -272,72 +132,16 @@ function confirmDeleteMember(index) {
         members.splice(index, 1);
         renderMembers();
         populateHostDropdowns();
+        saveDataToFirebase();
     }
 }
 
-function addMember() {
-    const name = document.getElementById('newMemberName').value.trim();
-    const email = document.getElementById('newMemberEmail').value.trim();
-    const location = document.getElementById('newMemberLocation').value.trim();
-
-    if (name && email && location) {
-        members.push({ name, email, location });
-        renderMembers();
-        populateHostDropdowns();
-        
-        // Clear input fields
-        document.getElementById('newMemberName').value = '';
-        document.getElementById('newMemberEmail').value = '';
-        document.getElementById('newMemberLocation').value = '';
-    } else {
-        alert('Please fill in all fields for the new member.');
-    }
-}
-
-function populateHostDropdowns() {
-    const newEventHost = document.getElementById('newEventHost');
-    const editEventHost = document.getElementById('editEventHost');
+function composeMemberEmail(email) {
+    const subject = encodeURIComponent("Poker Night");
+    const body = encodeURIComponent("Hello,\n\nI hope this email finds you well. I'm reaching out regarding our upcoming poker night.\n\nBest regards,\nNasser");
     
-    const hostOptions = members.map(member => `<option value="${member.name}">${member.name}</option>`).join('');
-    
-    newEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
-    editEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
-}
-
-function updateHostLocation() {
-    const hostSelect = document.activeElement.id === 'newEventHost' ? 'newEventHost' : 'editEventHost';
-    const locationInput = hostSelect === 'newEventHost' ? 'newEventLocation' : 'editEventLocation';
-    
-    const selectedHost = document.getElementById(hostSelect).value;
-    const member = members.find(m => m.name === selectedHost);
-    
-    if (member) {
-        document.getElementById(locationInput).value = member.location;
-    }
-}
-
-function addEvent() {
-    const date = document.getElementById('newEventDate').value;
-    const host = document.getElementById('newEventHost').value;
-    const location = document.getElementById('newEventLocation').value.trim();
-
-    if (date && host && location) {
-        const newEvent = {
-            date,
-            host,
-            location,
-            rsvps: {}
-        };
-        schedule.push(newEvent);
-        renderSchedule();
-        
-        // Clear input fields
-        document.getElementById('newEventDate').value = '';
-        document.getElementById('newEventHost').value = '';
-        document.getElementById('newEventLocation').value = '';
-    } else {
-        alert('Please fill in all fields for the new event.');
-    }
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
 }
 
 function renderSchedule() {
@@ -398,9 +202,87 @@ function renderSchedule() {
     document.getElementById('editEventLocation').value = '';
 }
 
+function addEvent() {
+    const date = document.getElementById('newEventDate').value;
+    const host = document.getElementById('newEventHost').value;
+    const location = document.getElementById('newEventLocation').value.trim();
+
+    if (date && host && location) {
+        const newEvent = {
+            date,
+            host,
+            location,
+            rsvps: {}
+        };
+        schedule.push(newEvent);
+        renderSchedule();
+        saveDataToFirebase();
+        
+        // Clear input fields
+        document.getElementById('newEventDate').value = '';
+        document.getElementById('newEventHost').value = '';
+        document.getElementById('newEventLocation').value = '';
+    } else {
+        alert('Please fill in all fields for the new event.');
+    }
+}
+
+function saveEventEdits() {
+    const editEventSelect = document.getElementById('editEventSelect');
+    const selectedIndex = editEventSelect.value;
+    
+    if (selectedIndex === "") {
+        alert("Please select an event to edit.");
+        return;
+    }
+
+    const newDate = document.getElementById('editEventDate').value;
+    const newHost = document.getElementById('editEventHost').value;
+    const newLocation = document.getElementById('editEventLocation').value.trim();
+
+    if (newDate && newHost && newLocation) {
+        schedule[selectedIndex].date = newDate;
+        schedule[selectedIndex].host = newHost;
+        schedule[selectedIndex].location = newLocation;
+        
+        renderSchedule();
+        saveDataToFirebase();
+        alert("Event updated successfully!");
+    } else {
+        alert("Please fill in all fields.");
+    }
+}
+
+function deleteEvent() {
+    const editEventSelect = document.getElementById('editEventSelect');
+    const selectedIndex = editEventSelect.value;
+    
+    if (selectedIndex === "") {
+        alert("Please select an event to delete.");
+        return;
+    }
+
+    if (confirm('Are you sure you want to delete this event?')) {
+        schedule.splice(selectedIndex, 1);
+        renderSchedule();
+        saveDataToFirebase();
+        alert("Event deleted successfully!");
+    }
+}
+
 function updateRSVP(eventIndex, memberName, status) {
     schedule[eventIndex].rsvps[memberName] = status;
     updateTotalAttending(eventIndex);
+    saveDataToFirebase();
+}
+
+function updateTotalAttending(eventIndex) {
+    const totalAttendingElement = document.getElementById(`totalAttending-${eventIndex}`);
+    if (!totalAttendingElement) return;
+    
+    const event = schedule[eventIndex];
+    const totalAttending = Object.values(event.rsvps).filter(status => status === 'attending').length;
+    totalAttendingElement.textContent = totalAttending;
 }
 
 function toggleEventDetails(eventIndex) {
@@ -416,13 +298,42 @@ function toggleEventDetails(eventIndex) {
     }
 }
 
-function updateTotalAttending(eventIndex) {
-    const totalAttendingElement = document.getElementById(`totalAttending-${eventIndex}`);
-    if (!totalAttendingElement) return;
+function loadEventForEditing() {
+    const editEventSelect = document.getElementById('editEventSelect');
+    const selectedIndex = editEventSelect.value;
     
-    const event = schedule[eventIndex];
-    const totalAttending = Object.values(event.rsvps).filter(status => status === 'attending').length;
-    totalAttendingElement.textContent = totalAttending;
+    if (selectedIndex !== "") {
+        const event = schedule[selectedIndex];
+        document.getElementById('editEventDate').value = event.date;
+        document.getElementById('editEventHost').value = event.host;
+        document.getElementById('editEventLocation').value = event.location;
+    } else {
+        document.getElementById('editEventDate').value = '';
+        document.getElementById('editEventHost').value = '';
+        document.getElementById('editEventLocation').value = '';
+    }
+}
+
+function populateHostDropdowns() {
+    const newEventHost = document.getElementById('newEventHost');
+    const editEventHost = document.getElementById('editEventHost');
+    
+    const hostOptions = members.map(member => `<option value="${member.name}">${member.name}</option>`).join('');
+    
+    newEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
+    editEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
+}
+
+function updateHostLocation() {
+    const hostSelect = document.activeElement.id === 'newEventHost' ? 'newEventHost' : 'editEventHost';
+    const locationInput = hostSelect === 'newEventHost' ? 'newEventLocation' : 'editEventLocation';
+    
+    const selectedHost = document.getElementById(hostSelect).value;
+    const member = members.find(m => m.name === selectedHost);
+    
+    if (member) {
+        document.getElementById(locationInput).value = member.location;
+    }
 }
 
 function composeInvitationEmail(eventIndex) {
@@ -580,19 +491,6 @@ function showPastEventsReport() {
     reportContainer.innerHTML = reportHTML;
 }
 
-function togglePastEventDetails(index) {
-    const detailsElement = document.getElementById(`pastEventDetails-${index}`);
-    const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
-    
-    if (detailsElement.style.display === 'none') {
-        detailsElement.style.display = 'block';
-        headerElement.textContent = '▲';
-    } else {
-        detailsElement.style.display = 'none';
-        headerElement.textContent = '▼';
-    }
-}
-
 function showAttendanceReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -632,3 +530,49 @@ function showAttendanceReport() {
     reportHTML += '</table>';
     reportContainer.innerHTML = reportHTML;
 }
+
+function togglePastEventDetails(index) {
+    const detailsElement = document.getElementById(`pastEventDetails-${index}`);
+    const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
+    
+    if (detailsElement.style.display === 'none') {
+        detailsElement.style.display = 'block';
+        headerElement.textContent = '▲';
+    } else {
+        detailsElement.style.display = 'none';
+        headerElement.textContent = '▼';
+    }
+}
+
+function toggleMemberList() {
+    const memberListContainer = document.getElementById('memberListContainer');
+    const headerElement = memberListContainer.previousElementSibling.querySelector('.expand-icon');
+    
+    if (memberListContainer.style.display === 'none') {
+        memberListContainer.style.display = 'block';
+        headerElement.textContent = '▲';
+    } else {
+        memberListContainer.style.display = 'none';
+        headerElement.textContent = '▼';
+    }
+}
+
+function toggleEventList() {
+    const scheduleContainer = document.getElementById('scheduleContainer');
+    const headerElement = scheduleContainer.previousElementSibling.querySelector('.expand-icon');
+    
+    if (scheduleContainer.style.display === 'none') {
+        scheduleContainer.style.display = 'block';
+        headerElement.textContent = '▲';
+    } else {
+        scheduleContainer.style.display = 'none';
+        headerElement.textContent = '▼';
+    }
+}
+
+// Add event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
+    document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
+    document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
+});
