@@ -266,7 +266,6 @@ function addEvent() {
     }
 }
 function loadEventForEditing() {
-    populateHostDropdowns(); // Add this line
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedIndex = editEventSelect.value;
     
@@ -361,21 +360,6 @@ function toggleEventDetails(eventIndex) {
     } else {
         detailsElement.style.display = 'none';
         headerElement.textContent = '▼';
-    }
-}
-function loadEventForEditing() {
-    const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
-    
-    if (selectedIndex !== "") {
-        const event = schedule[selectedIndex];
-        document.getElementById('editEventDate').value = event.date;
-        document.getElementById('editEventHost').value = event.host;
-        document.getElementById('editEventLocation').value = event.location;
-    } else {
-        document.getElementById('editEventDate').value = '';
-        document.getElementById('editEventHost').value = '';
-        document.getElementById('editEventLocation').value = '';
     }
 }
 
