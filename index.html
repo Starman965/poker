@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danville Poker Group Manager</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="script.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Danville Poker Group Manager</h1>
-        <div class="save-load-buttons">
-            <button id="saveDataButton" onclick="saveDataToFile()">Save Data</button>
-            <button id="loadDataButton" onclick="handleLoadDataClick()">Load Data</button>
-        </div>
+
         <div class="card">
             <div class="section-header" onclick="toggleMemberList()">
                 <h2>Members (<span id="memberCount">0</span>)</h2>
@@ -55,9 +54,7 @@
 
             <div class="card">
                 <h3>Edit/Delete Event</h3>
-                <select id="editEventSelect" onchange="loadEventForEditing()">
-                    <option value="">Select an event</option>
-                </select>
+                <select id="editEventSelect"></select>
                 <input type="date" id="editEventDate">
                 <select id="editEventHost"></select>
                 <input type="text" id="editEventLocation" placeholder="Location">
@@ -74,6 +71,8 @@
             <div id="reportContainer" class="report card"></div>
         </div>
     </div>
-    <p>Created by <a href="https://www.shutterstock.com/search/beautiful-woman-nice-breast" target="_blank">Nice Cans Software 2024</a></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
