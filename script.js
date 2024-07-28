@@ -40,8 +40,6 @@ onValue(connectedRef, (snap) => {
 // Function to load data from Firebase
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
 function loadDataFromFirebase() {
     const dbRef = ref(window.firebaseDatabase, '/');
     onValue(dbRef, (snapshot) => {
