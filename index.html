@@ -102,5 +102,24 @@
 
     <!-- Your main JavaScript file -->
     <script type="module" src="script.js"></script>
+
+    <!-- Include the togglePastEventDetails function -->
+    <script>
+        function togglePastEventDetails(index) {
+            const detailsElement = document.getElementById(`pastEventDetails-${index}`);
+            const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
+            
+            if (detailsElement.style.display === 'none' || detailsElement.style.display === '') {
+                detailsElement.style.display = 'block';
+                headerElement.textContent = '▲';
+            } else {
+                detailsElement.style.display = 'none';
+                headerElement.textContent = '▼';
+            }
+        }
+
+        // Export the function to the global scope
+        window.togglePastEventDetails = togglePastEventDetails;
+    </script>
 </body>
 </html>
