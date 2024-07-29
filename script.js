@@ -346,7 +346,7 @@ function saveEventEdits() {
 
     const newDate = document.getElementById('editEventDate').value;
     const newHost = document.getElementById('editEventHost').value;
-    const newLocation = document.getElementById('editEventLocation').value.trim();
+    const newLocation = document.getElementById('newEventLocation').value.trim();
 
     if (newDate && newHost && newLocation) {
         const updatedEvent = {
