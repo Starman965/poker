@@ -246,12 +246,12 @@ function renderSchedule() {
                 <h3>${formattedDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
-            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                ${rsvpDetails}
-                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
-            </div>
+            <div class="event-details" id="eventDetails-${event.id}" style="display: block; visibility: visible;">
+    ${rsvpDetails}
+    <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+    <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+    <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
+</div>
         `;
         scheduleContainer.appendChild(eventDiv);
 
