@@ -238,7 +238,17 @@ function renderSchedule() {
         const eventHost = event.host || 'Host not set';
 
         const rsvpDetails = Object.entries(event.rsvps)
-            .map(([name, status]) => `<p>${name}: ${status}</p>`)
+            .map(([name, status]) => `
+                <div>
+                    <p>${name}:</p>
+                    <select onchange="updateRSVP('${event.id}', '${name}', this.value)">
+                        <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                        <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
+                        <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                    </select>
+                </div>
+            `)
             .join('');
 
         eventDiv.innerHTML = `
@@ -246,12 +256,12 @@ function renderSchedule() {
                 <h3>${formattedDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
-            <div class="event-details" id="eventDetails-${event.id}" style="display: block; visibility: visible;">
-    ${rsvpDetails}
-    <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-    <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-    <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
-</div>
+            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+                ${rsvpDetails}
+                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
+            </div>
         `;
         scheduleContainer.appendChild(eventDiv);
 
