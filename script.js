@@ -239,9 +239,9 @@ function renderSchedule() {
 
         const rsvpDetails = Object.entries(event.rsvps)
             .map(([name, status]) => `
-                <div class="rsvp-item">
-                    <p class="rsvp-name">${name}:</p>
-                    <select class="rsvp-status" onchange="updateRSVP('${event.id}', '${name}', this.value)">
+                <div class="event-rsvp">
+                    <p>${name}:</p>
+                    <select onchange="updateRSVP('${event.id}', '${name}', this.value)">
                         <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
                         <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
                         <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
@@ -258,6 +258,12 @@ function renderSchedule() {
             </div>
             <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
                 ${rsvpDetails}
+                <div class="rsvp-totals" id="rsvpTotals-${event.id}">
+                    <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
+                    <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
+                    <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
+                    <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
+                </div>
                 <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
                 <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
                 <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
@@ -414,8 +420,7 @@ function updateRSVP(eventId, memberName, status) {
             console.log('RSVP updated successfully');
             event.rsvps = updatedRsvps;
             updateTotalAttending(eventId);
-
-            // Ensure the event details remain visible after the update
+            // Ensure the event details remain open
             const detailsElement = document.getElementById(`eventDetails-${eventId}`);
             if (detailsElement) {
                 detailsElement.style.display = 'block';
@@ -430,22 +435,37 @@ function updateRSVP(eventId, memberName, status) {
         });
 }
 
+
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
-    if (!totalAttendingElement) {
-        console.warn(`Total attending element not found for event ID ${eventId}`);
+    const totalNotAttendingElement = document.getElementById(`totalNotAttending-${eventId}`);
+    const totalNoResponseElement = document.getElementById(`totalNoResponse-${eventId}`);
+    const totalMaybeElement = document.getElementById(`totalMaybe-${eventId}`);
+
+    if (!totalAttendingElement || !totalNotAttendingElement || !totalNoResponseElement || !totalMaybeElement) {
+        console.warn(`Total element not found for event ID ${eventId}`);
         return;
     }
-    
+
     const event = schedule.find(e => e.id === eventId);
     if (!event || !event.rsvps) {
         console.warn(`Invalid event data for ID ${eventId}`, event);
         totalAttendingElement.textContent = '0';
+        totalNotAttendingElement.textContent = '0';
+        totalNoResponseElement.textContent = '0';
+        totalMaybeElement.textContent = '0';
         return;
     }
 
     const totalAttending = Object.values(event.rsvps).filter(status => status === 'attending').length;
+    const totalNotAttending = Object.values(event.rsvps).filter(status => status === 'not-attending').length;
+    const totalNoResponse = Object.values(event.rsvps).filter(status => status === 'no-response').length;
+    const totalMaybe = Object.values(event.rsvps).filter(status => status === 'maybe').length;
+
     totalAttendingElement.textContent = totalAttending.toString();
+    totalNotAttendingElement.textContent = totalNotAttending.toString();
+    totalNoResponseElement.textContent = totalNoResponse.toString();
+    totalMaybeElement.textContent = totalMaybe.toString();
 }
 
 
