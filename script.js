@@ -1,5 +1,5 @@
 // Initialize Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
     getDatabase,
     ref, 
@@ -12,6 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
     authDomain: "poker-a2e1c.firebaseapp.com",
@@ -23,9 +24,23 @@ const firebaseConfig = {
     measurementId: "G-NSL5SLKE5H"
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase(app);
+// Initialize Firebase if not already initialized
+if (!getApps().length) {
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+
+    // Make Firebase services available globally (if needed)
+    window.firebaseApp = app;
+    window.firebaseDatabase = database;
+} else {
+    const app = getApps()[0];
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+
+    window.firebaseApp = app;
+    window.firebaseDatabase = database;
+}
 
 let members = [];
 let schedule = [];
