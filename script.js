@@ -299,12 +299,27 @@ function addEvent() {
     const location = document.getElementById('newEventLocation').value.trim();
 
     if (date && host && location) {
-        const newEvent = createNewEvent(date, host, location);
-        
+        const newEvent = {
+            date,
+            host,
+            location,
+            rsvps: {}
+        };
+
+        // Initialize RSVP for all members
+        members.forEach(member => {
+            newEvent.rsvps[member.name] = 'no-response';
+        });
+
         push(ref(database, 'schedule'), newEvent)
-            .then(() => {
+            .then((newEventRef) => {
                 console.log('Event added successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
+                // Add the new event to the local schedule array
+                schedule.push({
+                    id: newEventRef.key,
+                    ...newEvent
+                });
+                renderSchedule();
                 // Clear input fields
                 document.getElementById('newEventDate').value = '';
                 document.getElementById('newEventHost').value = '';
@@ -377,15 +392,32 @@ function deleteEvent() {
     }
 }
 
-function updateRSVP(eventIndex, memberName, status) {
-    update(ref(database, `schedule/${eventIndex}/rsvps/${memberName}`), status)
+function updateRSVP(eventId, memberName, status) {
+    const eventIndex = schedule.findIndex(event => event.id === eventId);
+    if (eventIndex === -1) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    const updatedRsvps = {
+        ...schedule[eventIndex].rsvps,
+        [memberName]: status
+    };
+
+    const updates = {};
+    updates[`schedule/${eventId}/rsvps`] = updatedRsvps;
+
+    update(ref(database), updates)
         .then(() => {
             console.log('RSVP updated successfully');
-            loadDataFromFirebase(); // Reload data to reflect changes
+            // Update local data
+            schedule[eventIndex].rsvps = updatedRsvps;
+            updateTotalAttending(eventId);
         })
-        .catch((error) => console.error('Error updating RSVP:', error));
+        .catch((error) => {
+            console.error('Error updating RSVP:', error);
+        });
 }
-
 function updateTotalAttending(eventIndex) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventIndex}`);
     if (!totalAttendingElement) {
