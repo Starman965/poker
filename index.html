@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,77 +9,15 @@
     <link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
-    <div class="container my-4">
-        <h1 class="text-center">Danville Poker Group Manager</h1>
+    <!-- Your HTML content here -->
 
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center" onclick="toggleMemberList()">
-                <h2>Members (<span id="memberCount">0</span>)</h2>
-                <span class="expand-icon">▼</span>
-            </div>
-            <div id="memberListContainer" class="card-body" style="display: none;">
-                <div id="membersList" class="row"></div>
-            </div>
-        </div>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center" onclick="toggleEventList()">
-                <h2>Events</h2>
-                <span class="expand-icon">▼</span>
-            </div>
-            <div id="scheduleContainer" class="card-body" style="display: none;"></div>
-        </div>
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2>Member and Event Manager</h2>
-
-                <div id="addEditMemberCard" class="card mb-4">
-                    <div class="card-body">
-                        <h3 id="addEditMemberTitle">Add New Member</h3>
-                        <input type="text" id="newMemberName" class="form-control mb-2" placeholder="Name">
-                        <input type="email" id="newMemberEmail" class="form-control mb-2" placeholder="Email">
-                        <input type="text" id="newMemberLocation" class="form-control mb-2" placeholder="Location">
-                        <button class="btn btn-primary w-100" onclick="addMember()">Add Member</button>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3>Add New Event</h3>
-                        <input type="date" id="newEventDate" class="form-control mb-2">
-                        <select id="newEventHost" class="form-control mb-2"></select>
-                        <input type="text" id="newEventLocation" class="form-control mb-2" placeholder="Location">
-                        <button class="btn btn-primary w-100" onclick="addEvent()">Add Event</button>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3>Edit/Delete Event</h3>
-                        <select id="editEventSelect" class="form-control mb-2"></select>
-                        <input type="date" id="editEventDate" class="form-control mb-2">
-                        <select id="editEventHost" class="form-control mb-2"></select>
-                        <input type="text" id="editEventLocation" class="form-control mb-2" placeholder="Location">
-                        <button class="btn btn-primary w-100 mb-2" onclick="saveEventEdits()">Save Edits</button>
-                        <button class="btn btn-danger w-100" onclick="deleteEvent()">Delete Event</button>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3>Reports</h3>
-                        <button class="btn btn-secondary w-100 mb-2" onclick="showPastEventsReport()">Past Events Report</button>
-                        <button class="btn btn-secondary w-100" onclick="showAttendanceReport()">12-Month Attendance Report</button>
-                    </div>
-                </div>
-
-                <div id="reportContainer" class="card"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <!-- Firebase and other scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -133,8 +69,5 @@
         // Export the function to the global scope
         window.togglePastEventDetails = togglePastEventDetails;
     </script>
-
-    <!-- Load Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
