@@ -334,7 +334,7 @@ function addEvent() {
         alert('Please fill in all fields for the new event.');
     }
 }
-
+// new save event edits
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedEventId = editEventSelect.value;
@@ -346,7 +346,7 @@ function saveEventEdits() {
 
     const newDate = document.getElementById('editEventDate').value;
     const newHost = document.getElementById('editEventHost').value;
-    const newLocation = document.getElementById('newEventLocation').value.trim();
+    const newLocation = document.getElementById('editEventLocation').value.trim(); // Changed from 'newEventLocation' to 'editEventLocation'
 
     if (newDate && newHost && newLocation) {
         const updatedEvent = {
