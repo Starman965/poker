@@ -211,3 +211,19 @@ th {
 .rsvp-status {
     flex: 1;
 }
+.event-rsvp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px; /* Adjust as necessary */
+}
+
+.event-rsvp p {
+    margin: 0;
+    margin-right: 10px;
+}
+
+.event-rsvp select {
+    flex-grow: 1;
+    max-width: 200px; /* Adjust width as necessary */
+}
