@@ -272,6 +272,8 @@ function renderSchedule() {
     document.getElementById('editEventDate').value = '';
     document.getElementById('editEventHost').value = '';
     document.getElementById('editEventLocation').value = '';
+console.log('Rendering event:', event);
+console.log('RSVP details:', rsvpDetails);
 }
 
 // Add this new function to your code
@@ -419,6 +421,7 @@ function updateRSVP(eventId, memberName, status) {
             console.error('Error updating RSVP:', error);
         });
 }
+
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
     if (!totalAttendingElement) {
