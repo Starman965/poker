@@ -272,6 +272,9 @@ function renderSchedule() {
         scheduleContainer.appendChild(eventDiv);
 
         editEventSelect.innerHTML += `<option value="${event.id}">${formattedDate} - ${eventLocation} (Host: ${eventHost})</option>`;
+        
+        // Update the totals for each event
+        updateTotalAttending(event.id);
     });
 
     document.getElementById('editEventSelect').value = "";
@@ -434,8 +437,6 @@ function updateRSVP(eventId, memberName, status) {
             console.error('Error updating RSVP:', error);
         });
 }
-
-
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
     const totalNotAttendingElement = document.getElementById(`totalNotAttending-${eventId}`);
