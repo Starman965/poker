@@ -7,7 +7,8 @@ import {
     set, 
     push, 
     update, 
-    remove 
+    remove,
+    get // Add this line
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
@@ -45,16 +46,16 @@ function loadDataFromFirebase() {
         const data = snapshot.val();
         
         if (data && data.members) {
-            // Convert members object to array if it's not already
-            members = Array.isArray(data.members) ? data.members : Object.values(data.members);
+            // Convert the object of objects to an array
+            members = Object.values(data.members);
         } else {
             members = [];
             console.warn('No members data found or invalid structure');
         }
         
         if (data && data.schedule) {
-            // Convert schedule object to array if it's not already
-            schedule = Array.isArray(data.schedule) ? data.schedule : Object.values(data.schedule);
+            // Assuming schedule is stored similarly to members
+            schedule = Object.values(data.schedule);
         } else {
             schedule = [];
             console.warn('No schedule data found or invalid structure');
@@ -115,13 +116,20 @@ function addMember() {
 
     if (name && email && location) {
         const newMember = { name, email, location };
-        const membersRef = ref(window.firebaseDatabase, 'members');
-        push(membersRef, newMember)
-            .then(() => {
-                console.log('Member added successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
-            })
-            .catch((error) => console.error('Error adding member:', error));
+        const membersRef = ref(database, 'members');
+        
+        // Get the current number of members to use as the new index
+        get(membersRef).then((snapshot) => {
+            const currentMemberCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+            
+            // Add the new member with a numeric key
+            set(ref(database, `members/${currentMemberCount}`), newMember)
+                .then(() => {
+                    console.log('Member added successfully');
+                    loadDataFromFirebase(); // Reload data to reflect changes
+                })
+                .catch((error) => console.error('Error adding member:', error));
+        }).catch((error) => console.error('Error getting member count:', error));
 
         // Clear input fields
         document.getElementById('newMemberName').value = '';
