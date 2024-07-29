@@ -239,9 +239,9 @@ function renderSchedule() {
 
         const rsvpDetails = Object.entries(event.rsvps)
             .map(([name, status]) => `
-                <div>
-                    <p>${name}:</p>
-                    <select onchange="updateRSVP('${event.id}', '${name}', this.value)">
+                <div class="rsvp-item">
+                    <p class="rsvp-name">${name}:</p>
+                    <select class="rsvp-status" onchange="updateRSVP('${event.id}', '${name}', this.value)">
                         <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
                         <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
                         <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
@@ -272,8 +272,6 @@ function renderSchedule() {
     document.getElementById('editEventDate').value = '';
     document.getElementById('editEventHost').value = '';
     document.getElementById('editEventLocation').value = '';
-console.log('Rendering event:', event);
-console.log('RSVP details:', rsvpDetails);
 }
 
 // Add this new function to your code
@@ -416,6 +414,16 @@ function updateRSVP(eventId, memberName, status) {
             console.log('RSVP updated successfully');
             event.rsvps = updatedRsvps;
             updateTotalAttending(eventId);
+
+            // Ensure the event details remain visible after the update
+            const detailsElement = document.getElementById(`eventDetails-${eventId}`);
+            if (detailsElement) {
+                detailsElement.style.display = 'block';
+                const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
+                if (headerElement) {
+                    headerElement.textContent = '▲';
+                }
+            }
         })
         .catch((error) => {
             console.error('Error updating RSVP:', error);
