@@ -91,18 +91,19 @@ function loadDataFromFirebase() {
 
 // Function to save data to Firebase
 function saveDataToFirebase() {
-  set(ref(database, '/'), {
-    members: members,
-    schedule: schedule
-  }).then(() => {
-    console.log('Data saved successfully to Firebase!');
-  }).catch((error) => {
-    console.error('Error saving data to Firebase:', error);
-  });
+    set(ref(database, '/'), {
+        members: members,
+        schedule: schedule
+    }).then(() => {
+        console.log('Data saved successfully to Firebase!');
+    }).catch((error) => {
+        console.error('Error saving data to Firebase:', error);
+    });
 }
 
 // Load data when the page is ready
 document.addEventListener('DOMContentLoaded', loadDataFromFirebase);
+
 function renderMembers() {
     const membersList = document.getElementById('membersList');
     const memberCount = document.getElementById('memberCount');
@@ -128,6 +129,7 @@ function renderMembers() {
         membersList.appendChild(memberItem);
     });
 }
+
 function addMember() {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
@@ -158,6 +160,7 @@ function addMember() {
         alert('Please fill in all fields for the new member.');
     }
 }
+
 function startEditMember(index) {
     const member = members[index];
     document.getElementById('newMemberName').value = member.name;
@@ -217,6 +220,7 @@ function composeMemberEmail(email) {
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
+
 function renderSchedule() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const editEventSelect = document.getElementById('editEventSelect');
@@ -314,6 +318,7 @@ function createNewEvent(date, host, location) {
 
     return newEvent;
 }
+
 function addEvent() {
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
@@ -351,6 +356,7 @@ function addEvent() {
         alert('Please fill in all fields for the new event.');
     }
 }
+
 // new save event edits
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
@@ -421,6 +427,7 @@ function deleteEvent() {
             });
     }
 }
+
 function updateRSVP(eventId, memberName, status) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
@@ -452,6 +459,7 @@ function updateRSVP(eventId, memberName, status) {
             console.error('Error updating RSVP:', error);
         });
 }
+
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
     const totalNotAttendingElement = document.getElementById(`totalNotAttending-${eventId}`);
@@ -483,6 +491,7 @@ function updateTotalAttending(eventId) {
     totalNoResponseElement.textContent = totalNoResponse.toString();
     totalMaybeElement.textContent = totalMaybe.toString();
 }
+
 function toggleEventDetails(eventId) {
     const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -500,6 +509,7 @@ function toggleEventDetails(eventId) {
         console.log(`Hiding details for event ID: ${eventId}`);
     }
 }
+
 function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
     const editEventHost = document.getElementById('editEventHost');
@@ -516,6 +526,7 @@ function populateHostDropdowns() {
 
     console.log('Host dropdowns populated');
 }
+
 function updateHostLocation() {
     const hostSelect = document.activeElement.id === 'newEventHost' ? 'newEventHost' : 'editEventHost';
     const locationInput = hostSelect === 'newEventHost' ? 'newEventLocation' : 'editEventLocation';
@@ -640,7 +651,7 @@ function composeFinalConfirmationEmail(eventId) {
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-  const subject = encodeURIComponent(`Poker Night - 7pm, ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
+    const subject = encodeURIComponent(`Poker Night - 7pm, ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
@@ -737,6 +748,7 @@ function showAttendanceReport() {
     reportHTML += '</table>';
     reportContainer.innerHTML = reportHTML;
 }
+
 function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -765,6 +777,7 @@ function toggleMemberList() {
         headerElement.textContent = '▼';
     }
 }
+
 function toggleEventList() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const headerElement = scheduleContainer.previousElementSibling.querySelector('.expand-icon');
@@ -777,6 +790,7 @@ function toggleEventList() {
         headerElement.textContent = '▼';
     }
 }
+
 function loadEventForEditing() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedEventId = editEventSelect.value;
