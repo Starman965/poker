@@ -201,16 +201,29 @@ function composeMemberEmail(email) {
 function renderSchedule() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const editEventSelect = document.getElementById('editEventSelect');
-    if (!scheduleContainer || !editEventSelect) return;
+    if (!scheduleContainer || !editEventSelect) {
+        console.error('Schedule container or edit event select not found');
+        return;
+    }
     scheduleContainer.innerHTML = '';
     editEventSelect.innerHTML = '<option value="">Select an event</option>';
     
     schedule.forEach((event, eventIndex) => {
+        if (!event || typeof event !== 'object') {
+            console.warn(`Invalid event data at index ${eventIndex}`, event);
+            return; // Skip this iteration
+        }
+
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item';
+
+        const eventDate = event.date ? moment(event.date).format('MMMM D, YYYY') : 'Date not set';
+        const eventLocation = event.location || 'Location not set';
+        const eventHost = event.host || 'Host not set';
+
         eventDiv.innerHTML = `
             <div class="event-header" onclick="toggleEventDetails(${eventIndex})">
-                <h3>${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})</h3>
+                <h3>${eventDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
             <div class="event-details" id="eventDetails-${eventIndex}" style="display: none;">
@@ -225,19 +238,27 @@ function renderSchedule() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${members.map(member => `
-                            <tr>
-                                <td>${member.name}</td>
-                                <td>
-                                    <select class="rsvp-select" onchange="updateRSVP(${eventIndex}, '${member.name}', this.value)">
-                                        <option value="no-response" ${(event.rsvps[member.name] || 'no-response') === 'no-response' ? 'selected' : ''}>No Response</option>
-                                        <option value="attending" ${event.rsvps[member.name] === 'attending' ? 'selected' : ''}>Attending</option>
-                                        <option value="not-attending" ${event.rsvps[member.name] === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                                        <option value="maybe" ${event.rsvps[member.name] === 'maybe' ? 'selected' : ''}>Maybe</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${members.map(member => {
+                            if (!member || typeof member !== 'object') {
+                                console.warn('Invalid member data', member);
+                                return '';
+                            }
+                            const memberName = member.name || 'Unknown Member';
+                            const rsvpStatus = event.rsvps && event.rsvps[memberName] ? event.rsvps[memberName] : 'no-response';
+                            return `
+                                <tr>
+                                    <td>${memberName}</td>
+                                    <td>
+                                        <select class="rsvp-select" onchange="updateRSVP(${eventIndex}, '${memberName}', this.value)">
+                                            <option value="no-response" ${rsvpStatus === 'no-response' ? 'selected' : ''}>No Response</option>
+                                            <option value="attending" ${rsvpStatus === 'attending' ? 'selected' : ''}>Attending</option>
+                                            <option value="not-attending" ${rsvpStatus === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                                            <option value="maybe" ${rsvpStatus === 'maybe' ? 'selected' : ''}>Maybe</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
                 <p>Total Attending: <span id="totalAttending-${eventIndex}">0</span></p>
@@ -246,7 +267,7 @@ function renderSchedule() {
         scheduleContainer.appendChild(eventDiv);
         updateTotalAttending(eventIndex);
 
-        editEventSelect.innerHTML += `<option value="${eventIndex}">${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})</option>`;
+        editEventSelect.innerHTML += `<option value="${eventIndex}">${eventDate} - ${eventLocation} (Host: ${eventHost})</option>`;
     });
 
     // Clear edit fields and selection after rendering
@@ -256,18 +277,30 @@ function renderSchedule() {
     document.getElementById('editEventLocation').value = '';
 }
 
+// Add this new function to your code
+function createNewEvent(date, host, location) {
+    const newEvent = {
+        date,
+        host,
+        location,
+        rsvps: {}
+    };
+
+    // Initialize RSVP for all members
+    members.forEach(member => {
+        newEvent.rsvps[member.name] = 'no-response';
+    });
+
+    return newEvent;
+}
 function addEvent() {
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
     const location = document.getElementById('newEventLocation').value.trim();
 
     if (date && host && location) {
-        const newEvent = {
-            date,
-            host,
-            location,
-            rsvps: {}
-        };
+        const newEvent = createNewEvent(date, host, location);
+        
         push(ref(database, 'schedule'), newEvent)
             .then(() => {
                 console.log('Event added successfully');
@@ -297,12 +330,21 @@ function saveEventEdits() {
     const newLocation = document.getElementById('editEventLocation').value.trim();
 
     if (newDate && newHost && newLocation) {
+        const currentEvent = schedule[selectedIndex];
         const updatedEvent = {
             date: newDate,
             host: newHost,
             location: newLocation,
-            rsvps: schedule[selectedIndex].rsvps || {}
+            rsvps: currentEvent.rsvps || {} // Maintain existing RSVPs or create empty object if none exist
         };
+
+        // Ensure all members have an RSVP entry
+        members.forEach(member => {
+            if (!updatedEvent.rsvps[member.name]) {
+                updatedEvent.rsvps[member.name] = 'no-response';
+            }
+        });
+
         update(ref(database, `schedule/${selectedIndex}`), updatedEvent)
             .then(() => {
                 console.log('Event updated successfully');
@@ -346,9 +388,18 @@ function updateRSVP(eventIndex, memberName, status) {
 
 function updateTotalAttending(eventIndex) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventIndex}`);
-    if (!totalAttendingElement) return;
+    if (!totalAttendingElement) {
+        console.warn(`Total attending element not found for event index ${eventIndex}`);
+        return;
+    }
     
     const event = schedule[eventIndex];
+    if (!event || !event.rsvps) {
+        console.warn(`Invalid event data for index ${eventIndex}`);
+        totalAttendingElement.textContent = '0';
+        return;
+    }
+
     const totalAttending = Object.values(event.rsvps).filter(status => status === 'attending').length;
     totalAttendingElement.textContent = totalAttending;
 }
