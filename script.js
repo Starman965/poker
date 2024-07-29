@@ -468,9 +468,6 @@ function updateTotalAttending(eventId) {
     totalNoResponseElement.textContent = totalNoResponse.toString();
     totalMaybeElement.textContent = totalMaybe.toString();
 }
-
-
-
 function toggleEventDetails(eventId) {
     const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -480,13 +477,14 @@ function toggleEventDetails(eventId) {
         detailsElement.style.display = 'block';
         headerElement.textContent = '▲';
         console.log(`Showing details for event ID: ${eventId}`);
+        // Update totals when the event is expanded
+        updateTotalAttending(eventId);
     } else {
         detailsElement.style.display = 'none';
         headerElement.textContent = '▼';
         console.log(`Hiding details for event ID: ${eventId}`);
     }
 }
-
 function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
     const editEventHost = document.getElementById('editEventHost');
