@@ -211,22 +211,19 @@ function renderSchedule() {
     }
     scheduleContainer.innerHTML = '';
     editEventSelect.innerHTML = '<option value="">Select an event</option>';
-    
-    // Sort events by date
+
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Use a Map to keep track of events by date
     const eventsByDate = new Map();
 
     schedule.forEach((event) => {
         if (!event || typeof event !== 'object') {
             console.warn(`Invalid event data`, event);
-            return; // Skip this iteration
+            return;
         }
 
         const eventDate = event.date ? moment(event.date).format('YYYY-MM-DD') : 'Date not set';
-        
-        // If this date already has an event, skip this iteration
+
         if (eventsByDate.has(eventDate)) {
             return;
         }
@@ -240,22 +237,27 @@ function renderSchedule() {
         const eventLocation = event.location || 'Location not set';
         const eventHost = event.host || 'Host not set';
 
+        const rsvpDetails = Object.entries(event.rsvps)
+            .map(([name, status]) => `<p>${name}: ${status}</p>`)
+            .join('');
+
         eventDiv.innerHTML = `
             <div class="event-header" onclick="toggleEventDetails('${event.id}')">
                 <h3>${formattedDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
             <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                <!-- Event details content -->
+                ${rsvpDetails}
+                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
             </div>
         `;
         scheduleContainer.appendChild(eventDiv);
-        updateTotalAttending(event.id);
 
         editEventSelect.innerHTML += `<option value="${event.id}">${formattedDate} - ${eventLocation} (Host: ${eventHost})</option>`;
     });
 
-    // Clear edit fields and selection after rendering
     document.getElementById('editEventSelect').value = "";
     document.getElementById('editEventDate').value = '';
     document.getElementById('editEventHost').value = '';
@@ -430,7 +432,7 @@ function updateTotalAttending(eventId) {
 function toggleEventDetails(eventId) {
     const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
-    
+
     if (detailsElement.style.display === 'none') {
         detailsElement.style.display = 'block';
         headerElement.textContent = '▲';
@@ -439,6 +441,7 @@ function toggleEventDetails(eventId) {
         headerElement.textContent = '▼';
     }
 }
+
 
 function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
