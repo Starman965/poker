@@ -726,7 +726,7 @@ function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
     
-    if (detailsElement.style.display === 'none') {
+    if (detailsElement.style.display === 'none' || detailsElement.style.display === '') {
         detailsElement.style.display = 'block';
         headerElement.textContent = '▲';
     } else {
@@ -734,6 +734,10 @@ function togglePastEventDetails(index) {
         headerElement.textContent = '▼';
     }
 }
+
+// Export the function to the global scope
+window.togglePastEventDetails = togglePastEventDetails;
+
 function toggleMemberList() {
     const memberListContainer = document.getElementById('memberListContainer');
     const headerElement = memberListContainer.previousElementSibling.querySelector('.expand-icon');
