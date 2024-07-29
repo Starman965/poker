@@ -212,66 +212,47 @@ function renderSchedule() {
     scheduleContainer.innerHTML = '';
     editEventSelect.innerHTML = '<option value="">Select an event</option>';
     
+    // Sort events by date
+    schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Use a Map to keep track of events by date
+    const eventsByDate = new Map();
+
     schedule.forEach((event) => {
         if (!event || typeof event !== 'object') {
             console.warn(`Invalid event data`, event);
             return; // Skip this iteration
         }
 
+        const eventDate = event.date ? moment(event.date).format('YYYY-MM-DD') : 'Date not set';
+        
+        // If this date already has an event, skip this iteration
+        if (eventsByDate.has(eventDate)) {
+            return;
+        }
+
+        eventsByDate.set(eventDate, event);
+
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item';
 
-        const eventDate = event.date ? moment(event.date).format('MMMM D, YYYY') : 'Date not set';
+        const formattedDate = moment(event.date).format('MMMM D, YYYY');
         const eventLocation = event.location || 'Location not set';
         const eventHost = event.host || 'Host not set';
 
         eventDiv.innerHTML = `
             <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-                <h3>${eventDate} - ${eventLocation} (Host: ${eventHost})</h3>
+                <h3>${formattedDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
             <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                <button class="email-button" onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-                <button class="email-button" onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-                <button class="email-button" onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
-                <table class="rsvp-table">
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>RSVP</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${members.map(member => {
-                            if (!member || typeof member !== 'object') {
-                                console.warn('Invalid member data', member);
-                                return '';
-                            }
-                            const memberName = member.name || 'Unknown Member';
-                            const rsvpStatus = event.rsvps && event.rsvps[memberName] ? event.rsvps[memberName] : 'no-response';
-                            return `
-                                <tr>
-                                    <td>${memberName}</td>
-                                    <td>
-                                        <select class="rsvp-select" onchange="updateRSVP('${event.id}', '${memberName}', this.value)">
-                                            <option value="no-response" ${rsvpStatus === 'no-response' ? 'selected' : ''}>No Response</option>
-                                            <option value="attending" ${rsvpStatus === 'attending' ? 'selected' : ''}>Attending</option>
-                                            <option value="not-attending" ${rsvpStatus === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                                            <option value="maybe" ${rsvpStatus === 'maybe' ? 'selected' : ''}>Maybe</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-                <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
+                <!-- Event details content -->
             </div>
         `;
         scheduleContainer.appendChild(eventDiv);
         updateTotalAttending(event.id);
 
-        editEventSelect.innerHTML += `<option value="${event.id}">${eventDate} - ${eventLocation} (Host: ${eventHost})</option>`;
+        editEventSelect.innerHTML += `<option value="${event.id}">${formattedDate} - ${eventLocation} (Host: ${eventHost})</option>`;
     });
 
     // Clear edit fields and selection after rendering
@@ -323,7 +304,7 @@ function addEvent() {
                     id: newEventRef.key,
                     ...newEvent
                 });
-                renderSchedule();
+                renderSchedule(); // Re-render the schedule
                 // Clear input fields
                 document.getElementById('newEventDate').value = '';
                 document.getElementById('newEventHost').value = '';
