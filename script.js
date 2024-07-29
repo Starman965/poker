@@ -41,15 +41,25 @@ onValue(connectedRef, (snap) => {
 });
 
 function loadDataFromFirebase() {
-    const dbRef = ref(window.firebaseDatabase, '/');
+    const dbRef = ref(database, '/');
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         
-        // Convert members object to array
-        members = data.members ? Object.values(data.members) : [];
+        if (data && data.members) {
+            // Convert members object to array if it's not already
+            members = Array.isArray(data.members) ? data.members : Object.values(data.members);
+        } else {
+            members = [];
+            console.warn('No members data found or invalid structure');
+        }
         
-        // Convert schedule object to array if it's not already
-        schedule = data.schedule ? (Array.isArray(data.schedule) ? data.schedule : Object.values(data.schedule)) : [];
+        if (data && data.schedule) {
+            // Convert schedule object to array if it's not already
+            schedule = Array.isArray(data.schedule) ? data.schedule : Object.values(data.schedule);
+        } else {
+            schedule = [];
+            console.warn('No schedule data found or invalid structure');
+        }
         
         renderMembers();
         renderSchedule();
@@ -240,7 +250,6 @@ function renderSchedule() {
 }
 
 function addEvent() {
-    populateHostDropdowns(); // Add this line
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
     const location = document.getElementById('newEventLocation').value.trim();
@@ -256,13 +265,12 @@ function addEvent() {
             .then(() => {
                 console.log('Event added successfully');
                 loadDataFromFirebase(); // Reload data to reflect changes
+                // Clear input fields
+                document.getElementById('newEventDate').value = '';
+                document.getElementById('newEventHost').value = '';
+                document.getElementById('newEventLocation').value = '';
             })
             .catch((error) => console.error('Error adding event:', error));
-
-        // Clear input fields
-        document.getElementById('newEventDate').value = '';
-        document.getElementById('newEventHost').value = '';
-        document.getElementById('newEventLocation').value = '';
     } else {
         alert('Please fill in all fields for the new event.');
     }
@@ -355,14 +363,18 @@ function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
     const editEventHost = document.getElementById('editEventHost');
     
-    if (!newEventHost || !editEventHost) return;
+    if (!newEventHost || !editEventHost) {
+        console.error('Host dropdown elements not found');
+        return;
+    }
 
     const hostOptions = members.map(member => `<option value="${member.name}">${member.name}</option>`).join('');
     
     newEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
     editEventHost.innerHTML = `<option value="">Select a host</option>${hostOptions}`;
-}
 
+    console.log('Host dropdowns populated');
+}
 function updateHostLocation() {
     const hostSelect = document.activeElement.id === 'newEventHost' ? 'newEventHost' : 'editEventHost';
     const locationInput = hostSelect === 'newEventHost' ? 'newEventLocation' : 'editEventLocation';
