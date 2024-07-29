@@ -5,67 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danville Poker Group Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="container">
-        <h1>Danville Poker Group Manager</h1>
+        <h1 class="my-4">Danville Poker Group Manager</h1>
 
-        <div class="card">
-            <div class="section-header" onclick="toggleMemberList()">
+        <div class="card mb-4">
+            <div class="card-header" onclick="toggleMemberList()">
                 <h2>Members (<span id="memberCount">0</span>)</h2>
                 <span class="expand-icon">▼</span>
             </div>
-            <div id="memberListContainer" class="section-content">
-                <div id="membersList" class="members-grid"></div>
+            <div id="memberListContainer" class="card-body" style="display: none;">
+                <div id="membersList" class="row"></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="section-header" onclick="toggleEventList()">
+        <div class="card mb-4">
+            <div class="card-header" onclick="toggleEventList()">
                 <h2>Events</h2>
                 <span class="expand-icon">▼</span>
             </div>
-            <div id="scheduleContainer" class="section-content"></div>
+            <div id="scheduleContainer" class="card-body" style="display: none;"></div>
         </div>
 
-        <div class="admin-panel">
-            <h2>Member and Event Manager</h2>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2>Member and Event Manager</h2>
 
-            <div id="addEditMemberCard" class="card">
-                <h3 id="addEditMemberTitle">Add New Member</h3>
-                <input type="text" id="newMemberName" placeholder="Name">
-                <input type="email" id="newMemberEmail" placeholder="Email">
-                <input type="text" id="newMemberLocation" placeholder="Location">
-                <button onclick="addMember()">Add Member</button>
+                <div id="addEditMemberCard" class="card mb-4">
+                    <div class="card-body">
+                        <h3 id="addEditMemberTitle">Add New Member</h3>
+                        <input type="text" id="newMemberName" class="form-control mb-2" placeholder="Name">
+                        <input type="email" id="newMemberEmail" class="form-control mb-2" placeholder="Email">
+                        <input type="text" id="newMemberLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary" onclick="addMember()">Add Member</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Add New Event</h3>
+                        <input type="date" id="newEventDate" class="form-control mb-2">
+                        <select id="newEventHost" class="form-control mb-2"></select>
+                        <input type="text" id="newEventLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary" onclick="addEvent()">Add Event</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Edit/Delete Event</h3>
+                        <select id="editEventSelect" class="form-control mb-2"></select>
+                        <input type="date" id="editEventDate" class="form-control mb-2">
+                        <select id="editEventHost" class="form-control mb-2"></select>
+                        <input type="text" id="editEventLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary" onclick="saveEventEdits()">Save Edits</button>
+                        <button class="btn btn-danger" onclick="deleteEvent()">Delete Event</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Reports</h3>
+                        <button class="btn btn-secondary mb-2" onclick="showPastEventsReport()">Past Events Report</button>
+                        <button class="btn btn-secondary" onclick="showAttendanceReport()">12-Month Attendance Report</button>
+                    </div>
+                </div>
+
+                <div id="reportContainer" class="card"></div>
             </div>
-
-            <div class="card">
-                <h3>Add New Event</h3>
-                <input type="date" id="newEventDate">
-                <select id="newEventHost"></select>
-                <input type="text" id="newEventLocation" placeholder="Location">
-                <button onclick="addEvent()">Add Event</button>
-            </div>
-
-            <div class="card">
-                <h3>Edit/Delete Event</h3>
-                <select id="editEventSelect"></select>
-                <input type="date" id="editEventDate">
-                <select id="editEventHost"></select>
-                <input type="text" id="editEventLocation" placeholder="Location">
-                <button onclick="saveEventEdits()">Save Edits</button>
-                <button onclick="deleteEvent()">Delete Event</button>
-            </div>
-
-            <div class="card">
-                <h3>Reports</h3>
-                <button onclick="showPastEventsReport()">Past Events Report</button>
-                <button onclick="showAttendanceReport()">12-Month Attendance Report</button>
-            </div>
-
-            <div id="reportContainer" class="report card"></div>
         </div>
     </div>
 
@@ -121,5 +132,8 @@
         // Export the function to the global scope
         window.togglePastEventDetails = togglePastEventDetails;
     </script>
+
+    <!-- Load Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
