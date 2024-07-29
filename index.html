@@ -5,67 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danville Poker Group Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-     <link rel="icon" href="favicon-32x32.png" type="image/png">
+    <link rel="icon" href="favicon-32x32.png" type="image/png">
+    <link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
-    <div class="container">
-        <h1>Danville Poker Group Manager</h1>
+    <div class="container my-4">
+        <h1 class="text-center">Danville Poker Group Manager</h1>
 
-        <div class="card">
-            <div class="section-header" onclick="toggleMemberList()">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center" onclick="toggleMemberList()">
                 <h2>Members (<span id="memberCount">0</span>)</h2>
                 <span class="expand-icon">▼</span>
             </div>
-            <div id="memberListContainer" class="section-content" style="display: none;">
-                <div id="membersList" class="members-grid"></div>
+            <div id="memberListContainer" class="card-body" style="display: none;">
+                <div id="membersList" class="row"></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="section-header" onclick="toggleEventList()">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center" onclick="toggleEventList()">
                 <h2>Events</h2>
                 <span class="expand-icon">▼</span>
             </div>
-            <div id="scheduleContainer" class="section-content" style="display: none;"></div>
+            <div id="scheduleContainer" class="card-body" style="display: none;"></div>
         </div>
 
-        <div class="admin-panel">
-            <h2>Member and Event Manager</h2>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2>Member and Event Manager</h2>
 
-            <div id="addEditMemberCard" class="card">
-                <h3 id="addEditMemberTitle">Add New Member</h3>
-                <input type="text" id="newMemberName" placeholder="Name">
-                <input type="email" id="newMemberEmail" placeholder="Email">
-                <input type="text" id="newMemberLocation" placeholder="Location">
-                <button onclick="addMember()">Add Member</button>
+                <div id="addEditMemberCard" class="card mb-4">
+                    <div class="card-body">
+                        <h3 id="addEditMemberTitle">Add New Member</h3>
+                        <input type="text" id="newMemberName" class="form-control mb-2" placeholder="Name">
+                        <input type="email" id="newMemberEmail" class="form-control mb-2" placeholder="Email">
+                        <input type="text" id="newMemberLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary w-100" onclick="addMember()">Add Member</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Add New Event</h3>
+                        <input type="date" id="newEventDate" class="form-control mb-2">
+                        <select id="newEventHost" class="form-control mb-2"></select>
+                        <input type="text" id="newEventLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary w-100" onclick="addEvent()">Add Event</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Edit/Delete Event</h3>
+                        <select id="editEventSelect" class="form-control mb-2"></select>
+                        <input type="date" id="editEventDate" class="form-control mb-2">
+                        <select id="editEventHost" class="form-control mb-2"></select>
+                        <input type="text" id="editEventLocation" class="form-control mb-2" placeholder="Location">
+                        <button class="btn btn-primary w-100 mb-2" onclick="saveEventEdits()">Save Edits</button>
+                        <button class="btn btn-danger w-100" onclick="deleteEvent()">Delete Event</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Reports</h3>
+                        <button class="btn btn-secondary w-100 mb-2" onclick="showPastEventsReport()">Past Events Report</button>
+                        <button class="btn btn-secondary w-100" onclick="showAttendanceReport()">12-Month Attendance Report</button>
+                    </div>
+                </div>
+
+                <div id="reportContainer" class="card"></div>
             </div>
-
-            <div class="card">
-                <h3>Add New Event</h3>
-                <input type="date" id="newEventDate">
-                <select id="newEventHost"></select>
-                <input type="text" id="newEventLocation" placeholder="Location">
-                <button onclick="addEvent()">Add Event</button>
-            </div>
-
-            <div class="card">
-                <h3>Edit/Delete Event</h3>
-                <select id="editEventSelect"></select>
-                <input type="date" id="editEventDate">
-                <select id="editEventHost"></select>
-                <input type="text" id="editEventLocation" placeholder="Location">
-                <button onclick="saveEventEdits()">Save Edits</button>
-                <button onclick="deleteEvent()">Delete Event</button>
-            </div>
-
-            <div class="card">
-                <h3>Reports</h3>
-                <button onclick="showPastEventsReport()">Past Events Report</button>
-                <button onclick="showAttendanceReport()">12-Month Attendance Report</button>
-            </div>
-
-            <div id="reportContainer" class="report card"></div>
         </div>
     </div>
 
@@ -77,14 +89,14 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
-            authDomain: "poker-a2e1c.firebaseapp.com",
-            databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
-            projectId: "poker-a2e1c",
-            storageBucket: "poker-a2e1c.appspot.com",
-            messagingSenderId: "813172723871",
-            appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
-            measurementId: "G-NSL5SLKE5H"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         // Initialize Firebase
@@ -121,5 +133,8 @@
         // Export the function to the global scope
         window.togglePastEventDetails = togglePastEventDetails;
     </script>
+
+    <!-- Load Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
