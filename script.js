@@ -432,16 +432,18 @@ function updateTotalAttending(eventId) {
 function toggleEventDetails(eventId) {
     const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
-
-    if (detailsElement.style.display === 'none') {
+    
+    console.log(`Toggling details for event ID: ${eventId}`);
+    if (detailsElement.style.display === 'none' || detailsElement.style.display === '') {
         detailsElement.style.display = 'block';
         headerElement.textContent = '▲';
+        console.log(`Showing details for event ID: ${eventId}`);
     } else {
         detailsElement.style.display = 'none';
         headerElement.textContent = '▼';
+        console.log(`Hiding details for event ID: ${eventId}`);
     }
 }
-
 
 function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
