@@ -337,9 +337,9 @@ function addEvent() {
 
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
+    const selectedEventId = editEventSelect.value;
     
-    if (selectedIndex === "") {
+    if (selectedEventId === "") {
         alert("Please select an event to edit.");
         return;
     }
@@ -349,22 +349,13 @@ function saveEventEdits() {
     const newLocation = document.getElementById('editEventLocation').value.trim();
 
     if (newDate && newHost && newLocation) {
-        const currentEvent = schedule[selectedIndex];
         const updatedEvent = {
             date: newDate,
             host: newHost,
             location: newLocation,
-            rsvps: currentEvent.rsvps || {} // Maintain existing RSVPs or create empty object if none exist
         };
 
-        // Ensure all members have an RSVP entry
-        members.forEach(member => {
-            if (!updatedEvent.rsvps[member.name]) {
-                updatedEvent.rsvps[member.name] = 'no-response';
-            }
-        });
-
-        update(ref(database, `schedule/${selectedIndex}`), updatedEvent)
+        update(ref(database, `schedule/${selectedEventId}`), updatedEvent)
             .then(() => {
                 console.log('Event updated successfully');
                 loadDataFromFirebase(); // Reload data to reflect changes
@@ -495,8 +486,14 @@ function updateHostLocation() {
         document.getElementById(locationInput).value = member.location;
     }
 }
-function composeInvitationEmail(eventIndex) {
-    const event = schedule[eventIndex];
+
+function composeInvitationEmail(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
     const subject = encodeURIComponent(`Poker Night Invitation - ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
@@ -518,8 +515,13 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 
-function composeReminderEmail(eventIndex) {
-    const event = schedule[eventIndex];
+function composeReminderEmail(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
     const attendees = [];
     const maybes = [];
     const notAttending = [];
@@ -576,8 +578,13 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 
-function composeFinalConfirmationEmail(eventIndex) {
-    const event = schedule[eventIndex];
+function composeFinalConfirmationEmail(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
     const attendees = [];
     const notAttending = [];
 
@@ -618,6 +625,7 @@ Nasser`);
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
+
 function showPastEventsReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -726,13 +734,17 @@ function toggleEventList() {
 }
 function loadEventForEditing() {
     const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
+    const selectedEventId = editEventSelect.value;
     
-    if (selectedIndex !== "") {
-        const event = schedule[selectedIndex];
-        document.getElementById('editEventDate').value = event.date;
-        document.getElementById('editEventHost').value = event.host;
-        document.getElementById('editEventLocation').value = event.location;
+    if (selectedEventId !== "") {
+        const event = schedule.find(e => e.id === selectedEventId);
+        if (event) {
+            document.getElementById('editEventDate').value = event.date;
+            document.getElementById('editEventHost').value = event.host;
+            document.getElementById('editEventLocation').value = event.location;
+        } else {
+            console.error(`Event with ID ${selectedEventId} not found`);
+        }
     } else {
         document.getElementById('editEventDate').value = '';
         document.getElementById('editEventHost').value = '';
