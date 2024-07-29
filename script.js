@@ -46,7 +46,6 @@ function loadDataFromFirebase() {
         const data = snapshot.val();
         
         if (data && data.members) {
-            // Convert the object of objects to an array
             members = Object.values(data.members);
         } else {
             members = [];
@@ -54,12 +53,17 @@ function loadDataFromFirebase() {
         }
         
         if (data && data.schedule) {
-            // Assuming schedule is stored similarly to members
-            schedule = Object.values(data.schedule);
+            // Convert the schedule object to an array of events with their keys
+            schedule = Object.entries(data.schedule).map(([key, value]) => ({
+                id: key,
+                ...value
+            }));
         } else {
             schedule = [];
             console.warn('No schedule data found or invalid structure');
         }
+        
+        console.log('Data loaded:', { members, schedule });
         
         renderMembers();
         renderSchedule();
@@ -410,51 +414,49 @@ function deleteEvent() {
     }
 }
 function updateRSVP(eventId, memberName, status) {
-    const eventIndex = schedule.findIndex(event => event.id === eventId);
-    if (eventIndex === -1) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
         console.error(`Event with ID ${eventId} not found`);
         return;
     }
 
     const updatedRsvps = {
-        ...schedule[eventIndex].rsvps,
+        ...event.rsvps,
         [memberName]: status
     };
 
-    const updates = {};
-    updates[`schedule/${eventId}/rsvps`] = updatedRsvps;
-
-    update(ref(database), updates)
+    update(ref(database, `schedule/${eventId}/rsvps`), updatedRsvps)
         .then(() => {
             console.log('RSVP updated successfully');
-            // Update local data
-            schedule[eventIndex].rsvps = updatedRsvps;
+            event.rsvps = updatedRsvps;
             updateTotalAttending(eventId);
         })
         .catch((error) => {
             console.error('Error updating RSVP:', error);
         });
 }
-function updateTotalAttending(eventIndex) {
-    const totalAttendingElement = document.getElementById(`totalAttending-${eventIndex}`);
+function updateTotalAttending(eventId) {
+    const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
     if (!totalAttendingElement) {
-        console.warn(`Total attending element not found for event index ${eventIndex}`);
+        console.warn(`Total attending element not found for event ID ${eventId}`);
         return;
     }
     
-    const event = schedule[eventIndex];
+    const event = schedule.find(e => e.id === eventId);
     if (!event || !event.rsvps) {
-        console.warn(`Invalid event data for index ${eventIndex}`);
+        console.warn(`Invalid event data for ID ${eventId}`, event);
         totalAttendingElement.textContent = '0';
         return;
     }
 
     const totalAttending = Object.values(event.rsvps).filter(status => status === 'attending').length;
-    totalAttendingElement.textContent = totalAttending;
+    totalAttendingElement.textContent = totalAttending.toString();
 }
 
-function toggleEventDetails(eventIndex) {
-    const detailsElement = document.getElementById(`eventDetails-${eventIndex}`);
+
+
+function toggleEventDetails(eventId) {
+    const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
     
     if (detailsElement.style.display === 'none') {
