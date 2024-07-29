@@ -208,9 +208,9 @@ function renderSchedule() {
     scheduleContainer.innerHTML = '';
     editEventSelect.innerHTML = '<option value="">Select an event</option>';
     
-    schedule.forEach((event, eventIndex) => {
+    schedule.forEach((event) => {
         if (!event || typeof event !== 'object') {
-            console.warn(`Invalid event data at index ${eventIndex}`, event);
+            console.warn(`Invalid event data`, event);
             return; // Skip this iteration
         }
 
@@ -222,14 +222,14 @@ function renderSchedule() {
         const eventHost = event.host || 'Host not set';
 
         eventDiv.innerHTML = `
-            <div class="event-header" onclick="toggleEventDetails(${eventIndex})">
+            <div class="event-header" onclick="toggleEventDetails('${event.id}')">
                 <h3>${eventDate} - ${eventLocation} (Host: ${eventHost})</h3>
                 <span class="expand-icon">▼</span>
             </div>
-            <div class="event-details" id="eventDetails-${eventIndex}" style="display: none;">
-                <button class="email-button" onclick="composeInvitationEmail(${eventIndex})">Send Invitation</button>
-                <button class="email-button" onclick="composeReminderEmail(${eventIndex})">Send Reminder</button>
-                <button class="email-button" onclick="composeFinalConfirmationEmail(${eventIndex})">Send Final Confirmation</button>
+            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+                <button class="email-button" onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+                <button class="email-button" onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+                <button class="email-button" onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
                 <table class="rsvp-table">
                     <thead>
                         <tr>
@@ -249,7 +249,7 @@ function renderSchedule() {
                                 <tr>
                                     <td>${memberName}</td>
                                     <td>
-                                        <select class="rsvp-select" onchange="updateRSVP(${eventIndex}, '${memberName}', this.value)">
+                                        <select class="rsvp-select" onchange="updateRSVP('${event.id}', '${memberName}', this.value)">
                                             <option value="no-response" ${rsvpStatus === 'no-response' ? 'selected' : ''}>No Response</option>
                                             <option value="attending" ${rsvpStatus === 'attending' ? 'selected' : ''}>Attending</option>
                                             <option value="not-attending" ${rsvpStatus === 'not-attending' ? 'selected' : ''}>Not Attending</option>
@@ -261,13 +261,13 @@ function renderSchedule() {
                         }).join('')}
                     </tbody>
                 </table>
-                <p>Total Attending: <span id="totalAttending-${eventIndex}">0</span></p>
+                <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
             </div>
         `;
         scheduleContainer.appendChild(eventDiv);
-        updateTotalAttending(eventIndex);
+        updateTotalAttending(event.id);
 
-        editEventSelect.innerHTML += `<option value="${eventIndex}">${eventDate} - ${eventLocation} (Host: ${eventHost})</option>`;
+        editEventSelect.innerHTML += `<option value="${event.id}">${eventDate} - ${eventLocation} (Host: ${eventHost})</option>`;
     });
 
     // Clear edit fields and selection after rendering
@@ -374,24 +374,41 @@ function saveEventEdits() {
 
 function deleteEvent() {
     const editEventSelect = document.getElementById('editEventSelect');
-    const selectedIndex = editEventSelect.value;
+    const selectedEventId = editEventSelect.value;
     
-    if (selectedIndex === "") {
+    if (!selectedEventId) {
         alert("Please select an event to delete.");
         return;
     }
 
     if (confirm('Are you sure you want to delete this event?')) {
-        remove(ref(database, `schedule/${selectedIndex}`))
+        // Reference to the specific event in Firebase
+        const eventRef = ref(database, `schedule/${selectedEventId}`);
+
+        // Remove the event from Firebase
+        remove(eventRef)
             .then(() => {
-                console.log('Event deleted successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
+                console.log('Event deleted successfully from Firebase');
+                
+                // Remove the event from the local schedule array
+                schedule = schedule.filter(event => event.id !== selectedEventId);
+                
+                // Re-render the schedule
+                renderSchedule();
+                
+                // Clear the edit fields
+                document.getElementById('editEventDate').value = '';
+                document.getElementById('editEventHost').value = '';
+                document.getElementById('editEventLocation').value = '';
+                
                 alert("Event deleted successfully!");
             })
-            .catch((error) => console.error('Error deleting event:', error));
+            .catch((error) => {
+                console.error('Error deleting event:', error);
+                alert("Error deleting event. Please try again.");
+            });
     }
 }
-
 function updateRSVP(eventId, memberName, status) {
     const eventIndex = schedule.findIndex(event => event.id === eventId);
     if (eventIndex === -1) {
