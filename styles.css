@@ -198,3 +198,16 @@ th {
     margin-right: 10px;
     margin-bottom: 10px;
 }
+.rsvp-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Adjust as necessary */
+}
+
+.rsvp-name {
+    margin-right: 10px; /* Adjust spacing as needed */
+}
+
+.rsvp-status {
+    flex: 1;
+}
