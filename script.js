@@ -520,7 +520,7 @@ function composeInvitationEmail(eventId) {
         return;
     }
 
-    const subject = encodeURIComponent(`Poker Night Invitation - ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 It's that time again for our monthly poker group this month:
@@ -570,7 +570,7 @@ function composeReminderEmail(eventId) {
         }
     });
 
-    const subject = encodeURIComponent(`Poker Night Reminder - ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is a reminder about our upcoming poker night:
@@ -625,7 +625,7 @@ function composeFinalConfirmationEmail(eventId) {
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-    const subject = encodeURIComponent(`Final Confirmation - Poker Night ${moment(event.date).format('MMMM D, YYYY')} - Host: ${event.host}`);
+     const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
