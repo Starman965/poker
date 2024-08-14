@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danville Poker Group RSVP</title>
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Danville Poker Group RSVP</h1>
+        <div id="eventDetails" class="card">
+            <h2>Event Details</h2>
+            <p>Date: <span id="eventDate"></span></p>
+            <p>Host: <span id="eventHost"></span></p>
+            <p>Location: <span id="eventLocation"></span></p>
+        </div>
+        <div class="card">
+            <h2>Submit Your RSVP</h2>
+            <form id="rsvpForm">
+                <label for="memberSelect">Select Your Name:</label>
+                <select id="memberSelect" required>
+                    <option value="">Choose your name</option>
+                </select>
+                <label for="memberEmail">Confirm Your Email:</label>
+                <input type="email" id="memberEmail" required>
+                <label for="rsvpStatus">Your RSVP:</label>
+                <select id="rsvpStatus" required>
+                    <option value="attending">Attending</option>
+                    <option value="not-attending">Not Attending</option>
+                    <option value="maybe">Maybe</option>
+                </select>
+                <button type="submit">Submit RSVP</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="rsvp.js"></script>
+</body>
+</html>
