@@ -513,7 +513,7 @@ function updateHostLocation() {
     }
 }
 
-function composeInvitationEmail(eventId) {
+/* function composeInvitationEmail(eventId) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
         console.error(`Event with ID ${eventId} not found`);
@@ -531,6 +531,36 @@ Location: ${event.location}
 Host: ${event.host}
 
 Please RSVP ASAP so we can start planning. 
+
+Looking forward to seeing you there!
+
+Best regards,
+Nasser`);
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
+}
+*/
+function composeInvitationEmail(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const body = encodeURIComponent(`Danville Poker Group,
+
+It's that time again for our monthly poker group this month:
+
+Date: ${moment(event.date).format('MMMM D, YYYY')}
+Time: 7:00 PM
+Location: ${event.location}
+Host: ${event.host}
+
+Please RSVP ASAP so we can start planning. You can submit your RSVP here:
+${rsvpLink}
 
 Looking forward to seeing you there!
 
