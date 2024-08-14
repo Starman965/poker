@@ -1,44 +1,14 @@
-// Initialize Firebase
+import { firebaseConfig } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
     getDatabase,
     ref, 
-    onValue, 
-    set, 
-    push, 
-    update, 
-    remove,
-    get // Add this line
+    get,
+    set
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
-    authDomain: "poker-a2e1c.firebaseapp.com",
-    databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
-    projectId: "poker-a2e1c",
-    storageBucket: "poker-a2e1c.appspot.com",
-    messagingSenderId: "813172723871",
-    appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
-    measurementId: "G-NSL5SLKE5H"
-};
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const database = getDatabase(app);
-
-let members = [];
-let schedule = [];
-
-// Check connection
-const connectedRef = ref(database, ".info/connected");
-onValue(connectedRef, (snap) => {
-    if (snap.val() === true) {
-        console.log("Connected to Firebase");
-    } else {
-        console.log("Not connected to Firebase");
-    }
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -49,18 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Load event details
     loadEventDetails(eventToken);
-
-    // Load member list
     loadMemberList();
-
-    // Handle form submission
     document.getElementById('rsvpForm').addEventListener('submit', handleRSVPSubmission);
 });
 
 function loadEventDetails(eventToken) {
-    database.ref(`schedule/${eventToken}`).once('value').then((snapshot) => {
+    get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
         const event = snapshot.val();
         if (event) {
             document.getElementById('eventDate').textContent = moment(event.date).format('MMMM D, YYYY');
@@ -76,7 +41,7 @@ function loadEventDetails(eventToken) {
 }
 
 function loadMemberList() {
-    database.ref('members').once('value').then((snapshot) => {
+    get(ref(database, 'members')).then((snapshot) => {
         const members = snapshot.val();
         const memberSelect = document.getElementById('memberSelect');
         
@@ -100,12 +65,11 @@ function handleRSVPSubmission(event) {
     const rsvpStatus = document.getElementById('rsvpStatus').value;
     const eventToken = new URLSearchParams(window.location.search).get('token');
 
-    // Verify member email
-    database.ref('members').orderByChild('name').equalTo(memberName).once('value').then((snapshot) => {
-        const member = snapshot.val();
-        if (member && Object.values(member)[0].email === memberEmail) {
-            // Update RSVP in Firebase
-            database.ref(`schedule/${eventToken}/rsvps/${memberName}`).set(rsvpStatus).then(() => {
+    get(ref(database, 'members')).then((snapshot) => {
+        const members = snapshot.val();
+        const member = Object.values(members).find(m => m.name === memberName);
+        if (member && member.email === memberEmail) {
+            set(ref(database, `schedule/${eventToken}/rsvps/${memberName}`), rsvpStatus).then(() => {
                 window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
             }).catch((error) => {
                 console.error('Error updating RSVP:', error);
