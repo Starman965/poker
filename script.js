@@ -1,4 +1,5 @@
 // Initialize Firebase
+import { firebaseConfig } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
     getDatabase,
@@ -8,20 +9,9 @@ import {
     push, 
     update, 
     remove,
-    get // Add this line
+    get
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBHqMut5DC2YiBhEhMvtyX2L_5KBbKg1AU",
-    authDomain: "poker-a2e1c.firebaseapp.com",
-    databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
-    projectId: "poker-a2e1c",
-    storageBucket: "poker-a2e1c.appspot.com",
-    messagingSenderId: "813172723871",
-    appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
-    measurementId: "G-NSL5SLKE5H"
-};
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -42,7 +32,7 @@ onValue(connectedRef, (snap) => {
 
 function loadDataFromFirebase() {
     const dbRef = ref(database, '/');
-    onValue(dbRef, (snapshot) => {
+    get(dbRef).then((snapshot) => {
         const data = snapshot.val();
         
         if (data && data.members) {
@@ -53,7 +43,6 @@ function loadDataFromFirebase() {
         }
         
         if (data && data.schedule) {
-            // Convert the schedule object to an array of events with their keys
             schedule = Object.entries(data.schedule).map(([key, value]) => ({
                 id: key,
                 ...value
@@ -69,10 +58,11 @@ function loadDataFromFirebase() {
         renderSchedule();
         populateHostDropdowns();
         console.log('Data loaded successfully from Firebase!');
-    }, (error) => {
+    }).catch((error) => {
         console.error('Error loading data from Firebase:', error);
     });
 }
+
 
 // Function to save data to Firebase
 function saveDataToFirebase() {
