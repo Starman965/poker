@@ -11,6 +11,7 @@
         <h1>RSVP Confirmation</h1>
         <div class="card">
             <p id="confirmationMessage"></p>
+            <div id="rsvpImage"></div>
             <p>If you need to change your RSVP, you can do so from the invite email sent to you or <a href="rsvp.html" id="rsvpLink">here</a>.</p>
         </div>
     </div>
@@ -25,6 +26,14 @@
             
             const rsvpLink = document.getElementById('rsvpLink');
             rsvpLink.href = `rsvp.html?token=${token}`;
+
+            // Add image based on RSVP status
+            const imageElement = document.getElementById('rsvpImage');
+            if (status === 'attending') {
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.webp" alt="Thumbs up" style="max-width: 100px;">';
+            } else if (status === 'not-attending') {
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.webp" alt="Thumbs down" style="max-width: 100px;">';
+            }
         });
     </script>
 </body>
