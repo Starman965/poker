@@ -697,7 +697,7 @@ function showAttendanceReport() {
         });
     });
 
-    let reportHTML = '<h3>12-Month Attendance Report</h3>';
+    let reportHTML = '<h3>2024 Attendance Report</h3>';
     reportHTML += '<table><tr><th>Member</th><th>Events Attended</th></tr>';
 
     // Sort the members alphabetically by name
