@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,14 +40,14 @@
         <div class="card">
             <p id="confirmationMessage"></p>
             <div id="rsvpImage"></div>
-            <p>If you need to change your RSVP, you can do so from the invite email sent to you or <a href="rsvp.html" id="rsvpLink">here</a>.</p>
+            <p>You can change your RSVP from the email link or <a href="rsvp.html" id="rsvpLink">HERE</a>.</p>
         </div>
         <div class="card rsvp-summary">
             <h2>Current RSVP Summary</h2>
             <div id="rsvpSummary"></div>
         </div>
         <div class="card attendance-report">
-            <h2>Attendance Report (as of July 2024)</h2>
+            <h2>Attendance Leaderboard (as of July 2024)</h2>
             <div id="attendanceReport"></div>
         </div>
     </div>
@@ -79,9 +78,9 @@
             // Add image based on RSVP status
             const imageElement = document.getElementById('rsvpImage');
             if (status === 'attending') {
-                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.png" alt="Thumbs up" style="max-width: 100px;">';
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.png" alt="Thumbs up" style="max-width: 350px;">';
             } else if (status === 'not-attending') {
-                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.png" alt="Thumbs down" style="max-width: 100px;">';
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.png" alt="Thumbs down" style="max-width: 350px;">';
             }
 
             // Fetch and display RSVP summary
@@ -176,24 +175,30 @@
 
         function calculateAttendance(events) {
             const attendanceData = {};
-            const totalEvents = Object.keys(events).length;
+            const currentDate = new Date();
+            let pastEventCount = 0;
 
             Object.values(events).forEach(event => {
-                if (event.rsvps) {
-                    Object.entries(event.rsvps).forEach(([name, status]) => {
-                        if (!attendanceData[name]) {
-                            attendanceData[name] = { attended: 0, total: totalEvents };
-                        }
-                        if (status === 'attending') {
-                            attendanceData[name].attended++;
-                        }
-                    });
+                const eventDate = new Date(event.date);
+                if (eventDate < currentDate) {
+                    pastEventCount++;
+                    if (event.rsvps) {
+                        Object.entries(event.rsvps).forEach(([name, status]) => {
+                            if (!attendanceData[name]) {
+                                attendanceData[name] = { attended: 0, total: 0 };
+                            }
+                            attendanceData[name].total++;
+                            if (status === 'attending') {
+                                attendanceData[name].attended++;
+                            }
+                        });
+                    }
                 }
             });
 
             // Calculate percentages
             Object.values(attendanceData).forEach(data => {
-                data.percentage = ((data.attended / data.total) * 100).toFixed(2);
+                data.percentage = data.total > 0 ? ((data.attended / data.total) * 100).toFixed(2) : '0.00';
             });
 
             return attendanceData;
@@ -224,3 +229,13 @@
     </script>
 </body>
 </html>
+
+```
+
+This updated version of confirmation2.html includes the following changes:
+
+1. The `calculateAttendance` function now only considers events that have occurred in the past.
+2. Each member's total event count is calculated based on the events they were invited to, rather than using a global event count.
+3. The attendance percentage is calculated only for past events.
+
+These changes should resolve the discrepancy you noticed and provide accurate attendance statistics that match what you see in the main app. The report will now show 2/2 for events that have occurred so far, excluding any future events from the calculations.​​​​​​​​​​​​​​​​
