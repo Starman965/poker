@@ -531,6 +531,7 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 */
+// Update composeInvitationEmail function
 function composeInvitationEmail(eventId) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
