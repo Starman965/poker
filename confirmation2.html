@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,18 +8,30 @@
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <style>
-        .rsvp-summary {
+        .rsvp-summary, .attendance-report {
             margin-top: 20px;
         }
-        .rsvp-category {
+        .rsvp-category, .attendance-entry {
             margin-bottom: 10px;
         }
-        .rsvp-category h3 {
+        .rsvp-category h3, .attendance-entry h3 {
             margin-bottom: 5px;
         }
-        .rsvp-list {
+        .rsvp-list, .attendance-list {
             list-style-type: none;
             padding-left: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
@@ -33,6 +46,10 @@
         <div class="card rsvp-summary">
             <h2>Current RSVP Summary</h2>
             <div id="rsvpSummary"></div>
+        </div>
+        <div class="card attendance-report">
+            <h2>Attendance Report (as of July 2024)</h2>
+            <div id="attendanceReport"></div>
         </div>
     </div>
 
@@ -62,13 +79,16 @@
             // Add image based on RSVP status
             const imageElement = document.getElementById('rsvpImage');
             if (status === 'attending') {
-                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.png" alt="Thumbs up" style="max-width: 300px;">';
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.png" alt="Thumbs up" style="max-width: 100px;">';
             } else if (status === 'not-attending') {
-                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.png" alt="Thumbs down" style="max-width: 300px;">';
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.png" alt="Thumbs down" style="max-width: 100px;">';
             }
 
             // Fetch and display RSVP summary
             fetchRSVPSummary(token);
+
+            // Fetch and display Attendance Report
+            fetchAttendanceReport();
         });
 
         function fetchRSVPSummary(eventToken) {
@@ -138,6 +158,68 @@
             `;
 
             document.getElementById('rsvpSummary').innerHTML = summaryHTML;
+        }
+
+        function fetchAttendanceReport() {
+            get(ref(database, 'schedule')).then((snapshot) => {
+                const events = snapshot.val();
+                if (events) {
+                    const attendanceData = calculateAttendance(events);
+                    displayAttendanceReport(attendanceData);
+                } else {
+                    console.error('No event data found.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching event data:', error);
+            });
+        }
+
+        function calculateAttendance(events) {
+            const attendanceData = {};
+            const totalEvents = Object.keys(events).length;
+
+            Object.values(events).forEach(event => {
+                if (event.rsvps) {
+                    Object.entries(event.rsvps).forEach(([name, status]) => {
+                        if (!attendanceData[name]) {
+                            attendanceData[name] = { attended: 0, total: totalEvents };
+                        }
+                        if (status === 'attending') {
+                            attendanceData[name].attended++;
+                        }
+                    });
+                }
+            });
+
+            // Calculate percentages
+            Object.values(attendanceData).forEach(data => {
+                data.percentage = ((data.attended / data.total) * 100).toFixed(2);
+            });
+
+            return attendanceData;
+        }
+
+        function displayAttendanceReport(attendanceData) {
+            const sortedData = Object.entries(attendanceData).sort((a, b) => b[1].percentage - a[1].percentage);
+
+            const reportHTML = `
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Events Attended</th>
+                        <th>Attendance Percentage</th>
+                    </tr>
+                    ${sortedData.map(([name, data]) => `
+                        <tr>
+                            <td>${name}</td>
+                            <td>${data.attended} / ${data.total}</td>
+                            <td>${data.percentage}%</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+
+            document.getElementById('attendanceReport').innerHTML = reportHTML;
         }
     </script>
 </body>
