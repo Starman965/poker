@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danville Poker Group RSVP</title>
     <link href="styles.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="rsvp.js"></script>
+    <style>
+        select {
+            font-size: 16px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -21,12 +26,14 @@
         <div class="card">
             <h2>Submit Your RSVP</h2>
             <form id="rsvpForm">
-                <label for="memberSelect">Select Your Name:</label>
-                <select id="memberSelect" required>
+                <label for="memberSelect1">Select Your Name:</label>
+                <select id="memberSelect1" required>
                     <option value="">Choose your name</option>
                 </select>
-                <label for="memberEmail">Confirm Your Email:</label>
-                <input type="email" id="memberEmail" required>
+                <label for="memberSelect2">Confirm Your Name:</label>
+                <select id="memberSelect2" required>
+                    <option value="">Choose your name</option>
+                </select>
                 <label for="rsvpStatus">Your RSVP:</label>
                 <select id="rsvpStatus" required>
                     <option value="attending">Attending</option>
@@ -37,5 +44,92 @@
             </form>
         </div>
     </div>
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase,
+            ref, 
+            get,
+            set
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventToken = urlParams.get('token');
+
+            if (!eventToken) {
+                alert('Invalid event token. Please use the link provided in your email.');
+                return;
+            }
+
+            loadEventDetails(eventToken);
+            loadMemberList();
+            document.getElementById('rsvpForm').addEventListener('submit', handleRSVPSubmission);
+        });
+
+        function loadEventDetails(eventToken) {
+            get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
+                const event = snapshot.val();
+                if (event) {
+                    document.getElementById('eventDate').textContent = moment(event.date).format('MMMM D, YYYY');
+                    document.getElementById('eventHost').textContent = event.host;
+                    document.getElementById('eventLocation').textContent = event.location;
+                } else {
+                    alert('Event not found. Please check your invitation link.');
+                }
+            }).catch((error) => {
+                console.error('Error loading event details:', error);
+                alert('Error loading event details. Please try again later.');
+            });
+        }
+
+        function loadMemberList() {
+            get(ref(database, 'members')).then((snapshot) => {
+                const members = snapshot.val();
+                const memberSelect1 = document.getElementById('memberSelect1');
+                const memberSelect2 = document.getElementById('memberSelect2');
+                
+                Object.values(members).forEach((member) => {
+                    const option1 = document.createElement('option');
+                    option1.value = member.name;
+                    option1.textContent = member.name;
+                    memberSelect1.appendChild(option1);
+
+                    const option2 = document.createElement('option');
+                    option2.value = member.name;
+                    option2.textContent = member.name;
+                    memberSelect2.appendChild(option2);
+                });
+            }).catch((error) => {
+                console.error('Error loading member list:', error);
+                alert('Error loading member list. Please try again later.');
+            });
+        }
+
+        function handleRSVPSubmission(event) {
+            event.preventDefault();
+
+            const memberName1 = document.getElementById('memberSelect1').value;
+            const memberName2 = document.getElementById('memberSelect2').value;
+            const rsvpStatus = document.getElementById('rsvpStatus').value;
+            const eventToken = new URLSearchParams(window.location.search).get('token');
+
+            if (memberName1 !== memberName2) {
+                alert('You need to select your name in both lists.');
+                return;
+            }
+
+            set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
+                window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
+            }).catch((error) => {
+                console.error('Error updating RSVP:', error);
+                alert('Error updating RSVP. Please try again later.');
+            });
+        }
+    </script>
 </body>
 </html>
