@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Confirmation</title>
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        .rsvp-summary {
+            margin-top: 20px;
+        }
+        .rsvp-category {
+            margin-bottom: 10px;
+        }
+        .rsvp-category h3 {
+            margin-bottom: 5px;
+        }
+        .rsvp-list {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RSVP Confirmation</h1>
+        <div class="card">
+            <p id="confirmationMessage"></p>
+            <div id="rsvpImage"></div>
+            <p>If you need to change your RSVP, you can do so from the invite email sent to you or <a href="rsvp.html" id="rsvpLink">here</a>.</p>
+        </div>
+        <div class="card rsvp-summary">
+            <h2>Current RSVP Summary</h2>
+            <div id="rsvpSummary"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase,
+            ref, 
+            get
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const token = urlParams.get('token');
+            
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            confirmationMessage.textContent = `Your RSVP of "${status}" has been updated.`;
+            
+            const rsvpLink = document.getElementById('rsvpLink');
+            rsvpLink.href = `rsvp.html?token=${token}`;
+
+            // Add image based on RSVP status
+            const imageElement = document.getElementById('rsvpImage');
+            if (status === 'attending') {
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsup.webp" alt="Thumbs up" style="max-width: 100px;">';
+            } else if (status === 'not-attending') {
+                imageElement.innerHTML = '<img src="https://poker.davelewis.co/thumbsdown.webp" alt="Thumbs down" style="max-width: 100px;">';
+            }
+
+            // Fetch and display RSVP summary
+            fetchRSVPSummary(token);
+        });
+
+        function fetchRSVPSummary(eventToken) {
+            get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
+                const event = snapshot.val();
+                if (event && event.rsvps) {
+                    displayRSVPSummary(event.rsvps);
+                } else {
+                    console.error('No RSVP data found for this event.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching RSVP data:', error);
+            });
+        }
+
+        function displayRSVPSummary(rsvps) {
+            const summary = {
+                attending: [],
+                notAttending: [],
+                maybe: [],
+                noResponse: []
+            };
+
+            // Categorize RSVPs
+            Object.entries(rsvps).forEach(([name, status]) => {
+                switch(status) {
+                    case 'attending':
+                        summary.attending.push(name);
+                        break;
+                    case 'not-attending':
+                        summary.notAttending.push(name);
+                        break;
+                    case 'maybe':
+                        summary.maybe.push(name);
+                        break;
+                    default:
+                        summary.noResponse.push(name);
+                }
+            });
+
+            // Create HTML for summary
+            const summaryHTML = `
+                <div class="rsvp-category">
+                    <h3>Attending (${summary.attending.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.attending.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>Not Attending (${summary.notAttending.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.notAttending.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>Maybe (${summary.maybe.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.maybe.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>No Response (${summary.noResponse.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.noResponse.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('rsvpSummary').innerHTML = summaryHTML;
+        }
+    </script>
+</body>
+</html>
