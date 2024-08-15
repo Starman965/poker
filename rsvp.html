@@ -121,12 +121,12 @@
             const eventToken = new URLSearchParams(window.location.search).get('token');
 
             if (memberName1 !== memberName2) {
-                alert('You need to select your name in both lists.');
+                alert('You need to select the same name in both lists silly boy.');
                 return;
             }
 
             set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
-                window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
+                window.location.href = `confirmation2.html?status=${rsvpStatus}&token=${eventToken}`;
             }).catch((error) => {
                 console.error('Error updating RSVP:', error);
                 alert('Error updating RSVP. Please try again later.');
