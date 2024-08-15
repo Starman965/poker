@@ -502,36 +502,6 @@ function updateHostLocation() {
         document.getElementById(locationInput).value = member.location;
     }
 }
-
-/* function composeInvitationEmail(eventId) {
-    const event = schedule.find(e => e.id === eventId);
-    if (!event) {
-        console.error(`Event with ID ${eventId} not found`);
-        return;
-    }
-
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
-    const body = encodeURIComponent(`Danville Poker Group,
-
-It's that time again for our monthly poker group this month:
-
-Date: ${moment(event.date).format('MMMM D, YYYY')}
-Time: 7:00 PM
-Location: ${event.location}
-Host: ${event.host}
-
-Please RSVP ASAP so we can start planning. 
-
-Looking forward to seeing you there!
-
-Best regards,
-Nasser`);
-    
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
-    window.open(gmailUrl, '_blank');
-}
-*/
-// Update composeInvitationEmail function
 function composeInvitationEmail(eventId) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
@@ -569,29 +539,29 @@ function composeReminderEmail(eventId) {
         return;
     }
 
+    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
     const attendees = [];
     const maybes = [];
     const notAttending = [];
     const noResponse = [];
 
-    members.forEach(member => {
-        const status = event.rsvps[member.name] || 'no-response';
+    Object.entries(event.rsvps).forEach(([name, status]) => {
         switch(status) {
             case 'attending':
-                attendees.push(member.name);
+                attendees.push(name);
                 break;
             case 'maybe':
-                maybes.push(member.name);
+                maybes.push(name);
                 break;
             case 'not-attending':
-                notAttending.push(member.name);
+                notAttending.push(name);
                 break;
             default:
-                noResponse.push(member.name);
+                noResponse.push(name);
         }
     });
 
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is a reminder about our upcoming poker night:
@@ -614,7 +584,8 @@ ${maybes.join('\n')}
 No Response Yet (${noResponse.length}):
 ${noResponse.join('\n')}
 
-To those who haven't RSVP'd or are still in the "Maybe" category, please RSVP as soon as possible so we can get a final count.
+To those who haven't RSVP'd or are still in the "Maybe" category, please RSVP as soon as possible so we can get a final count. You can submit or update your RSVP here:
+${rsvpLink}
 
 Looking forward to seeing you all!
 
@@ -632,21 +603,21 @@ function composeFinalConfirmationEmail(eventId) {
         return;
     }
 
+    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
     const attendees = [];
     const notAttending = [];
 
-    members.forEach(member => {
-        const status = event.rsvps[member.name] || 'no-response';
+    Object.entries(event.rsvps).forEach(([name, status]) => {
         if (status === 'attending') {
-            attendees.push(member.name);
+            attendees.push(name);
         } else if (status === 'not-attending') {
-            notAttending.push(member.name);
+            notAttending.push(name);
         }
     });
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-     const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Final Confirmation: Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
@@ -663,6 +634,9 @@ ${attendees.join('\n')}
 
 Not Attending:
 ${notAttending.join('\n') || 'None'}
+
+If you need to make any last-minute changes to your RSVP, you can do so here:
+${rsvpLink}
 
 Looking forward to another great Poker Night!
 
