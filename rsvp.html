@@ -132,7 +132,7 @@
             }
 
             set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
-                window.location.href = `confirmation2.html?status=${rsvpStatus}&token=${eventToken}`;
+                window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
             }).catch((error) => {
                 console.error('Error updating RSVP:', error);
                 alert('Error updating RSVP. Please try again later.');
