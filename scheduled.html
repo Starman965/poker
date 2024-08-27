@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danville Poker Club - Upcoming Events</title>
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .logo {
+            display: block;
+            margin: 20px auto;
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://poker.davelewis.co/dpg.png" alt="Danville Poker Club Logo" class="logo">
+        <h1>Upcoming Poker Nights</h1>
+        <div id="scheduleContainer"></div>
+    </div>
+
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase,
+            ref, 
+            get
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchSchedule();
+        });
+
+        function fetchSchedule() {
+            get(ref(database, 'schedule')).then((snapshot) => {
+                const events = snapshot.val();
+                if (events) {
+                    displaySchedule(events);
+                } else {
+                    document.getElementById('scheduleContainer').innerHTML = '<p>No upcoming events found.</p>';
+                }
+            }).catch((error) => {
+                console.error('Error fetching schedule data:', error);
+                document.getElementById('scheduleContainer').innerHTML = '<p>Error loading schedule. Please try again later.</p>';
+            });
+        }
+
+        function displaySchedule(events) {
+            const currentDate = new Date();
+            const upcomingEvents = Object.values(events)
+                .filter(event => new Date(event.date) >= currentDate)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (upcomingEvents.length === 0) {
+                document.getElementById('scheduleContainer').innerHTML = '<p>No upcoming events found.</p>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <tr>
+                        <th>Date</th>
+                        <th>Host</th>
+                        <th>Location</th>
+                    </tr>
+                    ${upcomingEvents.map(event => `
+                        <tr>
+                            <td>${moment(event.date).format('MMMM D, YYYY')}</td>
+                            <td>${event.host}</td>
+                            <td>${event.location}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+
+            document.getElementById('scheduleContainer').innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
