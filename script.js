@@ -523,6 +523,8 @@ Host: ${event.host}
 Please RSVP ASAP so we can start planning. You can submit your RSVP here:
 ${rsvpLink}
 
+You can also see the upcoming hosting schedule at: https://poker.davelewis.co/scheduled.html
+
 Looking forward to seeing you there!
 
 Best regards,
