@@ -7,6 +7,8 @@
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/add-to-calendar-button@2" async defer></script>
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .rsvp-summary, .attendance-report {
             margin-top: 20px;
@@ -38,6 +40,9 @@
         #addToCalendarContainer {
             margin-top: 20px;
             display: none;
+        }
+        .attendance-icon {
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -76,10 +81,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             const token = urlParams.get('token');
-            
+
             const confirmationMessage = document.getElementById('confirmationMessage');
             confirmationMessage.textContent = `Your RSVP is: "${status}"`;
-            
+
             const rsvpLink = document.getElementById('rsvpLink');
             rsvpLink.href = `rsvp.html?token=${token}`;
 
@@ -242,6 +247,15 @@
             return attendanceData;
         }
 
+        function getAttendanceIcon(percentage) {
+            if (percentage >= 100) return '<i class="fas fa-medal" style="color: gold;" title="100% Attendance"></i>';
+            if (percentage >= 90) return '<i class="fas fa-trophy" style="color: silver;" title="90%+ Attendance"></i>';
+            if (percentage >= 80) return '<i class="fas fa-thumbs-up" style="color: #4CAF50;" title="80%+ Attendance"></i>';
+            if (percentage >= 70) return '<i class="fas fa-star" style="color: #2196F3;" title="70%+ Attendance"></i>';
+            if (percentage >= 60) return '<i class="fas fa-check-circle" style="color: #9C27B0;" title="60%+ Attendance"></i>';
+            return '<i class="fas fa-user" style="color: #607D8B;" title="Less than 60% Attendance"></i>';
+        }
+
         function displayAttendanceReport(attendanceData) {
             const sortedData = Object.entries(attendanceData).sort((a, b) => b[1].percentage - a[1].percentage);
 
@@ -256,7 +270,7 @@
                         <tr>
                             <td>${name}</td>
                             <td>${data.attended} / ${data.total}</td>
-                            <td>${data.percentage}%</td>
+                            <td>${data.percentage}% ${getAttendanceIcon(parseFloat(data.percentage))}</td>
                         </tr>
                     `).join('')}
                 </table>
