@@ -227,3 +227,6 @@ th {
     flex-grow: 1;
     max-width: 200px; /* Adjust width as necessary */
 }
+.attendance-icon {
+    margin-left: 10px;
+}
