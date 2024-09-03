@@ -41,19 +41,21 @@
     <div id="attendanceReport"></div>
 
     <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { 
+            getDatabase,
+            ref, 
+            get
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            // Add your Firebase config here
-        };
-
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
         document.addEventListener('DOMContentLoaded', function() {
+            fetchSchedule();
+        });
+    document.addEventListener('DOMContentLoaded', function() {
             fetchAttendanceReport();
         });
 
