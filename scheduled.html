@@ -69,36 +69,36 @@
             });
         }
 
-        function displaySchedule(events) {
-            const currentDate = new Date();
-            const upcomingEvents = Object.values(events)
-                .filter(event => new Date(event.date) >= currentDate)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+function displaySchedule(events) {
+    const currentDate = new Date();
+    const upcomingEvents = Object.values(events)
+        .filter(event => new Date(event.date) >= currentDate)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            if (upcomingEvents.length === 0) {
-                document.getElementById('scheduleContainer').innerHTML = '<p>No upcoming events found.</p>';
-                return;
-            }
+    if (upcomingEvents.length === 0) {
+        document.getElementById('scheduleContainer').innerHTML = '<p>No upcoming events found.</p>';
+        return;
+    }
 
-            const tableHTML = `
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Host</th>
-                        <th>Location</th>
-                    </tr>
-                    ${upcomingEvents.map(event => `
-                        <tr>
-                            <td>${moment(event.date).format('MMMM D, YYYY')}</td>
-                            <td>${event.host}</td>
-                            <td>${event.location}</td>
-                        </tr>
-                    `).join('')}
-                </table>
-            `;
+    const tableHTML = `
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Host</th>
+                <th>Location</th>
+            </tr>
+            ${upcomingEvents.map((event, index) => `
+                <tr ${index === 0 ? 'style="font-weight: bold;"' : ''}>
+                    <td>${moment(event.date).format('MMMM D, YYYY')}</td>
+                    <td>${event.host}</td>
+                    <td>${event.location}</td>
+                </tr>
+            `).join('')}
+        </table>
+    `;
 
-            document.getElementById('scheduleContainer').innerHTML = tableHTML;
-        }
-    </script>
+    document.getElementById('scheduleContainer').innerHTML = tableHTML;
+}
+</script>
 </body>
 </html>
