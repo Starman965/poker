@@ -509,7 +509,7 @@ function composeInvitationEmail(eventId) {
         return;
     }
 
-    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
+    const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
     const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
@@ -523,7 +523,7 @@ Host: ${event.host}
 Please RSVP ASAP so we can start planning. You can submit your RSVP here:
 ${rsvpLink}
 
-You can also see the upcoming hosting schedule at: https://poker.davelewis.co/scheduled.html
+You can also see the upcoming hosting schedule at: https://www.danvillepokergroup.com/scheduled.html
 
 Looking forward to seeing you there!
 
@@ -541,7 +541,7 @@ function composeReminderEmail(eventId) {
         return;
     }
 
-    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
+    const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
     const attendees = [];
     const maybes = [];
     const notAttending = [];
@@ -605,7 +605,7 @@ function composeFinalConfirmationEmail(eventId) {
         return;
     }
 
-    const rsvpLink = `https://poker.davelewis.co/rsvp.html?token=${eventId}`;
+    const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
     const attendees = [];
     const notAttending = [];
 
