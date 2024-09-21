@@ -760,8 +760,8 @@ function showHostingReport() {
         }
     });
 
-    let reportHTML = '<h3>Hosting Report</h3>';
-    reportHTML += '<table><tr><th>Member</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th></tr>';
+    let reportHTML = '<h3 class="report-title">Hosting Report</h3>';
+    reportHTML += '<table class="hosting-report"><thead><tr><th>Member</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th></tr></thead><tbody>';
 
     Object.entries(hostingCounts).forEach(([member, years]) => {
         reportHTML += `
@@ -778,10 +778,9 @@ function showHostingReport() {
         `;
     });
 
-    reportHTML += '</table>';
+    reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
 }
-
 function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
