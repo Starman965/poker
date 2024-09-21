@@ -105,23 +105,6 @@ input[type="text"], input[type="email"], input[type="date"], select {
     border-radius: 5px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: var(--primary-color);
-    color: white;
-}
-
 .admin-panel {
     background-color: #e9ecef;
     border-radius: 8px;
@@ -133,16 +116,6 @@ th {
     color: var(--text-color);
     border-bottom: 2px solid var(--primary-color);
     padding-bottom: 10px;
-}
-
-.save-load-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-.save-load-buttons button {
-    margin-left: 10px;
 }
 
 .section-header {
@@ -198,24 +171,12 @@ th {
     margin-right: 10px;
     margin-bottom: 10px;
 }
-.rsvp-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px; /* Adjust as necessary */
-}
 
-.rsvp-name {
-    margin-right: 10px; /* Adjust spacing as needed */
-}
-
-.rsvp-status {
-    flex: 1;
-}
 .event-rsvp {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px; /* Adjust as necessary */
+    margin-bottom: 10px;
 }
 
 .event-rsvp p {
@@ -225,11 +186,9 @@ th {
 
 .event-rsvp select {
     flex-grow: 1;
-    max-width: 200px; /* Adjust width as necessary */
+    max-width: 200px;
 }
-.attendance-icon {
-    margin-left: 10px;
-}
+
 #eventDisplaySelector {
     margin-bottom: 15px;
     padding: 5px;
@@ -239,83 +198,36 @@ th {
 
 .event-item strong {
     font-weight: bold;
-    color: #4a90e2;
+    color: var(--primary-color);
 }
 
-table {
+.report-title {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.attendance-report,
+.hosting-report {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.hosting-report th:first-child,
-.hosting-report td:first-child {
-    position: sticky;
-    left: 0;
-    background-color: #fff;
-    z-index: 1;
-}
-
-.hosting-report th:first-child {
-    background-color: #f2f2f2;
-}
-.report-title {
-    color: #4a90e2;
-    margin-bottom: 15px;
-}
-
-.attendance-report {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.attendance-report th {
-    background-color: #4a90e2;
+.attendance-report th,
+.hosting-report th {
+    background-color: var(--primary-color);
     color: white;
     padding: 10px;
     text-align: left;
 }
 
-.attendance-report td {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-}
-
-.attendance-report tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-.hosting-report {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.hosting-report th,
+.attendance-report td,
 .hosting-report td {
     padding: 8px;
-    text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-.hosting-report th {
-    background-color: #4a90e2;
-    color: white;
-}
-
+.attendance-report tr:nth-child(even),
 .hosting-report .even-row {
     background-color: #f2f2f2;
 }
@@ -331,7 +243,7 @@ tr:nth-child(even) {
 
 .hosting-report td:nth-child(2),
 .hosting-report th:nth-child(2) {
-    border-right: 2px solid #4a90e2;
+    border-right: 2px solid var(--primary-color);
 }
 
 .hosting-report td:first-child,
@@ -343,5 +255,5 @@ tr:nth-child(even) {
 }
 
 .hosting-report th:first-child {
-    background-color: #4a90e2;
+    background-color: var(--primary-color);
 }
