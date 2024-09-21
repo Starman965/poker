@@ -195,8 +195,9 @@ function composeMemberEmail(email) {
 function renderSchedule() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const editEventSelect = document.getElementById('editEventSelect');
-    if (!scheduleContainer || !editEventSelect) {
-        console.error('Schedule container or edit event select not found');
+    const eventDisplaySelector = document.getElementById('eventDisplaySelector');
+    if (!scheduleContainer || !editEventSelect || !eventDisplaySelector) {
+        console.error('Required elements not found');
         return;
     }
     scheduleContainer.innerHTML = '';
@@ -204,76 +205,40 @@ function renderSchedule() {
 
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    const eventsByDate = new Map();
+    const currentDate = new Date();
+    const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
+    const currentEvent = upcomingEvents[0];
 
-    schedule.forEach((event) => {
-        if (!event || typeof event !== 'object') {
-            console.warn(`Invalid event data`, event);
-            return;
-        }
-
-        const eventDate = event.date ? moment(event.date).format('YYYY-MM-DD') : 'Date not set';
-
-        if (eventsByDate.has(eventDate)) {
-            return;
-        }
-
-        eventsByDate.set(eventDate, event);
-
+    function renderEvent(event, isCurrent) {
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item';
-
-        const formattedDate = moment(event.date).format('MMMM D, YYYY');
-        const eventLocation = event.location || 'Location not set';
-        const eventHost = event.host || 'Host not set';
-
-        const rsvpDetails = Object.entries(event.rsvps)
-            .map(([name, status]) => `
-                <div class="event-rsvp">
-                    <p>${name}:</p>
-                    <select onchange="updateRSVP('${event.id}', '${name}', this.value)">
-                        <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                        <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                        <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                    </select>
-                </div>
-            `)
-            .join('');
-
         eventDiv.innerHTML = `
             <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-                <h3>${formattedDate} - ${eventLocation} (Host: ${eventHost})</h3>
+                <h3>${isCurrent ? '<strong>' : ''}${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
                 <span class="expand-icon">▼</span>
             </div>
             <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                ${rsvpDetails}
-                <div class="rsvp-totals" id="rsvpTotals-${event.id}">
-                    <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
-                    <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
-                    <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
-                    <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
-                </div>
-                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
+                <!-- RSVP details and buttons here -->
             </div>
         `;
         scheduleContainer.appendChild(eventDiv);
-
-        editEventSelect.innerHTML += `<option value="${event.id}">${formattedDate} - ${eventLocation} (Host: ${eventHost})</option>`;
+        editEventSelect.innerHTML += `<option value="${event.id}">${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})</option>`;
+    }
+function displayEvents() {
+        scheduleContainer.innerHTML = '';
+        const displayMode = eventDisplaySelector.value;
         
-        // Update the totals for each event
-        updateTotalAttending(event.id);
-    });
+        if (displayMode === 'current' && currentEvent) {
+            renderEvent(currentEvent, true);
+        } else if (displayMode === 'future') {
+            upcomingEvents.forEach((event, index) => renderEvent(event, index === 0));
+        }
+    }
 
-    document.getElementById('editEventSelect').value = "";
-    document.getElementById('editEventDate').value = '';
-    document.getElementById('editEventHost').value = '';
-    document.getElementById('editEventLocation').value = '';
+    eventDisplaySelector.addEventListener('change', displayEvents);
+    displayEvents();
 }
-
-// Add this new function to your code
+    
 function createNewEvent(date, host, location) {
     const newEvent = {
         date,
@@ -413,6 +378,13 @@ function updateRSVP(eventId, memberName, status) {
             console.log('RSVP updated successfully');
             event.rsvps = updatedRsvps;
             updateTotalAttending(eventId);
+            
+            // Update the color of the select element based on the status
+            const selectElement = document.querySelector(`#eventDetails-${eventId} select[onchange*="${memberName}"]`);
+            if (selectElement) {
+                selectElement.style.color = getStatusColor(status);
+            }
+            
             // Ensure the event details remain open
             const detailsElement = document.getElementById(`eventDetails-${eventId}`);
             if (detailsElement) {
@@ -426,6 +398,16 @@ function updateRSVP(eventId, memberName, status) {
         .catch((error) => {
             console.error('Error updating RSVP:', error);
         });
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'no-response': return 'red';
+        case 'attending': return 'green';
+        case 'not-attending':
+        case 'maybe':
+        default: return 'black';
+    }
 }
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
@@ -607,19 +589,26 @@ function composeFinalConfirmationEmail(eventId) {
 
     const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
     const attendees = [];
+    const maybes = [];
     const notAttending = [];
 
     Object.entries(event.rsvps).forEach(([name, status]) => {
-        if (status === 'attending') {
-            attendees.push(name);
-        } else if (status === 'not-attending') {
-            notAttending.push(name);
+        switch(status) {
+            case 'attending':
+                attendees.push(name);
+                break;
+            case 'maybe':
+                maybes.push(name);
+                break;
+            case 'not-attending':
+                notAttending.push(name);
+                break;
         }
     });
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-    const subject = encodeURIComponent(`[DanvillePoker] Final Confirmation: Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
@@ -631,11 +620,14 @@ Host: ${event.host}
 
 Google Maps Link: ${googleMapsLink}
 
-Final Attendee List (${attendees.length}):
+Attendees (${attendees.length}):
 ${attendees.join('\n')}
 
-Not Attending:
-${notAttending.join('\n') || 'None'}
+Maybe (${maybes.length}):
+${maybes.join('\n')}
+
+Not Attending (${notAttending.length}):
+${notAttending.join('\n')}
 
 If you need to make any last-minute changes to your RSVP, you can do so here:
 ${rsvpLink}
@@ -665,11 +657,10 @@ function showPastEventsReport() {
         reportHTML += `
             <div class="event-item">
                 <div class="event-header" onclick="togglePastEventDetails(${index})">
-                    <h4>${moment(event.date).format('MMMM D, YYYY')} - ${event.location}</h4>
+                    <h4>${moment(event.date).format('MMMM D, YYYY')} - ${event.host} - ${event.location}</h4>
                     <span class="expand-icon">▼</span>
                 </div>
                 <div class="event-details" id="pastEventDetails-${index}" style="display: none;">
-                    <p>Host: ${event.host}</p>
                     <p>Attendees: ${attendees.length}</p>
                     <p>Who Attended: ${attendees.join(', ') || 'None'}</p>
                 </div>
@@ -719,6 +710,48 @@ function showAttendanceReport() {
     reportHTML += '</table>';
     reportContainer.innerHTML = reportHTML;
 }
+function showHostingReport() {
+    const reportContainer = document.getElementById('reportContainer');
+    if (!reportContainer) return;
+
+    const hostingCounts = {};
+    members.forEach(member => {
+        hostingCounts[member.name] = {
+            2024: 0, 2025: 0, 2026: 0, 2027: 0, 2028: 0, 2029: 0, 2030: 0
+        };
+    });
+
+    schedule.forEach(event => {
+        const eventYear = new Date(event.date).getFullYear();
+        if (eventYear >= 2024 && eventYear <= 2030) {
+            if (hostingCounts[event.host]) {
+                hostingCounts[event.host][eventYear]++;
+            }
+        }
+    });
+
+    let reportHTML = '<h3>Hosting Report</h3>';
+    reportHTML += '<table><tr><th>Member</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th></tr>';
+
+    Object.entries(hostingCounts).forEach(([member, years]) => {
+        reportHTML += `
+            <tr>
+                <td>${member}</td>
+                <td>${years[2024]}</td>
+                <td>${years[2025]}</td>
+                <td>${years[2026]}</td>
+                <td>${years[2027]}</td>
+                <td>${years[2028]}</td>
+                <td>${years[2029]}</td>
+                <td>${years[2030]}</td>
+            </tr>
+        `;
+    });
+
+    reportHTML += '</table>';
+    reportContainer.innerHTML = reportHTML;
+}
+
 function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -784,6 +817,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
     document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
     document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
+ const eventDisplaySelector = document.getElementById('eventDisplaySelector');
+    if (eventDisplaySelector) {
+        eventDisplaySelector.addEventListener('change', renderSchedule);
+    }
 });
 
 // Export functions to global scope
@@ -803,3 +840,4 @@ window.composeReminderEmail = composeReminderEmail;
 window.composeFinalConfirmationEmail = composeFinalConfirmationEmail;
 window.showPastEventsReport = showPastEventsReport;
 window.showAttendanceReport = showAttendanceReport;
+window.showHostingReport = showHostingReport;
