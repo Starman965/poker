@@ -236,11 +236,6 @@ input[type="text"], input[type="email"], input[type="date"], select {
     background-color: #ffffff;
 }
 
-.hosting-report .current-year {
-    background-color: #e6f2ff;
-    font-weight: bold;
-}
-
 .hosting-report td:nth-child(2),
 .hosting-report th:nth-child(2) {
     border-right: 2px solid var(--primary-color);
