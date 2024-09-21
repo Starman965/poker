@@ -638,7 +638,7 @@ function composeFinalConfirmationEmail(eventId) {
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
