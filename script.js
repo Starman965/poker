@@ -720,8 +720,8 @@ function showAttendanceReport() {
         });
     });
 
-    let reportHTML = '<h3>2024 Attendance Report</h3>';
-    reportHTML += '<table><tr><th>Member</th><th>Events Attended</th></tr>';
+  let reportHTML = '<h3 class="report-title">2024 Attendance Report</h3>';
+  reportHTML += '<table class="attendance-report"><thead><tr><th>Member</th><th>Events Attended</th></tr></thead><tbody>';
 
     // Sort the members alphabetically by name
     const sortedMembers = Object.keys(attendanceCounts).sort((a, b) => a.localeCompare(b));
@@ -737,7 +737,7 @@ function showAttendanceReport() {
         `;
     });
 
-    reportHTML += '</table>';
+    reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
 }
 function showHostingReport() {
