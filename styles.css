@@ -304,18 +304,44 @@ tr:nth-child(even) {
     border-collapse: collapse;
 }
 
-.hosting-report th {
-    background-color: #4a90e2;
-    color: white;
-    padding: 10px;
-    text-align: left;
-}
-
+.hosting-report th,
 .hosting-report td {
     padding: 8px;
+    text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-.hosting-report tr:nth-child(even) {
+.hosting-report th {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.hosting-report .even-row {
     background-color: #f2f2f2;
+}
+
+.hosting-report .odd-row {
+    background-color: #ffffff;
+}
+
+.hosting-report .current-year {
+    background-color: #e6f2ff;
+    font-weight: bold;
+}
+
+.hosting-report td:nth-child(2),
+.hosting-report th:nth-child(2) {
+    border-right: 2px solid #4a90e2;
+}
+
+.hosting-report td:first-child,
+.hosting-report th:first-child {
+    position: sticky;
+    left: 0;
+    background-color: inherit;
+    z-index: 1;
+}
+
+.hosting-report th:first-child {
+    background-color: #4a90e2;
 }
