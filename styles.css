@@ -230,3 +230,47 @@ th {
 .attendance-icon {
     margin-left: 10px;
 }
+#eventDisplaySelector {
+    margin-bottom: 15px;
+    padding: 5px;
+    width: 100%;
+    max-width: 200px;
+}
+
+.event-item strong {
+    font-weight: bold;
+    color: #4a90e2;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.hosting-report th:first-child,
+.hosting-report td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #fff;
+    z-index: 1;
+}
+
+.hosting-report th:first-child {
+    background-color: #f2f2f2;
+}
