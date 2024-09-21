@@ -274,3 +274,28 @@ tr:nth-child(even) {
 .hosting-report th:first-child {
     background-color: #f2f2f2;
 }
+.report-title {
+    color: #4a90e2;
+    margin-bottom: 15px;
+}
+
+.attendance-report {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-report th {
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+.attendance-report td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.attendance-report tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
