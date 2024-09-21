@@ -30,6 +30,12 @@ onValue(connectedRef, (snap) => {
     }
 });
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
 function loadDataFromFirebase() {
     const dbRef = ref(database, '/');
     get(dbRef).then((snapshot) => {
@@ -210,20 +216,20 @@ function renderSchedule() {
     const currentEvent = upcomingEvents[0];
 
     function renderEvent(event, isCurrent) {
-        const eventDiv = document.createElement('div');
-        eventDiv.className = 'event-item';
-        eventDiv.innerHTML = `
-            <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-                <h3>${isCurrent ? '<strong>' : ''}${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
-                <span class="expand-icon">▼</span>
-            </div>
-            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                <!-- RSVP details and buttons here -->
-            </div>
-        `;
-        scheduleContainer.appendChild(eventDiv);
-        editEventSelect.innerHTML += `<option value="${event.id}">${moment(event.date).format('MMMM D, YYYY')} - ${event.location} (Host: ${event.host})</option>`;
-    }
+    const eventDiv = document.createElement('div');
+    eventDiv.className = 'event-item';
+    eventDiv.innerHTML = `
+        <div class="event-header" onclick="toggleEventDetails('${event.id}')">
+            <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
+            <span class="expand-icon">▼</span>
+        </div>
+        <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+            <!-- RSVP details and buttons here -->
+        </div>
+    `;
+    scheduleContainer.appendChild(eventDiv);
+    editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
+}
 function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
@@ -497,7 +503,7 @@ function composeInvitationEmail(eventId) {
 
 It's that time again for our monthly poker group this month:
 
-Date: ${moment(event.date).format('MMMM D, YYYY')}
+Date: ${formatDate(event.date)}
 Time: 7:00 PM
 Location: ${event.location}
 Host: ${event.host}
@@ -545,12 +551,12 @@ function composeReminderEmail(eventId) {
         }
     });
 
-    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is a reminder about our upcoming poker night:
 
-Date: ${moment(event.date).format('MMMM D, YYYY')}
+Date: ${formatDate(event.date)}
 Time: 7:00 PM
 Location: ${event.location}
 Host: ${event.host}
@@ -608,12 +614,12 @@ function composeFinalConfirmationEmail(eventId) {
 
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
 
-Date: ${moment(event.date).format('MMMM D, YYYY')}
+Date: ${formatDate(event.date)}
 Time: 7:00 PM
 Location: ${event.location}
 Host: ${event.host}
@@ -657,7 +663,7 @@ function showPastEventsReport() {
         reportHTML += `
             <div class="event-item">
                 <div class="event-header" onclick="togglePastEventDetails(${index})">
-                    <h4>${moment(event.date).format('MMMM D, YYYY')} - ${event.host} - ${event.location}</h4>
+                    <h4>${formatDate(event.date)} - ${event.host} - ${event.location}</h4>
                     <span class="expand-icon">▼</span>
                 </div>
                 <div class="event-details" id="pastEventDetails-${index}" style="display: none;">
