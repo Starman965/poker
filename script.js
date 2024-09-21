@@ -498,7 +498,7 @@ function composeInvitationEmail(eventId) {
     }
 
     const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${moment(event.date).format('MMMM D, YYYY')} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 It's that time again for our monthly poker group this month:
