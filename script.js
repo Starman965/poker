@@ -768,6 +768,7 @@ function showHostingReport() {
     });
 
     let reportHTML = '<h3 class="report-title">Hosting Report</h3>';
+    reportHTML += '<p><a href="https://www.danvillepokergroup.com/scheduled.html" target="_blank">View Upcoming Schedule</a></p>';
     reportHTML += `<table class="hosting-report">
         <thead>
             <tr>
