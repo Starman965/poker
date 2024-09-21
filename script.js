@@ -675,7 +675,11 @@ function showPastEventsReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
     const currentDate = new Date();
-    const pastEvents = schedule.filter(event => new Date(event.date) < currentDate);
+    
+    // Filter past events and sort them in descending order (most recent first)
+    const pastEvents = schedule
+        .filter(event => new Date(event.date) < currentDate)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     let reportHTML = '<h3 class="report-title">Past Events Report</h3>';
     
@@ -701,7 +705,6 @@ function showPastEventsReport() {
 
     reportContainer.innerHTML = reportHTML;
 }
-
 function showAttendanceReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
