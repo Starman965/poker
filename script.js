@@ -774,7 +774,7 @@ function showHostingReport() {
             <tr>
                 <th>Member</th>
                 <th>Total</th>
-                <th class="current-year">${currentYear}</th>
+                <th>${currentYear}</th>
                 <th>${currentYear + 1}</th>
                 <th>${currentYear + 2}</th>
             </tr>
@@ -788,7 +788,7 @@ function showHostingReport() {
                 <tr class="${index % 2 === 0 ? 'even-row' : 'odd-row'}">
                     <td>${member}</td>
                     <td>${years.total}</td>
-                    <td class="current-year">${years[currentYear]}</td>
+                    <td>${years[currentYear]}</td>
                     <td>${years[currentYear + 1]}</td>
                     <td>${years[currentYear + 2]}</td>
                 </tr>
