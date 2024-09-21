@@ -744,39 +744,55 @@ function showHostingReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
 
+    const currentYear = new Date().getFullYear();
+    const yearsToShow = [currentYear, currentYear + 1, currentYear + 2];
+
     const hostingCounts = {};
     members.forEach(member => {
         hostingCounts[member.name] = {
-            2024: 0, 2025: 0, 2026: 0, 2027: 0, 2028: 0, 2029: 0, 2030: 0
+            total: 0,
+            [currentYear]: 0,
+            [currentYear + 1]: 0,
+            [currentYear + 2]: 0
         };
     });
 
     schedule.forEach(event => {
         const eventYear = new Date(event.date).getFullYear();
-        if (eventYear >= 2024 && eventYear <= 2030) {
+        if (yearsToShow.includes(eventYear)) {
             if (hostingCounts[event.host]) {
                 hostingCounts[event.host][eventYear]++;
+                hostingCounts[event.host].total++;
             }
         }
     });
 
     let reportHTML = '<h3 class="report-title">Hosting Report</h3>';
-    reportHTML += '<table class="hosting-report"><thead><tr><th>Member</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th></tr></thead><tbody>';
-
-    Object.entries(hostingCounts).forEach(([member, years]) => {
-        reportHTML += `
+    reportHTML += `<table class="hosting-report">
+        <thead>
             <tr>
-                <td>${member}</td>
-                <td>${years[2024]}</td>
-                <td>${years[2025]}</td>
-                <td>${years[2026]}</td>
-                <td>${years[2027]}</td>
-                <td>${years[2028]}</td>
-                <td>${years[2029]}</td>
-                <td>${years[2030]}</td>
+                <th>Member</th>
+                <th>Total</th>
+                <th class="current-year">${currentYear}</th>
+                <th>${currentYear + 1}</th>
+                <th>${currentYear + 2}</th>
             </tr>
-        `;
-    });
+        </thead>
+        <tbody>`;
+
+    Object.entries(hostingCounts)
+        .sort((a, b) => b[1].total - a[1].total)
+        .forEach(([member, years], index) => {
+            reportHTML += `
+                <tr class="${index % 2 === 0 ? 'even-row' : 'odd-row'}">
+                    <td>${member}</td>
+                    <td>${years.total}</td>
+                    <td class="current-year">${years[currentYear]}</td>
+                    <td>${years[currentYear + 1]}</td>
+                    <td>${years[currentYear + 2]}</td>
+                </tr>
+            `;
+        });
 
     reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
