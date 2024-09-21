@@ -677,7 +677,7 @@ function showPastEventsReport() {
     const currentDate = new Date();
     const pastEvents = schedule.filter(event => new Date(event.date) < currentDate);
 
-    let reportHTML = '<h3>Past Events Report</h3>';
+    let reportHTML = '<h3 class="report-title">Past Events Report</h3>';
     
     pastEvents.forEach((event, index) => {
         const attendees = Object.entries(event.rsvps)
@@ -693,6 +693,7 @@ function showPastEventsReport() {
                 <div class="event-details" id="pastEventDetails-${index}" style="display: none;">
                     <p>Attendees: ${attendees.length}</p>
                     <p>Who Attended: ${attendees.join(', ') || 'None'}</p>
+                    <button onclick="editPastEventAttendees('${event.id}')">EDIT</button>
                 </div>
             </div>
         `;
@@ -740,6 +741,71 @@ function showAttendanceReport() {
     reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
 }
+function editPastEventAttendees(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    let editHTML = `
+        <h3>Edit Attendees for ${formatDate(event.date)}</h3>
+        <form id="editAttendeesForm">
+    `;
+
+    Object.entries(event.rsvps).forEach(([name, status]) => {
+        editHTML += `
+            <div>
+                <label>
+                    <input type="checkbox" name="${name}" ${status === 'attending' ? 'checked' : ''}>
+                    ${name}
+                </label>
+            </div>
+        `;
+    });
+
+    editHTML += `
+        <button type="submit">Save Changes</button>
+        <button type="button" onclick="cancelEditAttendees()">Cancel</button>
+        </form>
+    `;
+
+    const reportContainer = document.getElementById('reportContainer');
+    reportContainer.innerHTML = editHTML;
+
+    document.getElementById('editAttendeesForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveEditedAttendees(eventId, this);
+    });
+}
+
+function saveEditedAttendees(eventId, form) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    const formData = new FormData(form);
+    for (let [name, status] of Object.entries(event.rsvps)) {
+        event.rsvps[name] = formData.has(name) ? 'attending' : 'not-attending';
+    }
+
+    // Update the event in Firebase
+    update(ref(database, `schedule/${eventId}/rsvps`), event.rsvps)
+        .then(() => {
+            console.log('Attendees updated successfully');
+            showPastEventsReport(); // Refresh the report
+        })
+        .catch((error) => {
+            console.error('Error updating attendees:', error);
+        });
+}
+
+function cancelEditAttendees() {
+    showPastEventsReport(); // Go back to the past events report
+}
+
 function showHostingReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -887,3 +953,5 @@ window.composeFinalConfirmationEmail = composeFinalConfirmationEmail;
 window.showPastEventsReport = showPastEventsReport;
 window.showAttendanceReport = showAttendanceReport;
 window.showHostingReport = showHostingReport;
+window.editPastEventAttendees = editPastEventAttendees;
+window.cancelEditAttendees = cancelEditAttendees;
