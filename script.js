@@ -69,6 +69,7 @@ function loadDataFromFirebase() {
     });
 }
 
+
 // Function to save data to Firebase
 function saveDataToFirebase() {
   set(ref(database, '/'), {
