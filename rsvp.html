@@ -117,16 +117,42 @@
                 alert('Error loading member list. Please try again later.');
             });
         }
+function handleRSVPSubmission(event) {
+    event.preventDefault();
 
-        function sendSms(phoneNumber, message) {
+    const memberName1 = document.getElementById('memberSelect1').value;
+    const memberName2 = document.getElementById('memberSelect2').value;
+    const rsvpStatus = document.getElementById('rsvpStatus').value;
+    const eventToken = new URLSearchParams(window.location.search).get('token');
+
+    if (memberName1 !== memberName2) {
+        alert('You need to select the same name in both lists silly boy.');
+        return;
+    }
+
+    set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
+        // Once RSVP is saved to the database, send an SMS notification
+        const message = `${memberName1} has RSVPed as '${rsvpStatus}' for the poker night!`;
+        sendSms('+19259806777', message); // Replace with dynamic phone number if needed
+
+        // Redirect to confirmation page after sending SMS
+        window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
+    }).catch((error) => {
+        console.error('Error updating RSVP:', error);
+        alert('Error updating RSVP. Please try again later.');
+    });
+}
+
+// Function to send SMS
+function sendSms(phoneNumber, message) {
     fetch('/api/send-sms', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            phoneNumber: phoneNumber,  // Example: '+1234567890'
-            message: message           // Example: 'Poker night reminder!'
+            phoneNumber: phoneNumber,
+            message: message
         }),
     })
     .then(response => response.json())
@@ -144,29 +170,7 @@
     });
 }
 
-// Example usage: sending an SMS when someone RSVPs
-sendSms('+19259806777', 'Someone has just rsvp to poker!');
-
-        function handleRSVPSubmission(event) {
-            event.preventDefault();
-
-            const memberName1 = document.getElementById('memberSelect1').value;
-            const memberName2 = document.getElementById('memberSelect2').value;
-            const rsvpStatus = document.getElementById('rsvpStatus').value;
-            const eventToken = new URLSearchParams(window.location.search).get('token');
-
-            if (memberName1 !== memberName2) {
-                alert('You need to select the same name in both lists silly boy.');
-                return;
-            }
-
-            set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
-                window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
-            }).catch((error) => {
-                console.error('Error updating RSVP:', error);
-                alert('Error updating RSVP. Please try again later.');
-            });
-        }
+       
     </script>
 </body>
 </html>
