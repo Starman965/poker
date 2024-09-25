@@ -2,9 +2,9 @@ import { auth, googleProvider } from './firebase-config.js';
 import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 const allowedUsers = [
-    'david.lewis@example.com',
-    'david.williams@example.com',
-    'nasser.gaemi@example.com'
+    'demandgendave@gmail.com',
+    'davew102@yahoo.com',
+    'nasser@gcuniverse.com'
 ];
 
 function signInWithGoogle() {
