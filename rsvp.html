@@ -3,115 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSVP - Danville Poker Club</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Danville Poker Group RSVP</title>
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        .logo {
+            display: block;
+            margin: 20px auto;
+            max-width: 300px;
+            width: 100%;
+        }
+        select {
+            font-size: 16px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <img src="https://www.danvillepokergroup.com/dpg.png" alt="Danville Poker Club Logo" class="logo" style="width: 150px;">
-
         <div id="eventDetails" class="card">
             <h2>Event Details</h2>
             <p>Date: <span id="eventDate"></span></p>
             <p>Host: <span id="eventHost"></span></p>
             <p>Location: <span id="eventLocation"></span></p>
         </div>
-
         <div class="card">
             <h2>Please RSVP</h2>
             <form id="rsvpForm">
-                <label for="memberSelect">Select Your Name:</label>
-                <select id="memberSelect" required>
+                <label for="memberSelect1">Select Your Name:</label>
+                <select id="memberSelect1" required>
                     <option value="">Choose your name</option>
                 </select>
-
-                <label for="confirmMemberSelect">Confirm Your Name:</label>
-                <select id="confirmMemberSelect" required>
+                <label for="memberSelect2">Confirm Your Name:</label>
+                <select id="memberSelect2" required>
                     <option value="">Choose your name</option>
                 </select>
-
                 <label for="rsvpStatus">Your RSVP:</label>
                 <select id="rsvpStatus" required>
                     <option value="attending">Attending</option>
                     <option value="not-attending">Not Attending</option>
                     <option value="maybe">Maybe</option>
                 </select>
-
                 <button type="submit">Submit RSVP</button>
             </form>
         </div>
     </div>
 
     <script type="module">
-        import { database } from './firebase-config.js';
-        import { ref, get, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase,
+            ref, 
+            get,
+            set
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const eventId = urlParams.get('token');
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        if (!eventId) {
-            alert('No event specified. Please use the correct RSVP link.');
-        } else {
-            // Fetch event details
-            get(ref(database, `schedule/${eventId}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const eventData = snapshot.val();
-                    document.getElementById('eventDate').textContent = eventData.date;
-                    document.getElementById('eventHost').textContent = eventData.host;
-                    document.getElementById('eventLocation').textContent = eventData.location;
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventToken = urlParams.get('token');
+
+            if (!eventToken) {
+                alert('Invalid event token. Please use the link provided in your email.');
+                return;
+            }
+
+            loadEventDetails(eventToken);
+            loadMemberList();
+            document.getElementById('rsvpForm').addEventListener('submit', handleRSVPSubmission);
+        });
+
+        function loadEventDetails(eventToken) {
+            get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
+                const event = snapshot.val();
+                if (event) {
+                    document.getElementById('eventDate').textContent = moment(event.date).format('MMMM D, YYYY');
+                    document.getElementById('eventHost').textContent = event.host;
+                    document.getElementById('eventLocation').textContent = event.location;
                 } else {
-                    console.log("No event data available");
+                    alert('Event not found. Please check your invitation link.');
                 }
             }).catch((error) => {
-                console.error("Error fetching event details:", error);
+                console.error('Error loading event details:', error);
+                alert('Error loading event details. Please try again later.');
             });
+        }
 
-            // Populate member select dropdowns
+        function loadMemberList() {
             get(ref(database, 'members')).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const members = Object.values(snapshot.val());
-                    const selectElement = document.getElementById('memberSelect');
-                    const confirmSelectElement = document.getElementById('confirmMemberSelect');
-                    members.forEach(member => {
-                        const option = document.createElement('option');
-                        option.value = member.name;
-                        option.textContent = member.name;
-                        selectElement.appendChild(option.cloneNode(true));
-                        confirmSelectElement.appendChild(option);
-                    });
-                } else {
-                    console.log("No members data available");
-                }
-            }).catch((error) => {
-                console.error("Error fetching members:", error);
-            });
-
-            // Handle form submission
-            document.getElementById('rsvpForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const name = document.getElementById('memberSelect').value;
-                const confirmName = document.getElementById('confirmMemberSelect').value;
-                const status = document.getElementById('rsvpStatus').value;
+                const members = snapshot.val();
+                const memberSelect1 = document.getElementById('memberSelect1');
+                const memberSelect2 = document.getElementById('memberSelect2');
                 
-                if (name !== confirmName) {
-                    alert('The selected names do not match. Please confirm your name.');
-                    return;
-                }
+                Object.values(members).forEach((member) => {
+                    const option1 = document.createElement('option');
+                    option1.value = member.name;
+                    option1.textContent = member.name;
+                    memberSelect1.appendChild(option1);
 
-                if (name && status) {
-                    set(ref(database, `rsvps/${eventId}/${encodeURIComponent(name)}`), {
-                        name: name,
-                        status: status
-                    }).then(() => {
-                        alert('RSVP submitted successfully!');
-                        // Optionally, reset the form or redirect the user
-                    }).catch((error) => {
-                        console.error("Error submitting RSVP:", error);
-                        alert('Error submitting RSVP. Please try again.');
-                    });
-                } else {
-                    alert('Please select your name and RSVP status.');
-                }
+                    const option2 = document.createElement('option');
+                    option2.value = member.name;
+                    option2.textContent = member.name;
+                    memberSelect2.appendChild(option2);
+                });
+            }).catch((error) => {
+                console.error('Error loading member list:', error);
+                alert('Error loading member list. Please try again later.');
+            });
+        }
+
+        function handleRSVPSubmission(event) {
+            event.preventDefault();
+
+            const memberName1 = document.getElementById('memberSelect1').value;
+            const memberName2 = document.getElementById('memberSelect2').value;
+            const rsvpStatus = document.getElementById('rsvpStatus').value;
+            const eventToken = new URLSearchParams(window.location.search).get('token');
+
+            if (memberName1 !== memberName2) {
+                alert('You need to select the same name in both lists silly boy.');
+                return;
+            }
+
+            set(ref(database, `schedule/${eventToken}/rsvps/${memberName1}`), rsvpStatus).then(() => {
+                window.location.href = `confirmation.html?status=${rsvpStatus}&token=${eventToken}`;
+            }).catch((error) => {
+                console.error('Error updating RSVP:', error);
+                alert('Error updating RSVP. Please try again later.');
             });
         }
     </script>
