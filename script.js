@@ -926,6 +926,34 @@ function loadEventForEditing() {
         document.getElementById('editEventLocation').value = '';
     }
 }
+function sendSms(phoneNumber, message) {
+    fetch('/api/send-sms', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            phoneNumber: phoneNumber,  // Example: '+1234567890'
+            message: message           // Example: 'Poker night reminder!'
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('SMS sent successfully:', data.messageSid);
+            alert('SMS sent successfully!');
+        } else {
+            console.error('Failed to send SMS:', data.error);
+            alert('Failed to send SMS.');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending SMS:', error);
+    });
+}
+
+// Example usage: sending an SMS when someone RSVPs
+sendSms('+19259806777', 'Someone has just RSVP to poker!');
 
 // Add event listeners
 document.addEventListener('DOMContentLoaded', function() {
