@@ -1,24 +1,30 @@
-// Initialize Firebase
-import { firebaseConfig } from './firebase-config.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { 
-    getDatabase,
-    ref, 
-    onValue, 
-    set, 
-    push, 
-    update, 
-    remove,
-    get
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase(app);
+// script.js
+import { auth, database } from './firebase-config.js';
+import { ref, onValue, set, push, update, remove, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { checkAuth } from './auth.js';
 
 let members = [];
 let schedule = [];
+
+// Check authentication before loading data
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth().then((isAuthorized) => {
+        if (isAuthorized) {
+            loadDataFromFirebase();
+            initializeUI();
+        } else {
+            console.error('User is not authorized');
+        }
+    });
+});
+
+function initializeUI() {
+    document.getElementById('eventDisplaySelector').addEventListener('change', renderSchedule);
+    document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
+    document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
+    document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
+}
 
 // Check connection
 const connectedRef = ref(database, ".info/connected");
@@ -69,8 +75,6 @@ function loadDataFromFirebase() {
     });
 }
 
-
-// Function to save data to Firebase
 function saveDataToFirebase() {
   set(ref(database, '/'), {
     members: members,
@@ -82,8 +86,6 @@ function saveDataToFirebase() {
   });
 }
 
-// Load data when the page is ready
-document.addEventListener('DOMContentLoaded', loadDataFromFirebase);
 function renderMembers() {
     const membersList = document.getElementById('membersList');
     const memberCount = document.getElementById('memberCount');
@@ -109,6 +111,7 @@ function renderMembers() {
         membersList.appendChild(memberItem);
     });
 }
+
 function addMember() {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
@@ -118,20 +121,17 @@ function addMember() {
         const newMember = { name, email, location };
         const membersRef = ref(database, 'members');
         
-        // Get the current number of members to use as the new index
         get(membersRef).then((snapshot) => {
             const currentMemberCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
             
-            // Add the new member with a numeric key
             set(ref(database, `members/${currentMemberCount}`), newMember)
                 .then(() => {
                     console.log('Member added successfully');
-                    loadDataFromFirebase(); // Reload data to reflect changes
+                    loadDataFromFirebase();
                 })
                 .catch((error) => console.error('Error adding member:', error));
         }).catch((error) => console.error('Error getting member count:', error));
 
-        // Clear input fields
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
         document.getElementById('newMemberLocation').value = '';
@@ -139,6 +139,7 @@ function addMember() {
         alert('Please fill in all fields for the new member.');
     }
 }
+
 function startEditMember(index) {
     const member = members[index];
     document.getElementById('newMemberName').value = member.name;
@@ -149,7 +150,6 @@ function startEditMember(index) {
     addButton.textContent = 'Update Member';
     addButton.onclick = () => updateMember(index);
 
-    // Scroll to the edit member area
     const editMemberArea = document.querySelector('.admin-panel');
     editMemberArea.scrollIntoView({ behavior: 'smooth' });
 }
@@ -164,11 +164,10 @@ function updateMember(index) {
         update(ref(database, `members/${index}`), updatedMember)
             .then(() => {
                 console.log('Member updated successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
+                loadDataFromFirebase();
             })
             .catch((error) => console.error('Error updating member:', error));
 
-        // Reset the form
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
         document.getElementById('newMemberLocation').value = '';
@@ -185,7 +184,7 @@ function confirmDeleteMember(index) {
         remove(ref(database, `members/${index}`))
             .then(() => {
                 console.log('Member deleted successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
+                loadDataFromFirebase();
             })
             .catch((error) => console.error('Error deleting member:', error));
     }
@@ -198,6 +197,7 @@ function composeMemberEmail(email) {
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
+
 function renderSchedule() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const editEventSelect = document.getElementById('editEventSelect');
@@ -251,14 +251,13 @@ function renderSchedule() {
     scheduleContainer.appendChild(eventDiv);
     editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
     
-    // Update totals immediately after rendering
     updateTotalAttending(event.id);
 }
 function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
         
-        if (displayMode === 'current' && currentEvent) {
+       if (displayMode === 'current' && currentEvent) {
             renderEvent(currentEvent, true);
         } else if (displayMode === 'future') {
             upcomingEvents.forEach((event, index) => renderEvent(event, index === 0));
@@ -268,7 +267,7 @@ function displayEvents() {
     eventDisplaySelector.addEventListener('change', displayEvents);
     displayEvents();
 }
-    
+
 function createNewEvent(date, host, location) {
     const newEvent = {
         date,
@@ -277,41 +276,29 @@ function createNewEvent(date, host, location) {
         rsvps: {}
     };
 
-    // Initialize RSVP for all members
     members.forEach(member => {
         newEvent.rsvps[member.name] = 'no-response';
     });
 
     return newEvent;
 }
+
 function addEvent() {
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
     const location = document.getElementById('newEventLocation').value.trim();
 
     if (date && host && location) {
-        const newEvent = {
-            date,
-            host,
-            location,
-            rsvps: {}
-        };
-
-        // Initialize RSVP for all members
-        members.forEach(member => {
-            newEvent.rsvps[member.name] = 'no-response';
-        });
+        const newEvent = createNewEvent(date, host, location);
 
         push(ref(database, 'schedule'), newEvent)
             .then((newEventRef) => {
                 console.log('Event added successfully');
-                // Add the new event to the local schedule array
                 schedule.push({
                     id: newEventRef.key,
                     ...newEvent
                 });
-                renderSchedule(); // Re-render the schedule
-                // Clear input fields
+                renderSchedule();
                 document.getElementById('newEventDate').value = '';
                 document.getElementById('newEventHost').value = '';
                 document.getElementById('newEventLocation').value = '';
@@ -321,7 +308,7 @@ function addEvent() {
         alert('Please fill in all fields for the new event.');
     }
 }
-// new save event edits
+
 function saveEventEdits() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedEventId = editEventSelect.value;
@@ -333,7 +320,7 @@ function saveEventEdits() {
 
     const newDate = document.getElementById('editEventDate').value;
     const newHost = document.getElementById('editEventHost').value;
-    const newLocation = document.getElementById('editEventLocation').value.trim(); // Changed from 'newEventLocation' to 'editEventLocation'
+    const newLocation = document.getElementById('editEventLocation').value.trim();
 
     if (newDate && newHost && newLocation) {
         const updatedEvent = {
@@ -345,7 +332,7 @@ function saveEventEdits() {
         update(ref(database, `schedule/${selectedEventId}`), updatedEvent)
             .then(() => {
                 console.log('Event updated successfully');
-                loadDataFromFirebase(); // Reload data to reflect changes
+                loadDataFromFirebase();
                 alert("Event updated successfully!");
             })
             .catch((error) => console.error('Error updating event:', error));
@@ -364,25 +351,16 @@ function deleteEvent() {
     }
 
     if (confirm('Are you sure you want to delete this event?')) {
-        // Reference to the specific event in Firebase
         const eventRef = ref(database, `schedule/${selectedEventId}`);
 
-        // Remove the event from Firebase
         remove(eventRef)
             .then(() => {
                 console.log('Event deleted successfully from Firebase');
-                
-                // Remove the event from the local schedule array
                 schedule = schedule.filter(event => event.id !== selectedEventId);
-                
-                // Re-render the schedule
                 renderSchedule();
-                
-                // Clear the edit fields
                 document.getElementById('editEventDate').value = '';
                 document.getElementById('editEventHost').value = '';
                 document.getElementById('editEventLocation').value = '';
-                
                 alert("Event deleted successfully!");
             })
             .catch((error) => {
@@ -391,6 +369,7 @@ function deleteEvent() {
             });
     }
 }
+
 function updateRSVP(eventId, memberName, status) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
@@ -409,13 +388,11 @@ function updateRSVP(eventId, memberName, status) {
             event.rsvps = updatedRsvps;
             updateTotalAttending(eventId);
             
-            // Update the color of the select element based on the status
             const selectElement = document.querySelector(`#eventDetails-${eventId} select[onchange*="${memberName}"]`);
             if (selectElement) {
                 selectElement.style.color = getStatusColor(status);
             }
             
-            // Ensure the event details remain open
             const detailsElement = document.getElementById(`eventDetails-${eventId}`);
             if (detailsElement) {
                 detailsElement.style.display = 'block';
@@ -439,6 +416,7 @@ function getStatusColor(status) {
         default: return 'black';
     }
 }
+
 function updateTotalAttending(eventId) {
     const totalAttendingElement = document.getElementById(`totalAttending-${eventId}`);
     const totalNotAttendingElement = document.getElementById(`totalNotAttending-${eventId}`);
@@ -470,6 +448,7 @@ function updateTotalAttending(eventId) {
     totalNoResponseElement.textContent = totalNoResponse.toString();
     totalMaybeElement.textContent = totalMaybe.toString();
 }
+
 function toggleEventDetails(eventId) {
     const detailsElement = document.getElementById(`eventDetails-${eventId}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -479,7 +458,6 @@ function toggleEventDetails(eventId) {
         detailsElement.style.display = 'block';
         headerElement.textContent = '▲';
         console.log(`Showing details for event ID: ${eventId}`);
-        // Update totals when the event is expanded
         updateTotalAttending(eventId);
     } else {
         detailsElement.style.display = 'none';
@@ -487,6 +465,7 @@ function toggleEventDetails(eventId) {
         console.log(`Hiding details for event ID: ${eventId}`);
     }
 }
+
 function populateHostDropdowns() {
     const newEventHost = document.getElementById('newEventHost');
     const editEventHost = document.getElementById('editEventHost');
@@ -503,6 +482,7 @@ function populateHostDropdowns() {
 
     console.log('Host dropdowns populated');
 }
+
 function updateHostLocation() {
     const hostSelect = document.activeElement.id === 'newEventHost' ? 'newEventHost' : 'editEventHost';
     const locationInput = hostSelect === 'newEventHost' ? 'newEventLocation' : 'editEventLocation';
@@ -514,6 +494,7 @@ function updateHostLocation() {
         document.getElementById(locationInput).value = member.location;
     }
 }
+
 function composeInvitationEmail(eventId) {
     const event = schedule.find(e => e.id === eventId);
     if (!event) {
@@ -676,7 +657,6 @@ function showPastEventsReport() {
     if (!reportContainer) return;
     const currentDate = new Date();
     
-    // Filter past events and sort them in descending order (most recent first)
     const pastEvents = schedule
         .filter(event => new Date(event.date) < currentDate)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -705,6 +685,7 @@ function showPastEventsReport() {
 
     reportContainer.innerHTML = reportHTML;
 }
+
 function showAttendanceReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -724,10 +705,9 @@ function showAttendanceReport() {
         });
     });
 
-  let reportHTML = '<h3 class="report-title">2024 Attendance Report</h3>';
-  reportHTML += '<table class="attendance-report"><thead><tr><th>Member</th><th>Events Attended</th></tr></thead><tbody>';
+    let reportHTML = '<h3 class="report-title">2024 Attendance Report</h3>';
+    reportHTML += '<table class="attendance-report"><thead><tr><th>Member</th><th>Events Attended</th></tr></thead><tbody>';
 
-    // Sort the members alphabetically by name
     const sortedMembers = Object.keys(attendanceCounts).sort((a, b) => a.localeCompare(b));
 
     sortedMembers.forEach(member => {
@@ -743,70 +723,6 @@ function showAttendanceReport() {
 
     reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
-}
-function editPastEventAttendees(eventId) {
-    const event = schedule.find(e => e.id === eventId);
-    if (!event) {
-        console.error(`Event with ID ${eventId} not found`);
-        return;
-    }
-
-    let editHTML = `
-        <h3>Edit Attendees for ${formatDate(event.date)}</h3>
-        <form id="editAttendeesForm">
-    `;
-
-    Object.entries(event.rsvps).forEach(([name, status]) => {
-        editHTML += `
-            <div>
-                <label>
-                    <input type="checkbox" name="${name}" ${status === 'attending' ? 'checked' : ''}>
-                    ${name}
-                </label>
-            </div>
-        `;
-    });
-
-    editHTML += `
-        <button type="submit">Save Changes</button>
-        <button type="button" onclick="cancelEditAttendees()">Cancel</button>
-        </form>
-    `;
-
-    const reportContainer = document.getElementById('reportContainer');
-    reportContainer.innerHTML = editHTML;
-
-    document.getElementById('editAttendeesForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveEditedAttendees(eventId, this);
-    });
-}
-
-function saveEditedAttendees(eventId, form) {
-    const event = schedule.find(e => e.id === eventId);
-    if (!event) {
-        console.error(`Event with ID ${eventId} not found`);
-        return;
-    }
-
-    const formData = new FormData(form);
-    for (let [name, status] of Object.entries(event.rsvps)) {
-        event.rsvps[name] = formData.has(name) ? 'attending' : 'not-attending';
-    }
-
-    // Update the event in Firebase
-    update(ref(database, `schedule/${eventId}/rsvps`), event.rsvps)
-        .then(() => {
-            console.log('Attendees updated successfully');
-            showPastEventsReport(); // Refresh the report
-        })
-        .catch((error) => {
-            console.error('Error updating attendees:', error);
-        });
-}
-
-function cancelEditAttendees() {
-    showPastEventsReport(); // Go back to the past events report
 }
 
 function showHostingReport() {
@@ -867,6 +783,71 @@ function showHostingReport() {
     reportHTML += '</tbody></table>';
     reportContainer.innerHTML = reportHTML;
 }
+
+function editPastEventAttendees(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    let editHTML = `
+        <h3>Edit Attendees for ${formatDate(event.date)}</h3>
+        <form id="editAttendeesForm">
+    `;
+
+    Object.entries(event.rsvps).forEach(([name, status]) => {
+        editHTML += `
+            <div>
+                <label>
+                    <input type="checkbox" name="${name}" ${status === 'attending' ? 'checked' : ''}>
+                    ${name}
+                </label>
+            </div>
+        `;
+    });
+
+    editHTML += `
+        <button type="submit">Save Changes</button>
+        <button type="button" onclick="cancelEditAttendees()">Cancel</button>
+        </form>
+    `;
+
+    const reportContainer = document.getElementById('reportContainer');
+    reportContainer.innerHTML = editHTML;
+
+    document.getElementById('editAttendeesForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveEditedAttendees(eventId, this);
+    });
+}
+
+function saveEditedAttendees(eventId, form) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    const formData = new FormData(form);
+    for (let [name, status] of Object.entries(event.rsvps)) {
+        event.rsvps[name] = formData.has(name) ? 'attending' : 'not-attending';
+    }
+
+    update(ref(database, `schedule/${eventId}/rsvps`), event.rsvps)
+        .then(() => {
+            console.log('Attendees updated successfully');
+            showPastEventsReport();
+        })
+        .catch((error) => {
+            console.error('Error updating attendees:', error);
+        });
+}
+
+function cancelEditAttendees() {
+    showPastEventsReport();
+}
+
 function togglePastEventDetails(index) {
     const detailsElement = document.getElementById(`pastEventDetails-${index}`);
     const headerElement = detailsElement.previousElementSibling.querySelector('.expand-icon');
@@ -880,9 +861,6 @@ function togglePastEventDetails(index) {
     }
 }
 
-// Export the function to the global scope
-window.togglePastEventDetails = togglePastEventDetails;
-
 function toggleMemberList() {
     const memberListContainer = document.getElementById('memberListContainer');
     const headerElement = memberListContainer.previousElementSibling.querySelector('.expand-icon');
@@ -895,6 +873,7 @@ function toggleMemberList() {
         headerElement.textContent = '▼';
     }
 }
+
 function toggleEventList() {
     const scheduleContainer = document.getElementById('scheduleContainer');
     const headerElement = scheduleContainer.previousElementSibling.querySelector('.expand-icon');
@@ -907,6 +886,7 @@ function toggleEventList() {
         headerElement.textContent = '▼';
     }
 }
+
 function loadEventForEditing() {
     const editEventSelect = document.getElementById('editEventSelect');
     const selectedEventId = editEventSelect.value;
@@ -926,17 +906,6 @@ function loadEventForEditing() {
         document.getElementById('editEventLocation').value = '';
     }
 }
-
-// Add event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
-    document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
-    document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
- const eventDisplaySelector = document.getElementById('eventDisplaySelector');
-    if (eventDisplaySelector) {
-        eventDisplaySelector.addEventListener('change', renderSchedule);
-    }
-});
 
 // Export functions to global scope
 window.toggleMemberList = toggleMemberList;
@@ -958,3 +927,4 @@ window.showAttendanceReport = showAttendanceReport;
 window.showHostingReport = showHostingReport;
 window.editPastEventAttendees = editPastEventAttendees;
 window.cancelEditAttendees = cancelEditAttendees;
+window.togglePastEventDetails = togglePastEventDetails;
