@@ -934,3 +934,5 @@ window.showHostingReport = showHostingReport;
 window.editPastEventAttendees = editPastEventAttendees;
 window.cancelEditAttendees = cancelEditAttendees;
 window.togglePastEventDetails = togglePastEventDetails;
+// At the end of your script.js file, add this line:
+export { loadDataFromFirebase };
