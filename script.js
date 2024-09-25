@@ -68,8 +68,6 @@ function loadDataFromFirebase() {
         console.error('Error loading data from Firebase:', error);
     });
 }
-
-
 // Function to save data to Firebase
 function saveDataToFirebase() {
   set(ref(database, '/'), {
