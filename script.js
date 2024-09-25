@@ -59,17 +59,28 @@ function loadDataFromFirebase() {
                 id: key,
                 ...value
             }));
+
+            // Fetch RSVPs for each event
+            const rsvpPromises = schedule.map(event => 
+                get(ref(database, `rsvps/${event.id}`))
+                    .then(rsvpSnapshot => {
+                        event.rsvps = rsvpSnapshot.val() || {};
+                        return event;
+                    })
+            );
+
+            Promise.all(rsvpPromises).then(() => {
+                renderMembers();
+                renderSchedule();
+                populateHostDropdowns();
+                console.log('Data loaded successfully from Firebase!');
+            });
         } else {
             schedule = [];
             console.warn('No schedule data found or invalid structure');
         }
         
         console.log('Data loaded:', { members, schedule });
-        
-        renderMembers();
-        renderSchedule();
-        populateHostDropdowns();
-        console.log('Data loaded successfully from Firebase!');
     }).catch((error) => {
         console.error('Error loading data from Firebase:', error);
     });
@@ -225,14 +236,14 @@ function renderSchedule() {
         </div>
         <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
             <div class="rsvp-details">
-                ${Object.entries(event.rsvps).map(([name, status]) => `
+                ${Object.entries(event.rsvps || {}).map(([name, rsvpData]) => `
                     <div class="event-rsvp">
                         <p>${name}:</p>
-                        <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
-                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                        <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(rsvpData.status)}">
+                            <option value="no-response" ${rsvpData.status === 'no-response' ? 'selected' : ''}>No Response</option>
+                            <option value="attending" ${rsvpData.status === 'attending' ? 'selected' : ''}>Attending</option>
+                            <option value="not-attending" ${rsvpData.status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                            <option value="maybe" ${rsvpData.status === 'maybe' ? 'selected' : ''}>Maybe</option>
                         </select>
                     </div>
                 `).join('')}
@@ -371,22 +382,17 @@ function deleteEvent() {
 }
 
 function updateRSVP(eventId, memberName, status) {
-    const event = schedule.find(e => e.id === eventId);
-    if (!event) {
-        console.error(`Event with ID ${eventId} not found`);
-        return;
-    }
-
-    const updatedRsvps = {
-        ...event.rsvps,
-        [memberName]: status
-    };
-
-    update(ref(database, `schedule/${eventId}/rsvps`), updatedRsvps)
+    const rsvpRef = ref(database, `rsvps/${eventId}/${encodeURIComponent(memberName)}`);
+    set(rsvpRef, { name: memberName, status: status })
         .then(() => {
             console.log('RSVP updated successfully');
-            event.rsvps = updatedRsvps;
-            updateTotalAttending(eventId);
+            // Update local data structure
+            const event = schedule.find(e => e.id === eventId);
+            if (event) {
+                if (!event.rsvps) event.rsvps = {};
+                event.rsvps[memberName] = { name: memberName, status: status };
+                updateTotalAttending(eventId);
+            }
             
             const selectElement = document.querySelector(`#eventDetails-${eventId} select[onchange*="${memberName}"]`);
             if (selectElement) {
