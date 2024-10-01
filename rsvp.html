@@ -54,6 +54,9 @@
             max-width: 200px;
             border-radius: 50%;
         }
+        #rsvpSection {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -76,16 +79,18 @@
             
             <img id="memberImage" src="" alt="Member Image" style="display: none;">
             
-            <select id="rsvpStatus">
-                <option value="">Your RSVP</option>
-                <option value="attending">Attending</option>
-                <option value="not-attending">Not Attending</option>
-                <option value="maybe">Maybe</option>
-            </select>
-            
-            <p>By submitting this form, you consent to receive SMS confirmations of your RSVP.</p>
-            
-            <button id="submitRSVP">Submit RSVP</button>
+            <div id="rsvpSection">
+                <select id="rsvpStatus">
+                    <option value="">Your RSVP</option>
+                    <option value="attending">Attending</option>
+                    <option value="not-attending">Not Attending</option>
+                    <option value="maybe">Maybe</option>
+                </select>
+                
+                <p>By submitting this form, you consent to receive SMS confirmations of your RSVP.</p>
+                
+                <button id="submitRSVP">Submit RSVP</button>
+            </div>
         </div>
     </div>
 
@@ -106,31 +111,48 @@
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('token');
 
+        console.log('Event ID:', eventId); // Debugging log
+
         if (!eventId) {
+            console.error('No event ID provided');
             alert('No event ID provided. Please use the link from your invitation email.');
         } else {
             // Fetch event data
             database.ref(`/schedule/${eventId}`).once('value').then((snapshot) => {
                 eventData = snapshot.val();
+                console.log('Event data:', eventData); // Debugging log
                 if (eventData) {
                     document.getElementById('eventDate').textContent = formatDate(eventData.date);
                     document.getElementById('eventHost').textContent = eventData.host;
                     document.getElementById('eventLocation').textContent = eventData.location;
                 } else {
+                    console.error('Event not found');
                     alert('Event not found. Please check your invitation link.');
                 }
+            }).catch(error => {
+                console.error('Error fetching event data:', error);
             });
 
             // Fetch members data
             database.ref('/members').once('value').then((snapshot) => {
-                members = Object.values(snapshot.val());
-                const memberSelect = document.getElementById('memberSelect');
-                members.forEach((member, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = member.name;
-                    memberSelect.appendChild(option);
-                });
+                const membersData = snapshot.val();
+                console.log('Members data:', membersData); // Debugging log
+                
+                if (membersData) {
+                    members = Object.values(membersData);
+                    const memberSelect = document.getElementById('memberSelect');
+                    members.forEach((member, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = member.name;
+                        memberSelect.appendChild(option);
+                    });
+                    console.log('Member options added:', members.length);
+                } else {
+                    console.error('No members data found');
+                }
+            }).catch(error => {
+                console.error('Error fetching members data:', error);
             });
         }
 
@@ -143,13 +165,16 @@
         // Handle member selection
         document.getElementById('memberSelect').addEventListener('change', function() {
             const memberImage = document.getElementById('memberImage');
+            const rsvpSection = document.getElementById('rsvpSection');
             if (this.value !== "") {
                 const selectedMember = members[this.value];
                 const imagePath = `/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`;
                 memberImage.src = imagePath;
                 memberImage.style.display = 'block';
+                rsvpSection.style.display = 'block';
             } else {
                 memberImage.style.display = 'none';
+                rsvpSection.style.display = 'none';
             }
         });
 
