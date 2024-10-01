@@ -196,8 +196,9 @@
             };
 
             database.ref(`/schedule/${eventId}/rsvps`).update(updatedRsvp).then(() => {
-                alert('Your RSVP has been submitted successfully!');
-                // You can add code here to send an SMS confirmation
+                console.log('RSVP submitted successfully');
+                // Redirect to the confirmation page
+                window.location.href = `confirmation.html?token=${eventId}&name=${encodeURIComponent(selectedMember.name)}&status=${rsvpStatus.value}`;
             }).catch((error) => {
                 console.error('Error updating RSVP:', error);
                 alert('There was an error submitting your RSVP. Please try again.');
