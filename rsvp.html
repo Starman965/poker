@@ -96,14 +96,16 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script>
-        // Initialize Firebase (replace with your config)
-        const firebaseConfig = {
-            // Your Firebase configuration here
-        };
+    <script type="module">
+        // Import the Firebase configuration
+        import { firebaseConfig } from './firebase-config.js';
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
+        // Initialize Realtime Database and get a reference to the service
         const database = firebase.database();
+
         let eventData = null;
         let members = [];
 
