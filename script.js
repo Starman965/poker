@@ -968,19 +968,6 @@ function sendSms(phoneNumber, message) {
 // New Functions for Polls
 let polls = [];
 
-function togglePolls() {
-    const pollsContainer = document.getElementById('pollsContainer');
-    const headerElement = pollsContainer.previousElementSibling.querySelector('.expand-icon');
-    
-    if (pollsContainer.style.display === 'none') {
-        pollsContainer.style.display = 'block';
-        headerElement.textContent = '▲';
-    } else {
-        pollsContainer.style.display = 'none';
-        headerElement.textContent = '▼';
-    }
-}
-
 // Function to delete a poll
 function deletePoll(pollId) {
     if (confirm('Are you sure you want to delete this poll?')) {
