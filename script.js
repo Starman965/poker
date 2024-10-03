@@ -1026,8 +1026,8 @@ function resetCreatePollForm() {
 }
 
 function loadPolls() {
-    const pollsRef = firebase.database().ref('polls');
-    pollsRef.on('value', (snapshot) => {
+    const pollsRef = ref(database, 'polls');
+    onValue(pollsRef, (snapshot) => {
         polls = [];
         snapshot.forEach((childSnapshot) => {
             polls.push({
