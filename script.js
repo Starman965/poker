@@ -1003,16 +1003,17 @@ function createPoll() {
             question,
             options,
             token: generateUniqueToken(),
-            created: firebase.database.ServerValue.TIMESTAMP,
+            created: serverTimestamp(),
             active: true,
             votes: {}
         };
 
         // Save the new poll to Firebase
-        database.ref('polls').push(newPoll)
+        const pollsRef = ref(database, 'polls');
+        push(pollsRef, newPoll)
             .then(() => {
                 console.log('Poll created successfully');
-                loadPolls();
+                loadDataFromFirebase(); // Use this instead of loadPolls()
                 resetCreatePollForm();
             })
             .catch((error) => console.error('Error creating poll:', error));
