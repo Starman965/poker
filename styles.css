@@ -288,12 +288,6 @@ input[type="text"], input[type="email"], input[type="date"], select {
     margin-bottom: 10px;
 }
 
-.progress-bar {
-    width: 100%;
-    background-color: #f3f3f3;
-    border-radius: 5px;
-    overflow: hidden;
-}
 
 .progress {
     height: 20px;
@@ -301,3 +295,35 @@ input[type="text"], input[type="email"], input[type="date"], select {
     text-align: center;
     color: white;
 }
+.progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+
+/* Poll result option styling */
+.poll-result {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.poll-result:nth-child(even) {
+    background-color: #eef7fe;  /* Light blue for alternate options */
+}
+
+.poll-result-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.poll-result-count {
+    margin-top: 5px;
+    color: #555;
+}
+
