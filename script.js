@@ -1103,42 +1103,6 @@ function closePoll(pollId) {
         });
 }
 
-// Function to send poll results via email
-function composePollResultsEmail(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`);  // Use ref(database, 'polls/${pollId}')
-    get(pollRef).then((snapshot) => {
-        const pollData = snapshot.val();
-        if (!pollData) {
-            console.error(`Poll with ID ${pollId} not found`);
-            return;
-        }
-
-        // Calculate poll results
-        const pollResults = pollData.options.map((option, index) => {
-            const voteCount = pollData.votes ? Object.values(pollData.votes).filter(vote => vote.option === index).length : 0;
-            const percentage = (voteCount / Object.keys(pollData.votes || {}).length * 100).toFixed(2);
-            return `${option}: ${voteCount} votes (${percentage}%)`;
-        }).join('\n');
-
-        // Email subject and body
-        const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${pollData.question}`);
-        const body = encodeURIComponent(`Danville Poker Group,
-
-        The results for the poll "${pollData.question}" are now in:
-
-        ${pollResults}
-
-        Best regards,
-        Nasser`);
-
-        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
-        window.open(gmailUrl, '_blank');
-    }).catch((error) => {
-        console.error('Error fetching poll data:', error);
-    });
-}
-
-
 function createPollElement(poll) {
     const pollDiv = document.createElement('div');
     pollDiv.className = 'poll-item';
@@ -1220,10 +1184,9 @@ function composePollInvitationEmail(pollId) {
     });
 }
 
-
 function composePollResultsEmail(pollId) {
-    const pollRef = firebase.database().ref(`polls/${pollId}`);
-    pollRef.once('value', (snapshot) => {
+    const pollRef = ref(database, `polls/${pollId}`);
+    get(pollRef).then((snapshot) => {
         const pollData = snapshot.val();
         if (!pollData) {
             console.error(`Poll with ID ${pollId} not found`);
@@ -1239,20 +1202,19 @@ function composePollResultsEmail(pollId) {
         const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${pollData.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
 
-The results for the poll "${pollData.question}" are now in:
+        The results for the poll "${pollData.question}" are now in:
 
-${pollResults}
+        ${pollResults}
 
-Based on results, we will be (PUT THE OUTCOME HERE)
-
-Best regards,
-Nasser`);
+        Best regards,
+        Nasser`);
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
+    }).catch((error) => {
+        console.error('Error fetching poll data:', error);
     });
 }
-
 
 // Add event listeners
 document.addEventListener('DOMContentLoaded', function() {
