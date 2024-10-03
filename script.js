@@ -58,12 +58,22 @@ function loadDataFromFirebase() {
             console.warn('No schedule data found or invalid structure');
         }
         
-        console.log('Data loaded:', { members, schedule });
+        if (data && data.polls) {
+            polls = Object.entries(data.polls).map(([key, value]) => ({
+                id: key,
+                ...value
+            }));
+        } else {
+            polls = [];
+            console.warn('No polls data found or invalid structure');
+        }
+        
+        console.log('Data loaded:', { members, schedule, polls });
         
         renderMembers();
         renderSchedule();
         populateHostDropdowns();
-        console.log('Data loaded successfully from Firebase!');
+        renderPolls();
     }).catch((error) => {
         console.error('Error loading data from Firebase:', error);
     });
@@ -1166,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize data
     loadDataFromFirebase();
-    loadPolls();
 
     // Render initial view
     renderMembers();
