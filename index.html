@@ -31,15 +31,33 @@
                     <div id="scheduleContainer"></div>
                 </div>
             </div>
-        <!-- New Polls section -->
+
+            <!-- New Polls section -->
             <div class="card">
                 <div class="section-header" onclick="togglePolls()">
                     <h2>Polls</h2>
                     <span class="expand-icon">▼</span>
                 </div>
                 <div id="pollsContainer" class="section-content" style="display: none;">
-                    <div id="activePolls"></div>
-                    <div id="closedPolls"></div>
+                    <h3>Active Polls</h3>
+                    <div id="activePolls">
+                        <!-- Example Poll HTML Structure -->
+                        <div class="poll-item" id="poll-[pollId]">
+                            <h4>[Poll Title]</h4>
+                            <button id="closePollBtn-[pollId]" onclick="closePoll('[pollId]')">Close Poll</button>
+                            <button id="sendResultsBtn-[pollId]" style="display:none;" onclick="sendPollResults('[pollId]')">Send Poll Results</button>
+                        </div>
+                    </div>
+
+                    <h3>Closed Polls</h3>
+                    <div id="closedPolls">
+                        <!-- Example Closed Poll -->
+                        <div class="poll-item" id="closed-poll-[pollId]">
+                            <h4>[Poll Title]</h4>
+                            <button onclick="deletePoll('[pollId]')">Delete Poll</button>
+                        </div>
+                    </div>
+
                     <button onclick="showCreatePollForm()">Create New Poll</button>
                 </div>
             </div>
@@ -82,19 +100,21 @@
                     <button onclick="saveEventEdits()">Save Edits</button>
                     <button onclick="deleteEvent()">Delete Event</button>
                 </div>
-            <!-- Add new section for poll management -->
+
+                <!-- Poll Management Section -->
                 <div class="card">
                     <h3>Create New Poll</h3>
                     <div id="createPollForm" style="display: none;">
-                    <input type="text" id="pollQuestion" placeholder="Enter poll question">
-                    <div id="pollOptions">
-                    <input type="text" class="pollOption" placeholder="Option A">
-                    <input type="text" class="pollOption" placeholder="Option B">
-                    </div>
-                    <button onclick="addPollOption()">Add Option</button>
-                    <button onclick="createPoll()">Create Poll</button>
+                        <input type="text" id="pollQuestion" placeholder="Enter poll question">
+                        <div id="pollOptions">
+                            <input type="text" class="pollOption" placeholder="Option A">
+                            <input type="text" class="pollOption" placeholder="Option B">
+                        </div>
+                        <button onclick="addPollOption()">Add Option</button>
+                        <button onclick="createPoll()">Create Poll</button>
                     </div>
                 </div>
+
                 <div class="card">
                     <h3>Reports</h3>
                     <button onclick="showPastEventsReport()">Past Events Report</button>
@@ -117,7 +137,7 @@
         const provider = new GoogleAuthProvider();
 
         // Authorized admin emails
-        const allowedAdmins = ['demandgendave@gmail.com', 'davew102@yahoo.com', 'nasser@gcuniverse.com','nasser.gaemi@bigdates.com'];
+        const allowedAdmins = ['demandgendave@gmail.com', 'davew102@yahoo.com', 'nasser@gcuniverse.com', 'nasser.gaemi@bigdates.com'];
 
         // Check if the user's email is in the list of allowed admins
         function checkAdmin(email) {
