@@ -926,6 +926,7 @@ function loadEventForEditing() {
         document.getElementById('editEventLocation').value = '';
     }
 }
+/*
 function sendSms(phoneNumber, message) {
     fetch('/api/send-sms', {
         method: 'POST',
@@ -951,6 +952,7 @@ function sendSms(phoneNumber, message) {
         console.error('Error sending SMS:', error);
     });
 }
+*/
 
 // New Functions for Polls
 let polls = [];
@@ -1125,9 +1127,6 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 
-
-// Example usage: sending an SMS when someone RSVPs
-sendSms('+19259806777', 'Someone has just RSVP to poker!');
 
 // Add event listeners
 document.addEventListener('DOMContentLoaded', function() {
