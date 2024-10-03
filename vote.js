@@ -9,6 +9,7 @@ const database = getDatabase(app);
 
 let currentPoll = null;
 let currentMember = null;
+let members = []; // Global members array
 
 // Function to get URL parameters
 function getUrlParameter(name) {
@@ -66,13 +67,18 @@ function displayPollOptions() {
 function loadMemberData() {
     const membersRef = ref(database, 'members');
     onValue(membersRef, (snapshot) => {
-        const members = snapshot.val();
+        const membersData = snapshot.val(); // Fetch members data from Firebase
         const memberSelect = document.getElementById('memberSelect');
         memberSelect.innerHTML = '<option value="">Select your name</option>';
-        Object.values(members).forEach((member, index) => {
+
+        // Store the members globally
+        members = Object.values(membersData);
+
+        // Populate the dropdown
+        members.forEach((member, index) => {
             const option = document.createElement('option');
-            option.value = index; // Use index as value
-            option.textContent = member.name;
+            option.value = index; // Use index as the value
+            option.textContent = member.name; // Display the member's name
             memberSelect.appendChild(option);
         });
     });
@@ -85,8 +91,8 @@ function loadMemberImage() {
     const selectedIndex = memberSelect.value;
 
     if (selectedIndex !== '') {
-        const selectedMember = members[selectedIndex]; // Assuming the index maps to the correct member
-        const imagePath = `/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`; // Construct the image path based on name
+        const selectedMember = members[selectedIndex]; // Fetch the correct member from the global array
+        const imagePath = `/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`; // Construct the image path
         memberImage.src = imagePath;
         memberImage.style.display = 'block';
     } else {
