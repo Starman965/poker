@@ -1067,6 +1067,10 @@ function addPollOption() {
     pollOptions.appendChild(newOption);
 }
 
+// Make sure the event listener is attached to the button correctly
+document.getElementById('addPollOptionBtn').addEventListener('click', addPollOption);
+
+
 // Function to create a new poll
 function createPoll() {
     const pollQuestion = document.getElementById('pollQuestion').value;
