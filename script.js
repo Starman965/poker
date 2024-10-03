@@ -1189,17 +1189,19 @@ function composePollInvitationEmail(pollId) {
         const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${pollData.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
 
-We have a new poll for you to participate in:
+Hey Guys,
+
+We need your input on something:
 
 Question: ${pollData.question}
 
 Please respond with your choice:
 ${pollData.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
 
-You can submit your vote here:
+Please submit your preference here:
 ${pollLink}
 
-Your input is important to us. Thank you for participating!
+Thank you for providing your timely feedback!
 
 Best regards,
 Nasser`);
@@ -1230,6 +1232,8 @@ function composePollResultsEmail(pollId) {
 The results for the poll "${pollData.question}" are now in:
 
 ${pollResults}
+
+Based on results, we will be (PUT THE OUTCOME HERE)
 
 Best regards,
 Nasser`);
