@@ -1211,7 +1211,8 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.warn('Submit Poll Button not found!');
     }
-    // Initialize datas
+
+    // Initialize data
     loadDataFromFirebase();
 
     // Render initial view

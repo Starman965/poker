@@ -44,16 +44,17 @@
                         <!-- Polls will be rendered here dynamically -->
                     </div>
             
-                    <!-- Create New Poll -->
-                    <button onclick="showCreatePollForm()">Create New Poll</button>
-                    <div id="createPollForm" style="display: none;">
-                        <input type="text" id="pollQuestion" placeholder="Enter poll question">
-                        <div id="pollOptions">
-                            <input type="text" class="pollOption" placeholder="Option A">
-                            <input type="text" class="pollOption" placeholder="Option B">
-                        </div>
-                        <button onclick="addPollOption()">Add Option</button>
-                        <button onclick="createPoll()">Publish Poll</button>
+                   <!-- Poll creation form -->
+                <div id="pollOptions">
+                    <input type="text" class="pollOption" placeholder="Option A">
+                    <input type="text" class="pollOption" placeholder="Option B">
+                </div>
+
+                <!-- Add option button -->
+                <button id="addPollOptionBtn">Add Poll Option</button>
+
+                <!-- Submit poll button -->
+                <button id="submitPollBtn">Publish Poll</button>
                     </div>
                 </div>
             </div>      
