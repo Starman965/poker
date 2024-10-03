@@ -1105,9 +1105,14 @@ function closePoll(pollId) {
 
 // Function to send poll results via email
 function sendPollResults(pollId) {
-    const pollRef = firebase.database().ref(`polls/${pollId}`);
-    pollRef.once('value', (snapshot) => {
+    const pollRef = ref(database, `polls/${pollId}`);  // Updated to use modular syntax
+    get(pollRef).then((snapshot) => {
         const pollData = snapshot.val();
+
+        if (!pollData) {
+            console.error('Poll data not found');
+            return;
+        }
 
         // Format the results to be sent via email
         const pollResults = pollData.options.map((option, index) => {
@@ -1133,8 +1138,10 @@ function sendPollResults(pollId) {
             Danville Poker Group
         `;
 
-        // Call the existing email sending function
+        // Call the existing email sending function (assuming you have this function defined)
         sendEmailToGroup(emailSubject, emailBody);
+    }).catch((error) => {
+        console.error('Error fetching poll data:', error);
     });
 }
 
@@ -1182,7 +1189,7 @@ function showPollResults(pollId) {
 }
 
 function composePollInvitationEmail(pollId) {
-    const pollRef = firebase.database().ref(`polls/${pollId}`);
+    const pollRef = ref(database, `polls/${pollId}`); // Updated
     pollRef.once('value', (snapshot) => {
         const pollData = snapshot.val();
         if (!pollData) {
@@ -1193,23 +1200,23 @@ function composePollInvitationEmail(pollId) {
         const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${pollData.token}`;
         const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${pollData.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
+        
+        Hey Guys,
+        
+        We need your input on something:
 
-Hey Guys,
+        Question: ${pollData.question}
+        
+        Please respond with your choice:
+        ${pollData.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
+        
+        Please submit your preference here:
+        ${pollLink}
+        
+        Thank you for providing your timely feedback!
 
-We need your input on something:
-
-Question: ${pollData.question}
-
-Please respond with your choice:
-${pollData.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
-
-Please submit your preference here:
-${pollLink}
-
-Thank you for providing your timely feedback!
-
-Best regards,
-Nasser`);
+        Best regards,
+        Nasser`);
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
