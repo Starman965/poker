@@ -71,7 +71,7 @@ function loadMemberData() {
         memberSelect.innerHTML = '<option value="">Select your name</option>';
         Object.values(members).forEach((member, index) => {
             const option = document.createElement('option');
-            option.value = index;
+            option.value = index; // Use index as value
             option.textContent = member.name;
             memberSelect.appendChild(option);
         });
@@ -82,26 +82,18 @@ function loadMemberData() {
 function loadMemberImage() {
     const memberSelect = document.getElementById('memberSelect');
     const memberImage = document.getElementById('memberImage');
-    const selectedMemberId = memberSelect.value; // Assuming this is the member ID or index
+    const selectedIndex = memberSelect.value;
 
-    if (selectedMemberId !== '') {
-        const memberRef = ref(database, `members/${selectedMemberId}`);
-        onValue(memberRef, (snapshot) => {
-            currentMember = snapshot.val(); // Retrieve member data
-            if (currentMember && currentMember.image) {
-                // Display member image if it exists
-                memberImage.src = currentMember.image;
-                memberImage.style.display = 'block';
-            } else {
-                // Hide or display a placeholder if no image is found
-                memberImage.src = 'default-placeholder-image.jpg'; // Optional placeholder
-                memberImage.style.display = 'block'; // Show placeholder
-            }
-        });
+    if (selectedIndex !== '') {
+        const selectedMember = members[selectedIndex]; // Assuming the index maps to the correct member
+        const imagePath = `/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`; // Construct the image path based on name
+        memberImage.src = imagePath;
+        memberImage.style.display = 'block';
     } else {
-        memberImage.style.display = 'none'; // Hide image if no member selected
+        memberImage.style.display = 'none';
     }
 }
+
 
 // Submit vote
 function submitVote() {
