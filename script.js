@@ -981,10 +981,6 @@ function togglePolls() {
     }
 }
 
-function showCreatePollForm() {
-    document.getElementById('createPollForm').style.display = 'block';
-}
-
 function addPollOption() {
     const pollOptions = document.getElementById('pollOptions');
     const newOption = document.createElement('input');
