@@ -32,12 +32,12 @@ function loadPollData() {
         const polls = snapshot.val();
         if (polls) {
             // Find the poll using the token
-            currentPoll = Object.entries(polls).find(([key, poll]) => poll.token === pollToken);
-            if (currentPoll) {
+            const pollEntry = Object.entries(polls).find(([key, poll]) => poll.token === pollToken);
+            if (pollEntry) {
                 // Set currentPoll correctly
-                currentPoll.id = currentPoll[0]; // The poll ID
-                currentPoll = currentPoll[1]; // The actual poll object
-                currentPoll.id = currentPoll.id; // Ensure ID is stored
+                const [pollId, pollData] = pollEntry; // Destructure the key (pollId) and value (pollData)
+                currentPoll = pollData; // The actual poll object
+                currentPoll.id = pollId; // Ensure the poll ID is stored separately
                 displayPollQuestion();
                 displayPollOptions();
             } else {
@@ -47,6 +47,7 @@ function loadPollData() {
             alert('No polls found');
         }
     });
+    console.log(currentPoll); // Debug: Ensure the poll data and ID are correctly loaded
 }
 
 
