@@ -12,10 +12,10 @@ import {
     remove,
     get
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
 const database = getDatabase(app);
 
 let members = [];
@@ -1104,46 +1104,40 @@ function closePoll(pollId) {
 }
 
 // Function to send poll results via email
-function sendPollResults(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`);  // Updated to use modular syntax
+function composePollResultsEmail(pollId) {
+    const pollRef = ref(database, `polls/${pollId}`);  // Use ref(database, 'polls/${pollId}')
     get(pollRef).then((snapshot) => {
         const pollData = snapshot.val();
-
         if (!pollData) {
-            console.error('Poll data not found');
+            console.error(`Poll with ID ${pollId} not found`);
             return;
         }
 
-        // Format the results to be sent via email
+        // Calculate poll results
         const pollResults = pollData.options.map((option, index) => {
             const voteCount = pollData.votes ? Object.values(pollData.votes).filter(vote => vote.option === index).length : 0;
             const percentage = (voteCount / Object.keys(pollData.votes || {}).length * 100).toFixed(2);
             return `${option}: ${voteCount} votes (${percentage}%)`;
         }).join('\n');
 
-        // Customize the email subject and body for poll results
-        const emailSubject = `Results are in: ${pollData.question}`;
-        const emailBody = `
-            Hi,
+        // Email subject and body
+        const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${pollData.question}`);
+        const body = encodeURIComponent(`Danville Poker Group,
 
-            The results for our recent poll "${pollData.question}" are now available.
+        The results for the poll "${pollData.question}" are now in:
 
-            Poll Question: ${pollData.question}
+        ${pollResults}
 
-            Here are the results:
-            ${pollResults}
+        Best regards,
+        Nasser`);
 
-            Best regards,
-            Nasser
-            Danville Poker Group
-        `;
-
-        // Call the existing email sending function (assuming you have this function defined)
-        sendEmailToGroup(emailSubject, emailBody);
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
+        window.open(gmailUrl, '_blank');
     }).catch((error) => {
         console.error('Error fetching poll data:', error);
     });
 }
+
 
 function createPollElement(poll) {
     const pollDiv = document.createElement('div');
@@ -1165,11 +1159,12 @@ function togglePollStatus(pollId) {
     const poll = polls.find(p => p.id === pollId);
     if (poll) {
         const newStatus = !poll.active;
-        database.ref(`polls/${pollId}`).update({ active: newStatus })
+        update(ref(database, `polls/${pollId}`), { active: newStatus })
             .then(() => console.log(`Poll status updated to ${newStatus ? 'active' : 'closed'}`))
             .catch((error) => console.error('Error updating poll status:', error));
     }
 }
+
 
 function showPollResults(pollId) {
     const poll = polls.find(p => p.id === pollId);
@@ -1189,8 +1184,8 @@ function showPollResults(pollId) {
 }
 
 function composePollInvitationEmail(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`); // Updated
-    pollRef.once('value', (snapshot) => {
+    const pollRef = ref(database, `polls/${pollId}`);  // Use ref(database, 'polls/${pollId}')
+    get(pollRef).then((snapshot) => {
         const pollData = snapshot.val();
         if (!pollData) {
             console.error(`Poll with ID ${pollId} not found`);
@@ -1200,19 +1195,19 @@ function composePollInvitationEmail(pollId) {
         const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${pollData.token}`;
         const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${pollData.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
-        
+
         Hey Guys,
-        
+
         We need your input on something:
 
         Question: ${pollData.question}
-        
+
         Please respond with your choice:
         ${pollData.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
-        
+
         Please submit your preference here:
         ${pollLink}
-        
+
         Thank you for providing your timely feedback!
 
         Best regards,
@@ -1220,8 +1215,11 @@ function composePollInvitationEmail(pollId) {
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
+    }).catch((error) => {
+        console.error('Error fetching poll data:', error);
     });
 }
+
 
 function composePollResultsEmail(pollId) {
     const pollRef = firebase.database().ref(`polls/${pollId}`);
