@@ -32,10 +32,11 @@ onValue(connectedRef, (snap) => {
 });
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const date = new Date(dateString + 'T00:00:00Z');  // Append 'Z' to force UTC interpretation
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
 }
+
 
 function loadDataFromFirebase() {
     const dbRef = ref(database, '/');
