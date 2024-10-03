@@ -44,10 +44,10 @@
                         <!-- Example Poll HTML Structure -->
                         <div class="poll-item" id="poll-[pollId]">
                             <h4>[Poll Title]</h4>
-                            <button onclick="composePollInvitationEmail('[pollId]')">Send Poll Out</button>
+                            <button onclick="composePollInvitationEmail('[pollId]')">Send Poll Invitation</button>
                             <button id="closePollBtn-[pollId]" onclick="closePoll('[pollId]')">Close Poll</button>
-                            <button id="sendResultsBtn-[pollId]" style="display:none;" onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
-                        </div>
+                            <button onclick="showPollResults('[pollId]')">Show Results</button>
+                          </div>                          
                     </div>
             
                     <h3>Closed Polls</h3>
@@ -55,9 +55,11 @@
                         <!-- Example Closed Poll -->
                         <div class="poll-item" id="closed-poll-[pollId]">
                             <h4>[Poll Title]</h4>
+                            <button id="sendResultsBtn-[pollId]" onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
                             <button onclick="deletePoll('[pollId]')">Delete Poll</button>
-                            <button onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
-                        </div>
+                            <button onclick="showPollResults('[pollId]')">Show Results</button>
+                          </div>
+                          
                     </div>
             
                     <button onclick="showCreatePollForm()">Create New Poll</button>

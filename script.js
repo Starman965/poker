@@ -1035,10 +1035,10 @@ function resetPollForm() {
 // Delete a closed poll
 function deletePoll(pollId) {
     if (confirm('Are you sure you want to delete this poll? This action cannot be undone.')) {
-        const pollRef = firebase.database().ref(`polls/${pollId}`);
-        pollRef.remove().then(() => {
+        const pollRef = ref(database, `polls/${pollId}`);
+        remove(pollRef).then(() => {
             alert('Poll deleted successfully.');
-            document.getElementById(`poll-${pollId}`).remove(); // Remove from UI
+            document.getElementById(`closed-poll-${pollId}`).remove(); // Remove from UI
         }).catch((error) => {
             console.error('Error deleting poll:', error);
         });
@@ -1091,8 +1091,8 @@ function renderPolls() {
 
 // Function to close a poll
 function closePoll(pollId) {
-    const pollRef = firebase.database().ref(`polls/${pollId}`);
-    pollRef.update({ active: false })
+    const pollRef = ref(database, `polls/${pollId}`);
+    update(pollRef, { active: false })
         .then(() => {
             alert('Poll closed successfully.');
             document.getElementById(`sendResultsBtn-${pollId}`).style.display = 'block';
@@ -1102,6 +1102,7 @@ function closePoll(pollId) {
             console.error('Error closing poll:', error);
         });
 }
+
 
 function createPollElement(poll) {
     const pollDiv = document.createElement('div');
