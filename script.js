@@ -981,15 +981,6 @@ function togglePolls() {
     }
 }
 
-function addPollOption() {
-    const pollOptions = document.getElementById('pollOptions');
-    const newOption = document.createElement('input');
-    newOption.type = 'text';
-    newOption.className = 'pollOption';
-    newOption.placeholder = `Option ${String.fromCharCode(65 + pollOptions.children.length)}`;
-    pollOptions.appendChild(newOption);
-}
-
 // Reset the form after creating a poll
 function resetPollForm() {
     document.getElementById('pollQuestion').value = '';
