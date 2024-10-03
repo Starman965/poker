@@ -1022,6 +1022,20 @@ function loadPolls() {
         renderPolls(); // Render polls after loading
     });
 }
+// function to open and close the polls section
+function togglePolls() {
+    const pollsContainer = document.getElementById('pollsContainer');
+    const headerElement = pollsContainer.previousElementSibling.querySelector('.expand-icon');
+    
+    if (pollsContainer.style.display === 'none') {
+        pollsContainer.style.display = 'block';
+        headerElement.textContent = '▲';
+    } else {
+        pollsContainer.style.display = 'none';
+        headerElement.textContent = '▼';
+    }
+}
+
 
 // Function to render polls in the UI
 function renderPolls() {
@@ -1210,9 +1224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.warn('Submit Poll Button not found!');
     }
-});
-
-    // Initialize data
+    // Initialize datas
     loadDataFromFirebase();
 
     // Render initial view
