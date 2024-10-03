@@ -152,5 +152,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = document.querySelector('button');
     if (submitButton) {
         submitButton.addEventListener('click', submitVote);
-    }
+    }    
 });
