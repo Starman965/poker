@@ -1013,12 +1013,15 @@ function createPoll() {
         votes: {}
     };
 
-    const pollsRef = firebase.database().ref('polls');
-    pollsRef.push(newPoll).then(() => {
+    const pollsRef = ref(database, 'polls');  // Use the correct reference to the initialized database
+    push(pollsRef, newPoll).then(() => {
         alert('Poll created successfully.');
-        resetPollForm(); // Clears the form after publishing
+        resetPollForm();  // Clears the form after publishing
+    }).catch((error) => {
+        console.error('Error creating poll:', error);
     });
 }
+
 
 // Reset the form after creating a poll
 function resetPollForm() {
@@ -1072,8 +1075,9 @@ function loadPolls() {
 function renderPolls() {
     const activePolls = document.getElementById('activePolls');
     const closedPolls = document.getElementById('closedPolls');
-    activePolls.innerHTML = '<h3>Active Polls</h3>';
-    closedPolls.innerHTML = '<h3>Closed Polls</h3>';
+    
+    activePolls.innerHTML = '';  // Clear existing polls
+    closedPolls.innerHTML = '';  // Clear existing polls
 
     polls.forEach(poll => {
         const pollElement = createPollElement(poll);
@@ -1084,6 +1088,7 @@ function renderPolls() {
         }
     });
 }
+
 // Function to close a poll
 function closePoll(pollId) {
     const pollRef = firebase.database().ref(`polls/${pollId}`);
