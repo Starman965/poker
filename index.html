@@ -44,23 +44,25 @@
                         <!-- Example Poll HTML Structure -->
                         <div class="poll-item" id="poll-[pollId]">
                             <h4>[Poll Title]</h4>
+                            <button onclick="composePollInvitationEmail('[pollId]')">Send Poll Invitation</button>
                             <button id="closePollBtn-[pollId]" onclick="closePoll('[pollId]')">Close Poll</button>
-                            <button id="sendResultsBtn-[pollId]" style="display:none;" onclick="sendPollResults('[pollId]')">Send Poll Results</button>
+                            <button id="sendResultsBtn-[pollId]" style="display:none;" onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
                         </div>
                     </div>
-
+            
                     <h3>Closed Polls</h3>
                     <div id="closedPolls">
                         <!-- Example Closed Poll -->
                         <div class="poll-item" id="closed-poll-[pollId]">
                             <h4>[Poll Title]</h4>
                             <button onclick="deletePoll('[pollId]')">Delete Poll</button>
+                            <button onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
                         </div>
                     </div>
-
+            
                     <button onclick="showCreatePollForm()">Create New Poll</button>
                 </div>
-            </div>
+            </div>            
 
             <div class="card">
                 <div class="section-header" onclick="toggleMemberList()">
