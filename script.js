@@ -1124,15 +1124,17 @@ function composePollInvitationEmail(pollId) {
     if (poll) {
         const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${poll.token}`;
         const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${poll.question}`);
-        const body = encodeURIComponent(`Danville Poker Group,
+        const body = encodeURIComponent(`Hey Guys,
 
-We need your input on the following question:
+We need your timely input on the following:
 
 Question: ${poll.question}
 
 Please vote here: ${pollLink}
 
-Thank you for your participation!`);
+Best regards,
+Nasser`);
+
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
@@ -1155,6 +1157,8 @@ function composePollResultsEmail(pollId) {
 The results for the poll "${poll.question}" are in:
 
 ${pollResults}
+
+As a result, we will (PUT THE OUTCOME HERE).
 
 Best regards,
 Nasser`);
