@@ -92,13 +92,16 @@ function loadMemberImage() {
 
     if (selectedIndex !== '') {
         const selectedMember = members[selectedIndex]; // Fetch the correct member from the global array
+        currentMember = selectedMember; // Set currentMember
         const imagePath = `/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`; // Construct the image path
         memberImage.src = imagePath;
         memberImage.style.display = 'block';
     } else {
         memberImage.style.display = 'none';
+        currentMember = null; // Reset currentMember if no member is selected
     }
 }
+
 
 
 // Submit vote
