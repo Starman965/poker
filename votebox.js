@@ -53,6 +53,12 @@ function calculateAndDisplayResults() {
     const results = currentPoll.options.map(() => 0);
     let totalVotes = 0;
 
+    // If no votes are present, avoid errors
+    if (Object.keys(votes).length === 0) {
+        document.getElementById('pollResults').textContent = 'No votes have been recorded yet.';
+        return;
+    }
+
     Object.values(votes).forEach(vote => {
         results[vote.option]++;
         totalVotes++;
@@ -62,8 +68,8 @@ function calculateAndDisplayResults() {
     resultsContainer.innerHTML = '';
 
     currentPoll.options.forEach((option, index) => {
-        const votes = results[index];
-        const percentage = totalVotes > 0 ? (votes / totalVotes * 100).toFixed(2) : 0;
+        const voteCount = results[index];
+        const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(2) : 0;
 
         const resultElement = document.createElement('div');
         resultElement.className = 'poll-result';
@@ -72,7 +78,7 @@ function calculateAndDisplayResults() {
             <div class="progress-bar">
                 <div class="progress" style="width: ${percentage}%"></div>
             </div>
-            <p>${votes} votes (${percentage}%)</p>
+            <p>${voteCount} votes (${percentage}%)</p>
         `;
         resultsContainer.appendChild(resultElement);
     });
