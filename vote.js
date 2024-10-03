@@ -124,7 +124,7 @@ function submitVote() {
         return;
     }
 
-    const voteRef = ref(database, `polls/${currentPoll.id}/votes/${currentMember.id}`);
+    const voteRef = ref(database, `polls/${currentPoll.id}/votes/${voteData.memberId}`);
     update(voteRef, voteData)
         .then(() => {
             alert('Your vote has been recorded');
@@ -135,7 +135,6 @@ function submitVote() {
             alert('There was an error submitting your vote. Please try again.');
         });
 }
-
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
