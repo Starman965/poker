@@ -1249,3 +1249,5 @@ window.addPollOption = addPollOption;
 window.createPoll = createPoll;
 window.showPollResults = showPollResults;
 window.composePollInvitationEmail = composePollInvitationEmail;
+window.composePollResultsEmail = composePollResultsEmail;
+window.deletePoll = deletePoll;
