@@ -44,16 +44,30 @@ function loadPollResults() {
 
 // Display poll question
 function displayPollQuestion() {
-    document.getElementById('pollQuestion').textContent = currentPoll.question;
+    const pollQuestionElement = document.getElementById('pollQuestion');
+    if (pollQuestionElement) {
+        pollQuestionElement.textContent = currentPoll.question;
+    } else {
+        console.error('Poll question element not found.');
+    }
 }
 
-// Calculate and display results
 function calculateAndDisplayResults() {
     const votes = currentPoll.votes || {};
     const results = currentPoll.options.map(() => 0);
     let totalVotes = 0;
 
-    // Iterate through the votes
+    // If no votes are present, avoid errors
+    if (Object.keys(votes).length === 0) {
+        const pollResultsElement = document.getElementById('pollResults');
+        if (pollResultsElement) {
+            pollResultsElement.textContent = 'No votes have been recorded yet.';
+        } else {
+            console.error('Poll results element not found.');
+        }
+        return;
+    }
+
     Object.values(votes).forEach(vote => {
         if (vote.option !== undefined) {
             results[vote.option]++;
@@ -62,28 +76,33 @@ function calculateAndDisplayResults() {
     });
 
     const resultsContainer = document.getElementById('pollResults');
-    resultsContainer.innerHTML = '';
+    if (resultsContainer) {
+        resultsContainer.innerHTML = '';
 
-    currentPoll.options.forEach((option, index) => {
-        const voteCount = results[index];
-        const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(2) : 0;
+        currentPoll.options.forEach((option, index) => {
+            const voteCount = results[index];
+            const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(2) : 0;
 
-        const resultElement = document.createElement('div');
-        resultElement.className = 'poll-result';
-        resultElement.innerHTML = `
-            <p>${option}</p>
-            <div class="progress-bar">
-                <div class="progress" style="width: ${percentage}%"></div>
-            </div>
-            <p>${voteCount} votes (${percentage}%)</p>
-        `;
-        resultsContainer.appendChild(resultElement);
-    });
+            const resultElement = document.createElement('div');
+            resultElement.className = 'poll-result';
+            resultElement.innerHTML = `
+                <p>${option}</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: ${percentage}%"></div>
+                </div>
+                <p>${voteCount} votes (${percentage}%)</p>
+            `;
+            resultsContainer.appendChild(resultElement);
+        });
 
-    const totalElement = document.createElement('p');
-    totalElement.textContent = `Total votes: ${totalVotes}`;
-    resultsContainer.appendChild(totalElement);
+        const totalElement = document.createElement('p');
+        totalElement.textContent = `Total votes: ${totalVotes}`;
+        resultsContainer.appendChild(totalElement);
+    } else {
+        console.error('Results container element not found.');
+    }
 }
+
 
 
 // Initialize the page
