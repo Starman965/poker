@@ -1127,19 +1127,54 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 
-
 // Add event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('newEventHost').addEventListener('change', updateHostLocation);
-    document.getElementById('editEventHost').addEventListener('change', updateHostLocation);
-    document.getElementById('editEventSelect').addEventListener('change', loadEventForEditing);
- const eventDisplaySelector = document.getElementById('eventDisplaySelector');
+    // Event management
+    const newEventHost = document.getElementById('newEventHost');
+    const editEventHost = document.getElementById('editEventHost');
+    const editEventSelect = document.getElementById('editEventSelect');
+    const eventDisplaySelector = document.getElementById('eventDisplaySelector');
+
+    if (newEventHost) {
+        newEventHost.addEventListener('change', updateHostLocation);
+    }
+    if (editEventHost) {
+        editEventHost.addEventListener('change', updateHostLocation);
+    }
+    if (editEventSelect) {
+        editEventSelect.addEventListener('change', loadEventForEditing);
+    }
     if (eventDisplaySelector) {
         eventDisplaySelector.addEventListener('change', renderSchedule);
     }
-    loadPolls();
-});
 
+    // Poll management
+    const createPollBtn = document.getElementById('createPollBtn');
+    if (createPollBtn) {
+        createPollBtn.addEventListener('click', showCreatePollForm);
+    }
+
+    const addPollOptionBtn = document.getElementById('addPollOptionBtn');
+    if (addPollOptionBtn) {
+        addPollOptionBtn.addEventListener('click', addPollOption);
+    }
+
+    const submitPollBtn = document.getElementById('submitPollBtn');
+    if (submitPollBtn) {
+        submitPollBtn.addEventListener('click', createPoll);
+    }
+
+    // Initialize data
+    loadDataFromFirebase();
+    loadPolls();
+
+    // Render initial view
+    renderMembers();
+    renderSchedule();
+    populateHostDropdowns();
+
+    console.log('DOM fully loaded and parsed');
+});
 
 // Export functions to global scope
 window.toggleMemberList = toggleMemberList;
