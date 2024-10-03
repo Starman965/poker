@@ -1085,6 +1085,7 @@ function createPoll() {
     push(pollsRef, newPoll).then(() => {
         alert('Poll created successfully.');
         resetPollForm();
+        loadPolls();  // Reload the polls to show the newly created poll
     }).catch((error) => {
         console.error('Error creating poll:', error);
     });
