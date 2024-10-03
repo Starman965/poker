@@ -32,32 +32,38 @@
                 </div>
             </div>
 
-            <!-- New Polls section -->
-            <div class="card">
-                <div class="section-header" onclick="togglePolls()">
-                    <h2>Polls</h2>
-                    <span class="expand-icon">▼</span>
-                </div>
-                <div id="pollsContainer" class="section-content" style="display: none;">
-                    <h3>Polls</h3>
-                    <div id="pollsList">
-                        <!-- Polls will be rendered here dynamically -->
-                    </div>
-            
-                   <!-- Poll creation form -->
-                <div id="pollOptions">
-                    <input type="text" class="pollOption" placeholder="Option A">
-                    <input type="text" class="pollOption" placeholder="Option B">
-                </div>
+  <!-- New Polls section -->
+<div class="card">
+    <div class="section-header" onclick="togglePolls()">
+        <h2>Polls</h2>
+        <span class="expand-icon">▼</span>
+    </div>
+    <div id="pollsContainer" class="section-content" style="display: none;">
+        <h3>Polls</h3>
+        <div id="pollsList">
+            <!-- Polls will be rendered here dynamically -->
+        </div>
 
-                <!-- Add option button -->
-                <button id="addPollOptionBtn">Add Poll Option</button>
+        <!-- Button to show poll creation form -->
+        <button id="createPollBtn" onclick="showCreatePollForm()">Create New Poll</button>
+        
+        <!-- Poll creation form (hidden by default) -->
+        <div id="createPollForm" style="display: none;">
+            <input type="text" id="pollQuestion" placeholder="Enter poll question">
+            <div id="pollOptions">
+                <input type="text" class="pollOption" placeholder="Option A">
+                <input type="text" class="pollOption" placeholder="Option B">
+            </div>
 
-                <!-- Submit poll button -->
-                <button id="submitPollBtn">Publish Poll</button>
-                    </div>
-                </div>
-            </div>      
+            <!-- Add option button -->
+            <button id="addPollOptionBtn">Add Poll Option</button>
+
+            <!-- Submit poll button -->
+            <button id="submitPollBtn">Publish Poll</button>
+        </div>
+    </div>
+</div>
+ 
 
             <div class="card">
                 <div class="section-header" onclick="toggleMemberList()">

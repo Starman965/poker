@@ -1247,6 +1247,5 @@ window.togglePolls = togglePolls;
 window.showCreatePollForm = showCreatePollForm;
 window.addPollOption = addPollOption;
 window.createPoll = createPoll;
-window.togglePollStatus = togglePollStatus;
 window.showPollResults = showPollResults;
 window.composePollInvitationEmail = composePollInvitationEmail;
