@@ -1088,23 +1088,6 @@ function createPoll() {
         console.error('Error creating poll:', error);
     });
 }
-/*
-function createPollElement(poll) {
-    const pollDiv = document.createElement('div');
-    pollDiv.className = 'poll-item';
-    pollDiv.innerHTML = `
-        <h4>${poll.question}</h4>
-        <p>Created: ${new Date(poll.created).toLocaleString()}</p>
-        <p>Status: ${poll.active ? 'Active' : 'Closed'}</p>
-        <button onclick="togglePollStatus('${poll.id}')">
-            ${poll.active ? 'Close Poll' : 'Reopen Poll'}
-        </button>
-        <button onclick="showPollResults('${poll.id}')">Show Results</button>
-        <button onclick="composePollInvitationEmail('${poll.id}')">Send Invitation</button>
-    `;
-    return pollDiv;
-}
-*/
 
 // Function to reset the poll creation form
 function resetPollForm() {
@@ -1172,14 +1155,14 @@ The results for the poll "${poll.question}" are in:
 
 ${pollResults}
 
-        Best regards,
-        Nasser`);
+Best regards,
+Nasser`);
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
-    }).catch((error) => {
-        console.error('Error fetching poll data:', error);
-    });
+    } else {
+        console.error('Poll not found');
+    }
 }
 
 // Add event listeners
