@@ -114,10 +114,15 @@ function submitVote() {
     }
 
     const voteData = {
-        memberId: currentMember.id,
+        memberId: currentMember.id || currentMember.name, // Ensure you have the member ID or name
         option: parseInt(selectedOption.value),
         timestamp: new Date().toISOString()
     };
+
+    if (!voteData.memberId) {
+        alert('Error: Member ID is missing');
+        return;
+    }
 
     const voteRef = ref(database, `polls/${currentPoll.id}/votes/${currentMember.id}`);
     update(voteRef, voteData)
@@ -130,6 +135,7 @@ function submitVote() {
             alert('There was an error submitting your vote. Please try again.');
         });
 }
+
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
