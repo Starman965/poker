@@ -123,13 +123,19 @@ function submitVote() {
         return;
     }
 
+    // Ensure currentPoll.id exists
+    if (!currentPoll || !currentPoll.id) {
+        alert('Poll ID is missing');
+        return;
+    }
+
     const voteData = {
         memberId: memberId,
         option: parseInt(selectedOption.value),
         timestamp: new Date().toISOString()
     };
 
-    // Use the proper path for storing the vote in the current poll
+    // Use the proper path for storing the vote in the correct poll
     const voteRef = ref(database, `polls/${currentPoll.id}/votes/${memberId}`);
     update(voteRef, voteData)
         .then(() => {
