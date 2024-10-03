@@ -82,21 +82,24 @@ function loadMemberData() {
 function loadMemberImage() {
     const memberSelect = document.getElementById('memberSelect');
     const memberImage = document.getElementById('memberImage');
-    const selectedIndex = memberSelect.value;
+    const selectedMemberId = memberSelect.value; // Assuming this is the member ID or index
 
-    if (selectedIndex !== '') {
-        const memberRef = ref(database, `members/${selectedIndex}`);
+    if (selectedMemberId !== '') {
+        const memberRef = ref(database, `members/${selectedMemberId}`);
         onValue(memberRef, (snapshot) => {
-            currentMember = snapshot.val();
+            currentMember = snapshot.val(); // Retrieve member data
             if (currentMember && currentMember.image) {
+                // Display member image if it exists
                 memberImage.src = currentMember.image;
                 memberImage.style.display = 'block';
             } else {
-                memberImage.style.display = 'none';
+                // Hide or display a placeholder if no image is found
+                memberImage.src = 'default-placeholder-image.jpg'; // Optional placeholder
+                memberImage.style.display = 'block'; // Show placeholder
             }
         });
     } else {
-        memberImage.style.display = 'none';
+        memberImage.style.display = 'none'; // Hide image if no member selected
     }
 }
 
@@ -113,21 +116,24 @@ function submitVote() {
         return;
     }
 
-    const voteData = {
-        memberId: currentMember.id || currentMember.name, // Ensure you have the member ID or name
-        option: parseInt(selectedOption.value),
-        timestamp: new Date().toISOString()
-    };
-
-    if (!voteData.memberId) {
+    const memberId = currentMember.id || currentMember.name; // Ensure the memberId is either ID or name
+    if (!memberId) {
         alert('Error: Member ID is missing');
         return;
     }
 
-    const voteRef = ref(database, `polls/${currentPoll.id}/votes/${voteData.memberId}`);
+    const voteData = {
+        memberId: memberId,
+        option: parseInt(selectedOption.value),
+        timestamp: new Date().toISOString()
+    };
+
+    // Use the proper path for storing the vote in the current poll
+    const voteRef = ref(database, `polls/${currentPoll.id}/votes/${memberId}`);
     update(voteRef, voteData)
         .then(() => {
             alert('Your vote has been recorded');
+            // Redirect to the votebox (results page) with the current poll token
             window.location.href = `votebox.html?token=${getUrlParameter('token')}`;
         })
         .catch((error) => {
