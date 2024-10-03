@@ -1215,18 +1215,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Poll management
     const createPollBtn = document.getElementById('createPollBtn');
     if (createPollBtn) {
+        console.log('Create Poll Button found, adding event listener...');
         createPollBtn.addEventListener('click', showCreatePollForm);
+    } else {
+        console.warn('Create Poll Button not found!');
     }
 
     const addPollOptionBtn = document.getElementById('addPollOptionBtn');
     if (addPollOptionBtn) {
+        console.log('Add Poll Option Button found, adding event listener...');
         addPollOptionBtn.addEventListener('click', addPollOption);
+    } else {
+        console.warn('Add Poll Option Button not found!');
     }
 
     const submitPollBtn = document.getElementById('submitPollBtn');
     if (submitPollBtn) {
+        console.log('Submit Poll Button found, adding event listener...');
         submitPollBtn.addEventListener('click', createPoll);
+    } else {
+        console.warn('Submit Poll Button not found!');
     }
+});
 
     // Initialize data
     loadDataFromFirebase();
