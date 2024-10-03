@@ -1153,7 +1153,7 @@ function composePollResultsEmail(pollId) {
         }).join('\n');
 
         const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${poll.question}`);
-        const body = encodeURIComponent(`Danville Poker Group,
+        const body = encodeURIComponent(`Hey Guys,
 
 The results for the poll "${poll.question}" are in:
 
