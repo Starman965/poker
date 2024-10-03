@@ -1155,7 +1155,7 @@ function createPollElement(poll) {
     return pollDiv;
 }
 
-function togglePollStatus(pollId) {
+window.togglePollStatus = function(pollId) {
     const poll = polls.find(p => p.id === pollId);
     if (poll) {
         const newStatus = !poll.active;
@@ -1163,7 +1163,7 @@ function togglePollStatus(pollId) {
             .then(() => console.log(`Poll status updated to ${newStatus ? 'active' : 'closed'}`))
             .catch((error) => console.error('Error updating poll status:', error));
     }
-}
+};
 
 
 function showPollResults(pollId) {
