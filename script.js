@@ -228,6 +228,7 @@ function renderSchedule() {
     const currentEvent = upcomingEvents[0];
 
    function renderEvent(event, isCurrent) {
+    console.log('Event Date:', event.date);  // Log the date to check what's being passed
     const eventDiv = document.createElement('div');
     eventDiv.className = 'event-item';
     eventDiv.innerHTML = `
