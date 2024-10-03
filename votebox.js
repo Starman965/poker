@@ -1,6 +1,11 @@
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+import { firebaseConfig } from './firebase-config.js';
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
 let currentPoll = null;
 
@@ -20,14 +25,19 @@ function loadPollResults() {
         return;
     }
 
-    database.ref('polls').orderByChild('token').equalTo(pollToken).once('value', (snapshot) => {
+    const pollsRef = ref(database, 'polls');
+    onValue(pollsRef, (snapshot) => {
         const polls = snapshot.val();
         if (polls) {
-            currentPoll = Object.values(polls)[0];
-            displayPollQuestion();
-            calculateAndDisplayResults();
+            currentPoll = Object.values(polls).find(poll => poll.token === pollToken);
+            if (currentPoll) {
+                displayPollQuestion();
+                calculateAndDisplayResults();
+            } else {
+                alert('Poll not found');
+            }
         } else {
-            alert('Poll not found');
+            alert('No polls found');
         }
     });
 }

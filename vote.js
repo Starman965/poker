@@ -1,6 +1,11 @@
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+import { firebaseConfig } from './firebase-config.js';
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
 let currentPoll = null;
 let currentMember = null;
@@ -21,14 +26,19 @@ function loadPollData() {
         return;
     }
 
-    database.ref('polls').orderByChild('token').equalTo(pollToken).once('value', (snapshot) => {
+    const pollsRef = ref(database, 'polls');
+    onValue(pollsRef, (snapshot) => {
         const polls = snapshot.val();
         if (polls) {
-            currentPoll = Object.values(polls)[0];
-            displayPollQuestion();
-            displayPollOptions();
+            currentPoll = Object.values(polls).find(poll => poll.token === pollToken);
+            if (currentPoll) {
+                displayPollQuestion();
+                displayPollOptions();
+            } else {
+                alert('Poll not found');
+            }
         } else {
-            alert('Poll not found');
+            alert('No polls found');
         }
     });
 }
@@ -54,7 +64,8 @@ function displayPollOptions() {
 
 // Load member data
 function loadMemberData() {
-    database.ref('members').once('value', (snapshot) => {
+    const membersRef = ref(database, 'members');
+    onValue(membersRef, (snapshot) => {
         const members = snapshot.val();
         const memberSelect = document.getElementById('memberSelect');
         memberSelect.innerHTML = '<option value="">Select your name</option>';
@@ -74,7 +85,8 @@ function loadMemberImage() {
     const selectedIndex = memberSelect.value;
 
     if (selectedIndex !== '') {
-        database.ref(`members/${selectedIndex}`).once('value', (snapshot) => {
+        const memberRef = ref(database, `members/${selectedIndex}`);
+        onValue(memberRef, (snapshot) => {
             currentMember = snapshot.val();
             if (currentMember && currentMember.image) {
                 memberImage.src = currentMember.image;
@@ -104,10 +116,11 @@ function submitVote() {
     const voteData = {
         memberId: currentMember.id,
         option: parseInt(selectedOption.value),
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        timestamp: new Date().toISOString()
     };
 
-    database.ref(`polls/${currentPoll.id}/votes/${currentMember.id}`).set(voteData)
+    const voteRef = ref(database, `polls/${currentPoll.id}/votes/${currentMember.id}`);
+    update(voteRef, voteData)
         .then(() => {
             alert('Your vote has been recorded');
             window.location.href = `votebox.html?token=${getUrlParameter('token')}`;
@@ -122,4 +135,16 @@ function submitVote() {
 document.addEventListener('DOMContentLoaded', () => {
     loadPollData();
     loadMemberData();
+    
+    // Add event listener for member selection
+    const memberSelect = document.getElementById('memberSelect');
+    if (memberSelect) {
+        memberSelect.addEventListener('change', loadMemberImage);
+    }
+    
+    // Add event listener for submit button
+    const submitButton = document.querySelector('button');
+    if (submitButton) {
+        submitButton.addEventListener('click', submitVote);
+    }
 });
