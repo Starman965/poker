@@ -1010,7 +1010,7 @@ function loadPolls() {
     });
 }
 // function to open and close the polls section
-function togglePolls() {
+window.togglePolls = function() {
     const pollsContainer = document.getElementById('pollsContainer');
     const headerElement = pollsContainer.previousElementSibling.querySelector('.expand-icon');
     
@@ -1021,7 +1021,7 @@ function togglePolls() {
         pollsContainer.style.display = 'none';
         headerElement.textContent = '▼';
     }
-}
+};
 
 
 // Function to render polls in the UI
