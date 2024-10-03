@@ -21,7 +21,7 @@ function getUrlParameter(name) {
 
 // Load poll data
 function loadPollData() {
-    const pollToken = getUrlParameter('token');
+    const pollToken = getUrlParameter('token'); // Get token from the URL
     if (!pollToken) {
         alert('Invalid poll token');
         return;
@@ -31,8 +31,13 @@ function loadPollData() {
     onValue(pollsRef, (snapshot) => {
         const polls = snapshot.val();
         if (polls) {
-            currentPoll = Object.values(polls).find(poll => poll.token === pollToken);
+            // Find the poll using the token
+            currentPoll = Object.entries(polls).find(([key, poll]) => poll.token === pollToken);
             if (currentPoll) {
+                // Set currentPoll correctly
+                currentPoll.id = currentPoll[0]; // The poll ID
+                currentPoll = currentPoll[1]; // The actual poll object
+                currentPoll.id = currentPoll.id; // Ensure ID is stored
                 displayPollQuestion();
                 displayPollOptions();
             } else {
@@ -43,6 +48,7 @@ function loadPollData() {
         }
     });
 }
+
 
 // Display poll question
 function displayPollQuestion() {
@@ -117,13 +123,13 @@ function submitVote() {
         return;
     }
 
-    const memberId = currentMember.id || currentMember.name; // Ensure the memberId is either ID or name
+    const memberId = currentMember.id || currentMember.name; // Use the member ID or name
     if (!memberId) {
         alert('Error: Member ID is missing');
         return;
     }
 
-    // Ensure currentPoll.id exists
+    // Ensure the poll ID exists
     if (!currentPoll || !currentPoll.id) {
         alert('Poll ID is missing');
         return;
@@ -135,12 +141,12 @@ function submitVote() {
         timestamp: new Date().toISOString()
     };
 
-    // Use the proper path for storing the vote in the correct poll
+    // Use the correct path for storing the vote under the correct poll
     const voteRef = ref(database, `polls/${currentPoll.id}/votes/${memberId}`);
     update(voteRef, voteData)
         .then(() => {
             alert('Your vote has been recorded');
-            // Redirect to the votebox (results page) with the current poll token
+            // Redirect to the results page
             window.location.href = `votebox.html?token=${getUrlParameter('token')}`;
         })
         .catch((error) => {
@@ -148,6 +154,7 @@ function submitVote() {
             alert('There was an error submitting your vote. Please try again.');
         });
 }
+
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
