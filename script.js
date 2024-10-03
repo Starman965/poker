@@ -994,35 +994,6 @@ function addPollOption() {
     pollOptions.appendChild(newOption);
 }
 
-// Create a new poll with at least two options
-function createPoll() {
-    const pollQuestion = document.getElementById('pollQuestion').value;
-    const pollOptions = Array.from(document.querySelectorAll('.pollOption')).map(input => input.value).filter(Boolean);
-
-    if (pollOptions.length < 2) {
-        alert('Please enter at least two options.');
-        return;
-    }
-
-    const newPoll = {
-        question: pollQuestion,
-        options: pollOptions,
-        token: generateUniqueToken(),
-        created: Date.now(),
-        active: true,
-        votes: {}
-    };
-
-    const pollsRef = ref(database, 'polls');  // Use the correct reference to the initialized database
-    push(pollsRef, newPoll).then(() => {
-        alert('Poll created successfully.');
-        resetPollForm();  // Clears the form after publishing
-    }).catch((error) => {
-        console.error('Error creating poll:', error);
-    });
-}
-
-
 // Reset the form after creating a poll
 function resetPollForm() {
     document.getElementById('pollQuestion').value = '';
@@ -1032,13 +1003,13 @@ function resetPollForm() {
     `;
 }
 
-// Delete a closed poll
+// Function to delete a poll
 function deletePoll(pollId) {
-    if (confirm('Are you sure you want to delete this poll? This action cannot be undone.')) {
+    if (confirm('Are you sure you want to delete this poll?')) {
         const pollRef = ref(database, `polls/${pollId}`);
         remove(pollRef).then(() => {
             alert('Poll deleted successfully.');
-            document.getElementById(`closed-poll-${pollId}`).remove(); // Remove from UI
+            loadPolls(); // Refresh the poll list
         }).catch((error) => {
             console.error('Error deleting poll:', error);
         });
@@ -1059,6 +1030,7 @@ function resetCreatePollForm() {
     document.getElementById('createPollForm').style.display = 'none';
 }
 
+// Function to load polls from Firebase
 function loadPolls() {
     const pollsRef = ref(database, 'polls');
     onValue(pollsRef, (snapshot) => {
@@ -1069,41 +1041,72 @@ function loadPolls() {
                 ...childSnapshot.val()
             });
         });
-        renderPolls();
+        renderPolls(); // Render polls after loading
     });
 }
+
+// Function to render polls in the UI
 function renderPolls() {
-    const activePolls = document.getElementById('activePolls');
-    const closedPolls = document.getElementById('closedPolls');
-    
-    activePolls.innerHTML = '';  // Clear existing polls
-    closedPolls.innerHTML = '';  // Clear existing polls
+    const pollsList = document.getElementById('pollsList');
+    pollsList.innerHTML = '';  // Clear existing polls
 
     polls.forEach(poll => {
-        const pollElement = createPollElement(poll);
-        if (poll.active) {
-            activePolls.appendChild(pollElement);
-        } else {
-            closedPolls.appendChild(pollElement);
-        }
+        const pollDiv = document.createElement('div');
+        pollDiv.className = 'poll-item';
+        pollDiv.innerHTML = `
+            <h4>${poll.question}</h4>
+            <p>Created: ${new Date(poll.created).toLocaleString()}</p>
+            <button onclick="composePollInvitationEmail('${poll.id}')">Send Poll Out</button>
+            <button onclick="showPollResults('${poll.id}')">Show Results</button>
+            <button onclick="composePollResultsEmail('${poll.id}')">Send Results</button>
+            <button onclick="deletePoll('${poll.id}')">Delete Poll</button>
+        `;
+        pollsList.appendChild(pollDiv);
     });
 }
 
-// Function to close a poll
-function closePoll(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`);
-    update(pollRef, { active: false })
-        .then(() => {
-            alert('Poll closed successfully.');
-            document.getElementById(`sendResultsBtn-${pollId}`).style.display = 'block';
-            document.getElementById(`closePollBtn-${pollId}`).style.display = 'none';
-        })
-        .catch((error) => {
-            console.error('Error closing poll:', error);
-        });
+// Function to show the Create Poll form
+function showCreatePollForm() {
+    document.getElementById('createPollForm').style.display = 'block';
 }
 
+// Function to add a new poll option
+function addPollOption() {
+    const pollOptions = document.getElementById('pollOptions');
+    const newOption = document.createElement('input');
+    newOption.type = 'text';
+    newOption.className = 'pollOption';
+    newOption.placeholder = `Option ${String.fromCharCode(65 + pollOptions.children.length)}`;
+    pollOptions.appendChild(newOption);
+}
 
+// Function to create a new poll
+function createPoll() {
+    const pollQuestion = document.getElementById('pollQuestion').value;
+    const pollOptions = Array.from(document.querySelectorAll('.pollOption')).map(input => input.value).filter(Boolean);
+
+    if (pollOptions.length < 2) {
+        alert('Please enter at least two options.');
+        return;
+    }
+
+    const newPoll = {
+        question: pollQuestion,
+        options: pollOptions,
+        token: generateUniqueToken(),
+        created: Date.now(),
+        votes: {}
+    };
+
+    const pollsRef = ref(database, 'polls');
+    push(pollsRef, newPoll).then(() => {
+        alert('Poll created successfully.');
+        resetPollForm();
+    }).catch((error) => {
+        console.error('Error creating poll:', error);
+    });
+}
+/*
 function createPollElement(poll) {
     const pollDiv = document.createElement('div');
     pollDiv.className = 'poll-item';
@@ -1119,18 +1122,19 @@ function createPollElement(poll) {
     `;
     return pollDiv;
 }
+*/
 
-window.togglePollStatus = function(pollId) {
-    const poll = polls.find(p => p.id === pollId);
-    if (poll) {
-        const newStatus = !poll.active;
-        update(ref(database, `polls/${pollId}`), { active: newStatus })
-            .then(() => console.log(`Poll status updated to ${newStatus ? 'active' : 'closed'}`))
-            .catch((error) => console.error('Error updating poll status:', error));
-    }
-};
+// Function to reset the poll creation form
+function resetPollForm() {
+    document.getElementById('pollQuestion').value = '';
+    document.getElementById('pollOptions').innerHTML = `
+        <input type="text" class="pollOption" placeholder="Option A">
+        <input type="text" class="pollOption" placeholder="Option B">
+    `;
+    document.getElementById('createPollForm').style.display = 'none';
+}
 
-
+// Function to show poll results
 function showPollResults(pollId) {
     const poll = polls.find(p => p.id === pollId);
     if (poll) {
@@ -1148,64 +1152,43 @@ function showPollResults(pollId) {
     }
 }
 
+// Function to send poll invitation email
 function composePollInvitationEmail(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`);  // Use ref(database, 'polls/${pollId}')
-    get(pollRef).then((snapshot) => {
-        const pollData = snapshot.val();
-        if (!pollData) {
-            console.error(`Poll with ID ${pollId} not found`);
-            return;
-        }
-
-        const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${pollData.token}`;
-        const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${pollData.question}`);
+    const poll = polls.find(p => p.id === pollId);
+    if (poll) {
+        const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${poll.token}`;
+        const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${poll.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
 
-        Hey Guys,
+We need your input on the following question:
 
-        We need your input on something:
+Question: ${poll.question}
 
-        Question: ${pollData.question}
+Please vote here: ${pollLink}
 
-        Please respond with your choice:
-        ${pollData.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
-
-        Please submit your preference here:
-        ${pollLink}
-
-        Thank you for providing your timely feedback!
-
-        Best regards,
-        Nasser`);
+Thank you for your participation!`);
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
         window.open(gmailUrl, '_blank');
-    }).catch((error) => {
-        console.error('Error fetching poll data:', error);
-    });
+    }
 }
 
+// Function to send poll results email
 function composePollResultsEmail(pollId) {
-    const pollRef = ref(database, `polls/${pollId}`);
-    get(pollRef).then((snapshot) => {
-        const pollData = snapshot.val();
-        if (!pollData) {
-            console.error(`Poll with ID ${pollId} not found`);
-            return;
-        }
-
-        const pollResults = pollData.options.map((option, index) => {
-            const voteCount = pollData.votes ? Object.values(pollData.votes).filter(vote => vote.option === index).length : 0;
-            const percentage = (voteCount / Object.keys(pollData.votes || {}).length * 100).toFixed(2);
+    const poll = polls.find(p => p.id === pollId);
+    if (poll) {
+        const pollResults = poll.options.map((option, index) => {
+            const voteCount = poll.votes ? Object.values(poll.votes).filter(vote => vote.option === index).length : 0;
+            const percentage = (voteCount / Object.keys(poll.votes || {}).length * 100).toFixed(2);
             return `${option}: ${voteCount} votes (${percentage}%)`;
         }).join('\n');
 
-        const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${pollData.question}`);
+        const subject = encodeURIComponent(`[DanvillePoker] Poll Results: ${poll.question}`);
         const body = encodeURIComponent(`Danville Poker Group,
 
-        The results for the poll "${pollData.question}" are now in:
+The results for the poll "${poll.question}" are in:
 
-        ${pollResults}
+${pollResults}
 
         Best regards,
         Nasser`);

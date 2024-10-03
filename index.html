@@ -39,32 +39,24 @@
                     <span class="expand-icon">▼</span>
                 </div>
                 <div id="pollsContainer" class="section-content" style="display: none;">
-                    <h3>Active Polls</h3>
-                    <div id="activePolls">
-                        <!-- Example Poll HTML Structure -->
-                        <div class="poll-item" id="poll-[pollId]">
-                            <h4>[Poll Title]</h4>
-                            <button onclick="composePollInvitationEmail('[pollId]')">Send Poll Invitation</button>
-                            <button id="closePollBtn-[pollId]" onclick="closePoll('[pollId]')">Close Poll</button>
-                            <button onclick="showPollResults('[pollId]')">Show Results</button>
-                          </div>                          
+                    <h3>Polls</h3>
+                    <div id="pollsList">
+                        <!-- Polls will be rendered here dynamically -->
                     </div>
             
-                    <h3>Closed Polls</h3>
-                    <div id="closedPolls">
-                        <!-- Example Closed Poll -->
-                        <div class="poll-item" id="closed-poll-[pollId]">
-                            <h4>[Poll Title]</h4>
-                            <button id="sendResultsBtn-[pollId]" onclick="composePollResultsEmail('[pollId]')">Send Poll Results</button>
-                            <button onclick="deletePoll('[pollId]')">Delete Poll</button>
-                            <button onclick="showPollResults('[pollId]')">Show Results</button>
-                          </div>
-                          
-                    </div>
-            
+                    <!-- Create New Poll -->
                     <button onclick="showCreatePollForm()">Create New Poll</button>
+                    <div id="createPollForm" style="display: none;">
+                        <input type="text" id="pollQuestion" placeholder="Enter poll question">
+                        <div id="pollOptions">
+                            <input type="text" class="pollOption" placeholder="Option A">
+                            <input type="text" class="pollOption" placeholder="Option B">
+                        </div>
+                        <button onclick="addPollOption()">Add Option</button>
+                        <button onclick="createPoll()">Publish Poll</button>
+                    </div>
                 </div>
-            </div>            
+            </div>      
 
             <div class="card">
                 <div class="section-header" onclick="toggleMemberList()">
