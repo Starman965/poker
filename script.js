@@ -1026,7 +1026,8 @@ function resetCreatePollForm() {
 }
 
 function loadPolls() {
-    database.ref('polls').on('value', (snapshot) => {
+    const pollsRef = firebase.database().ref('polls');
+    pollsRef.on('value', (snapshot) => {
         polls = [];
         snapshot.forEach((childSnapshot) => {
             polls.push({
@@ -1037,7 +1038,6 @@ function loadPolls() {
         renderPolls();
     });
 }
-
 function renderPolls() {
     const activePolls = document.getElementById('activePolls');
     const closedPolls = document.getElementById('closedPolls');
