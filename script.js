@@ -981,15 +981,6 @@ function togglePolls() {
     }
 }
 
-// Reset the form after creating a poll
-function resetPollForm() {
-    document.getElementById('pollQuestion').value = '';
-    document.getElementById('pollOptions').innerHTML = `
-        <input type="text" class="pollOption" placeholder="Option A">
-        <input type="text" class="pollOption" placeholder="Option B">
-    `;
-}
-
 // Function to delete a poll
 function deletePoll(pollId) {
     if (confirm('Are you sure you want to delete this poll?')) {
