@@ -32,7 +32,8 @@ onValue(connectedRef, (snap) => {
 });
 
 function formatDate(dateString) {
-    const date = new Date(dateString + 'T00:00:00Z');  // Append 'Z' to force UTC interpretation
+    const dateParts = dateString.split('-');  // Split 'YYYY-MM-DD' to avoid time zone shifts
+    const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);  // Treat the date as local
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
 }
