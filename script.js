@@ -952,6 +952,180 @@ function sendSms(phoneNumber, message) {
     });
 }
 
+// New Functions for Polls
+let polls = [];
+
+function togglePolls() {
+    const pollsContainer = document.getElementById('pollsContainer');
+    const headerElement = pollsContainer.previousElementSibling.querySelector('.expand-icon');
+    
+    if (pollsContainer.style.display === 'none') {
+        pollsContainer.style.display = 'block';
+        headerElement.textContent = '▲';
+    } else {
+        pollsContainer.style.display = 'none';
+        headerElement.textContent = '▼';
+    }
+}
+
+function showCreatePollForm() {
+    document.getElementById('createPollForm').style.display = 'block';
+}
+
+function addPollOption() {
+    const pollOptions = document.getElementById('pollOptions');
+    const newOption = document.createElement('input');
+    newOption.type = 'text';
+    newOption.className = 'pollOption';
+    newOption.placeholder = `Option ${String.fromCharCode(65 + pollOptions.children.length)}`;
+    pollOptions.appendChild(newOption);
+}
+
+function createPoll() {
+    const question = document.getElementById('pollQuestion').value.trim();
+    const optionInputs = document.querySelectorAll('.pollOption');
+    const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
+
+    if (question && options.length >= 2) {
+        const newPoll = {
+            question,
+            options,
+            token: generateUniqueToken(),
+            created: firebase.database.ServerValue.TIMESTAMP,
+            active: true,
+            votes: {}
+        };
+
+        // Save the new poll to Firebase
+        database.ref('polls').push(newPoll)
+            .then(() => {
+                console.log('Poll created successfully');
+                loadPolls();
+                resetCreatePollForm();
+            })
+            .catch((error) => console.error('Error creating poll:', error));
+    } else {
+        alert('Please enter a question and at least two options.');
+    }
+}
+
+function generateUniqueToken() {
+    return Math.random().toString(36).substr(2, 10);
+}
+
+function resetCreatePollForm() {
+    document.getElementById('pollQuestion').value = '';
+    const pollOptions = document.getElementById('pollOptions');
+    pollOptions.innerHTML = `
+        <input type="text" class="pollOption" placeholder="Option A">
+        <input type="text" class="pollOption" placeholder="Option B">
+    `;
+    document.getElementById('createPollForm').style.display = 'none';
+}
+
+function loadPolls() {
+    database.ref('polls').on('value', (snapshot) => {
+        polls = [];
+        snapshot.forEach((childSnapshot) => {
+            polls.push({
+                id: childSnapshot.key,
+                ...childSnapshot.val()
+            });
+        });
+        renderPolls();
+    });
+}
+
+function renderPolls() {
+    const activePolls = document.getElementById('activePolls');
+    const closedPolls = document.getElementById('closedPolls');
+    activePolls.innerHTML = '<h3>Active Polls</h3>';
+    closedPolls.innerHTML = '<h3>Closed Polls</h3>';
+
+    polls.forEach(poll => {
+        const pollElement = createPollElement(poll);
+        if (poll.active) {
+            activePolls.appendChild(pollElement);
+        } else {
+            closedPolls.appendChild(pollElement);
+        }
+    });
+}
+
+function createPollElement(poll) {
+    const pollDiv = document.createElement('div');
+    pollDiv.className = 'poll-item';
+    pollDiv.innerHTML = `
+        <h4>${poll.question}</h4>
+        <p>Created: ${new Date(poll.created).toLocaleString()}</p>
+        <p>Status: ${poll.active ? 'Active' : 'Closed'}</p>
+        <button onclick="togglePollStatus('${poll.id}')">
+            ${poll.active ? 'Close Poll' : 'Reopen Poll'}
+        </button>
+        <button onclick="showPollResults('${poll.id}')">Show Results</button>
+        <button onclick="composePollInvitationEmail('${poll.id}')">Send Invitation</button>
+    `;
+    return pollDiv;
+}
+
+function togglePollStatus(pollId) {
+    const poll = polls.find(p => p.id === pollId);
+    if (poll) {
+        const newStatus = !poll.active;
+        database.ref(`polls/${pollId}`).update({ active: newStatus })
+            .then(() => console.log(`Poll status updated to ${newStatus ? 'active' : 'closed'}`))
+            .catch((error) => console.error('Error updating poll status:', error));
+    }
+}
+
+function showPollResults(pollId) {
+    const poll = polls.find(p => p.id === pollId);
+    if (poll) {
+        let results = poll.options.map(option => ({ option, votes: 0 }));
+        Object.values(poll.votes || {}).forEach(vote => {
+            results[vote.option].votes++;
+        });
+
+        const totalVotes = results.reduce((sum, result) => sum + result.votes, 0);
+        const resultsHTML = results.map(result => 
+            `<p>${result.option}: ${result.votes} votes (${((result.votes / totalVotes) * 100).toFixed(2)}%)</p>`
+        ).join('');
+
+        alert(`Poll Results for "${poll.question}"\n\nTotal Votes: ${totalVotes}\n\n${resultsHTML}`);
+    }
+}
+
+function composePollInvitationEmail(pollId) {
+    const poll = polls.find(p => p.id === pollId);
+    if (!poll) {
+        console.error(`Poll with ID ${pollId} not found`);
+        return;
+    }
+
+    const pollLink = `https://www.danvillepokergroup.com/vote.html?token=${poll.token}`;
+    const subject = encodeURIComponent(`[DanvillePoker] New Poll: ${poll.question}`);
+    const body = encodeURIComponent(`Danville Poker Group,
+
+We have a new poll for you to participate in:
+
+Question: ${poll.question}
+
+Please respond with your choice:
+${poll.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
+
+You can submit your vote here:
+${pollLink}
+
+Your input is important to us. Thank you for participating!
+
+Best regards,
+Nasser`);
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
+}
+
+
 // Example usage: sending an SMS when someone RSVPs
 sendSms('+19259806777', 'Someone has just RSVP to poker!');
 
@@ -964,7 +1138,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (eventDisplaySelector) {
         eventDisplaySelector.addEventListener('change', renderSchedule);
     }
+    loadPolls();
 });
+
 
 // Export functions to global scope
 window.toggleMemberList = toggleMemberList;
@@ -986,3 +1162,10 @@ window.showAttendanceReport = showAttendanceReport;
 window.showHostingReport = showHostingReport;
 window.editPastEventAttendees = editPastEventAttendees;
 window.cancelEditAttendees = cancelEditAttendees;
+window.togglePolls = togglePolls;
+window.showCreatePollForm = showCreatePollForm;
+window.addPollOption = addPollOption;
+window.createPoll = createPoll;
+window.togglePollStatus = togglePollStatus;
+window.showPollResults = showPollResults;
+window.composePollInvitationEmail = composePollInvitationEmail;

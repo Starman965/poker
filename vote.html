@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danville Poker Group - Vote</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Danville Poker Group Poll</h1>
+        <div id="pollContainer" class="card">
+            <h2 id="pollQuestion"></h2>
+            <div id="memberSelection">
+                <label for="memberSelect">Select Your Name:</label>
+                <select id="memberSelect" onchange="loadMemberImage()"></select>
+                <img id="memberImage" style="display: none;" alt="Member Image">
+            </div>
+            <div id="pollOptions"></div>
+            <button onclick="submitVote()">Submit Vote</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Your Firebase configuration -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Your custom JavaScript -->
+    <script src="vote.js"></script>
+</body>
+</html>

@@ -31,6 +31,18 @@
                     <div id="scheduleContainer"></div>
                 </div>
             </div>
+        <!-- New Polls section -->
+            <div class="card">
+                <div class="section-header" onclick="togglePolls()">
+                    <h2>Polls</h2>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div id="pollsContainer" class="section-content" style="display: none;">
+                    <div id="activePolls"></div>
+                    <div id="closedPolls"></div>
+                    <button onclick="showCreatePollForm()">Create New Poll</button>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="section-header" onclick="toggleMemberList()">
@@ -70,7 +82,19 @@
                     <button onclick="saveEventEdits()">Save Edits</button>
                     <button onclick="deleteEvent()">Delete Event</button>
                 </div>
-
+            <!-- Add new section for poll management -->
+                <div class="card">
+                    <h3>Create New Poll</h3>
+                    <div id="createPollForm" style="display: none;">
+                    <input type="text" id="pollQuestion" placeholder="Enter poll question">
+                    <div id="pollOptions">
+                    <input type="text" class="pollOption" placeholder="Option A">
+                    <input type="text" class="pollOption" placeholder="Option B">
+                    </div>
+                    <button onclick="addPollOption()">Add Option</button>
+                    <button onclick="createPoll()">Create Poll</button>
+                    </div>
+                </div>
                 <div class="card">
                     <h3>Reports</h3>
                     <button onclick="showPastEventsReport()">Past Events Report</button>
