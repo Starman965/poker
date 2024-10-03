@@ -53,15 +53,12 @@ function calculateAndDisplayResults() {
     const results = currentPoll.options.map(() => 0);
     let totalVotes = 0;
 
-    // If no votes are present, avoid errors
-    if (Object.keys(votes).length === 0) {
-        document.getElementById('pollResults').textContent = 'No votes have been recorded yet.';
-        return;
-    }
-
+    // Iterate through the votes
     Object.values(votes).forEach(vote => {
-        results[vote.option]++;
-        totalVotes++;
+        if (vote.option !== undefined) {
+            results[vote.option]++;
+            totalVotes++;
+        }
     });
 
     const resultsContainer = document.getElementById('pollResults');
@@ -87,6 +84,7 @@ function calculateAndDisplayResults() {
     totalElement.textContent = `Total votes: ${totalVotes}`;
     resultsContainer.appendChild(totalElement);
 }
+
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', loadPollResults);
