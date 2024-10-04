@@ -103,7 +103,50 @@ function calculateAndDisplayResults() {
     }
 }
 
+const totalVoters = 18;  // Total number of people who can vote
 
+function showPollResults(pollId) {
+    const poll = polls.find(p => p.id === pollId);
+    if (poll) {
+        // Display poll question
+        document.getElementById('pollQuestion').innerText = poll.question;
+
+        // Display individual poll results
+        const pollResults = document.getElementById('pollResults');
+        pollResults.innerHTML = '';  // Clear previous results
+
+        let totalVotes = 0;
+
+        poll.options.forEach((option, index) => {
+            const voteCount = poll.votes ? Object.values(poll.votes).filter(vote => vote.option === index).length : 0;
+            const percentage = (voteCount / totalVoters * 100).toFixed(2);
+
+            totalVotes += voteCount;
+
+            // Create HTML for each poll option result
+            const resultHtml = `
+                <div class="poll-result">
+                    <div class="poll-result-title">${option}</div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${percentage}%;">${percentage}%</div>
+                    </div>
+                    <div class="poll-result-count">${voteCount} votes (${percentage}%)</div>
+                </div>
+            `;
+            pollResults.innerHTML += resultHtml;
+        });
+
+        // Calculate and display total votes and percentage voted
+        const notVoted = totalVoters - totalVotes;
+        const percentVoted = ((totalVotes / totalVoters) * 100).toFixed(2);
+        const percentNotVoted = ((notVoted / totalVoters) * 100).toFixed(2);
+
+        const totalVotesText = `Total votes: ${totalVotes} (${percentVoted}%) | Not voted yet: ${notVoted} (${percentNotVoted}%)`;
+        document.getElementById('totalVotesText').innerText = totalVotesText;
+    } else {
+        console.error('Poll not found');
+    }
+}
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', loadPollResults);
