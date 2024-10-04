@@ -56,6 +56,7 @@ function calculateAndDisplayResults() {
     const votes = currentPoll.votes || {};
     const results = currentPoll.options.map(() => 0);
     let totalVotes = 0;
+    const totalVoters = 18; // Total number of potential voters
 
     // If no votes are present, avoid errors
     if (Object.keys(votes).length === 0) {
@@ -68,6 +69,7 @@ function calculateAndDisplayResults() {
         return;
     }
 
+    // Count votes for each option and the total votes
     Object.values(votes).forEach(vote => {
         if (vote.option !== undefined) {
             results[vote.option]++;
@@ -77,8 +79,9 @@ function calculateAndDisplayResults() {
 
     const resultsContainer = document.getElementById('pollResults');
     if (resultsContainer) {
-        resultsContainer.innerHTML = '';
+        resultsContainer.innerHTML = ''; // Clear previous results
 
+        // Display results for each option
         currentPoll.options.forEach((option, index) => {
             const voteCount = results[index];
             const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(2) : 0;
@@ -95,8 +98,13 @@ function calculateAndDisplayResults() {
             resultsContainer.appendChild(resultElement);
         });
 
+        // Calculate and display total votes and percentage of participation
+        const notVoted = totalVoters - totalVotes;
+        const percentVoted = ((totalVotes / totalVoters) * 100).toFixed(2);
+        const percentNotVoted = ((notVoted / totalVoters) * 100).toFixed(2);
+
         const totalElement = document.createElement('p');
-        totalElement.textContent = `Total votes: ${totalVotes}`;
+        totalElement.textContent = `Total votes: ${totalVotes} (${percentVoted}%) | Not voted yet: ${notVoted} (${percentNotVoted}%)`;
         resultsContainer.appendChild(totalElement);
     } else {
         console.error('Results container element not found.');
