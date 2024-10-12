@@ -264,6 +264,7 @@ function renderSchedule() {
                 </div>
                 <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
                 <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+                <button onclick="composeNonRespondersEmail('${event.id}')">Email Non-Responders</button>
                 <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
             </div>
         `;
@@ -689,6 +690,51 @@ Best regards,
 Nasser`);
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
+}
+
+function composeNonRespondersEmail(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event) {
+        console.error(`Event with ID ${eventId} not found`);
+        return;
+    }
+
+    const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
+    
+    // Filter non-responders and get their email addresses
+    const nonResponders = members.filter(member => 
+        event.rsvps[member.name] === 'no-response'
+    );
+
+    if (nonResponders.length === 0) {
+        alert('Everyone has responded to this event!');
+        return;
+    }
+
+    // Compose the email addresses string
+    const toEmails = nonResponders.map(member => member.email).join(',');
+
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: We Need Your RSVP - Poker Night on ${formatDate(event.date)}`);
+    const body = encodeURIComponent(`Dear Danville Poker Group member,
+
+We haven't received your RSVP for our upcoming poker night:
+
+Date: ${formatDate(event.date)}
+Time: 7:00 PM
+Location: ${event.location}
+Host: ${event.host}
+
+Your response is important for planning. Please take a moment to RSVP using the link below:
+
+${rsvpLink}
+
+We're looking forward to a great night of poker and hope you can join us!
+
+Best regards,
+Nasser`);
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
 }
 
@@ -1272,3 +1318,4 @@ window.composePollInvitationEmail = composePollInvitationEmail;
 window.composePollResultsEmail = composePollResultsEmail;
 window.deletePoll = deletePoll;
 window.openHostingSchedule = openHostingSchedule;
+window.composeNonRespondersEmail = composeNonRespondersEmail;
