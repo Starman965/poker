@@ -715,10 +715,10 @@ function composeNonRespondersEmail(eventId) {
     // Compose the email addresses string
     const toEmails = nonResponders.map(member => member.email).join(',');
 
-    const subject = encodeURIComponent(`[DanvillePoker] Reminder: We Need Your RSVP - Poker Night on ${formatDate(event.date)}`);
-    const body = encodeURIComponent(`Dear Danville Poker Group member,
+    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const body = encodeURIComponent(`Danville Poker Group member,
 
-We haven't received your RSVP for our upcoming poker night:
+We still haven't received your RSVP for our upcoming poker night:
 
 Date: ${formatDate(event.date)}
 Time: 7:00 PM
