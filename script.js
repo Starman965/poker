@@ -716,7 +716,7 @@ function composeNonRespondersEmail(eventId) {
     const toEmails = nonResponders.map(member => member.email).join(',');
 
     const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
-    const body = encodeURIComponent(`Danville Poker Group member,
+    const body = encodeURIComponent(`Danville Poker Group,
 
 We still haven't received your RSVP for our upcoming poker night:
 
