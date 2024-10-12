@@ -234,13 +234,29 @@ function renderSchedule() {
     });
 
     function renderEvent(event, isCurrent) {
-        // ... (existing renderEvent function code)
+        console.log('Rendering event:', event);  // Debug log
+        const eventDiv = document.createElement('div');
+        eventDiv.className = 'event-item';
+        eventDiv.innerHTML = `
+            <div class="event-header" onclick="toggleEventDetails('${event.id}')">
+                <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+                <!-- Event details content -->
+            </div>
+        `;
+        scheduleContainer.appendChild(eventDiv);
     }
 
     function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
         
+        console.log('Display mode:', displayMode);  // Debug log
+        console.log('Current event:', currentEvent);  // Debug log
+        console.log('Upcoming events:', upcomingEvents);  // Debug log
+
         if (displayMode === 'current' && currentEvent) {
             renderEvent(currentEvent, true);
         } else if (displayMode === 'future') {
