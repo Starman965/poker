@@ -515,8 +515,23 @@ Time: 7:00 PM
 Location: ${event.location}
 Host: ${event.host}
 
-Please RSVP ASAP so we can start planning. You can submit your RSVP here:
-${rsvpLink}
+Please RSVP ASAP so we can start planning. Click the button below to submit your RSVP:
+
+<table width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>
+      <table cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="border-radius: 2px;" bgcolor="#4CAF50">
+            <a href="${rsvpLink}" target="_blank" style="padding: 8px 12px; border: 1px solid #4CAF50;border-radius: 2px;font-family: Helvetica, Arial, sans-serif;font-size: 14px; color: #ffffff;text-decoration: none;font-weight:bold;display: inline-block;">
+              RSVP Now              
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
 You can also see the upcoming hosting schedule at: https://www.danvillepokergroup.com/scheduled.html
 
