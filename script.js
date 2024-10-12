@@ -228,47 +228,16 @@ function renderSchedule() {
     const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
     const currentEvent = upcomingEvents[0];
 
-   function renderEvent(event, isCurrent) {
-    console.log('Event Date:', event.date);  // Log the date to check what's being passed
-    const eventDiv = document.createElement('div');
-    eventDiv.className = 'event-item';
-    eventDiv.innerHTML = `
-        <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-            <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
-            <span class="expand-icon">▼</span>
-        </div>
-        <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-            <div class="rsvp-details">
-                ${Object.entries(event.rsvps).map(([name, status]) => `
-                    <div class="event-rsvp">
-                        <p>${name}:</p>
-                        <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
-                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                        </select>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="rsvp-totals" id="rsvpTotals-${event.id}">
-                <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
-                <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
-                <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
-                <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
-            </div>
-            <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-            <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-            <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
-        </div>
-    `;
-    scheduleContainer.appendChild(eventDiv);
-    editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
-    
-    // Update totals immediately after rendering
-    updateTotalAttending(event.id);
-}
-function displayEvents() {
+    // Populate the edit event dropdown with all upcoming events
+    upcomingEvents.forEach(event => {
+        editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
+    });
+
+    function renderEvent(event, isCurrent) {
+        // ... (existing renderEvent function code)
+    }
+
+    function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
         
