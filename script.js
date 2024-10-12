@@ -820,7 +820,6 @@ function showHostingReport() {
     });
 
     let reportHTML = '<h3 class="report-title">Hosting Report</h3>';
-    reportHTML += '<p><a href="https://www.danvillepokergroup.com/scheduled.html" target="_blank">View Upcoming Schedule</a></p>';
     reportHTML += `<table class="hosting-report">
         <thead>
             <tr>
@@ -1153,7 +1152,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const editEventHost = document.getElementById('editEventHost');
     const editEventSelect = document.getElementById('editEventSelect');
     const eventDisplaySelector = document.getElementById('eventDisplaySelector');
-
+    const hostingScheduleBtn = document.querySelector('button[onclick="openHostingSchedule()"]');
+    if (hostingScheduleBtn) {
+        hostingScheduleBtn.addEventListener('click', window.openHostingSchedule);
+    }
     if (newEventHost) {
         newEventHost.addEventListener('change', updateHostLocation);
     }
