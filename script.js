@@ -909,9 +909,9 @@ function loadEventForEditing() {
         document.getElementById('editEventLocation').value = '';
     }
 }
-function openHostingSchedule() {
+window.openHostingSchedule = function() {
     window.open('https://www.danvillepokergroup.com/scheduled.html', '_blank');
-}
+};
 /*
 function sendSms(phoneNumber, message) {
     fetch('/api/send-sms', {
