@@ -27,6 +27,29 @@
             </div>
         </div>
 
+        <div class="card attendance-details">
+            <h2>Event Attendance</h2>
+            <div id="attendanceDetails">
+                <div class="attendance-section">
+                    <h3>Attending</h3>
+                    <div id="attending"></div>
+                </div>
+                <div class="attendance-section">
+                    <h3>Not Attending</h3>
+                    <div id="notAttending"></div>
+                </div>
+                <div class="attendance-section">
+                    <h3>Maybe</h3>
+                    <div id="maybe"></div>
+                </div>
+                <div class="attendance-section">
+                    <h3>No Response</h3>
+                    <div id="noResponse"></div>
+                </div>
+                <div id="totalCount" class="total-section"></div>
+            </div>
+        </div>
+
         <div class="button-container" style="margin-top: 20px;">
             <button onclick="window.open('attendance.html', '_blank')" style="margin-right: 10px;">Attendance Report</button>
             <button onclick="window.open('scheduled.html', '_blank')">Hosting Schedule</button>
@@ -58,9 +81,69 @@
                     document.getElementById('hostAddress').textContent = eventData.location;
                     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventData.location)}`;
                     document.getElementById('addressLink').href = mapsLink;
+
+                    // Process RSVPs
+                    const rsvps = eventData.rsvps || {};
+                    const attending = [];
+                    const notAttending = [];
+                    const maybe = [];
+                    const noResponse = [];
+
+                    Object.entries(rsvps).forEach(([name, status]) => {
+                        switch(status) {
+                            case 'attending':
+                                attending.push(name);
+                                break;
+                            case 'not-attending':
+                                notAttending.push(name);
+                                break;
+                            case 'maybe':
+                                maybe.push(name);
+                                break;
+                            default:
+                                noResponse.push(name);
+                        }
+                    });
+
+                    // Update attendance lists
+                    document.getElementById('attending').innerHTML = attending.length ? 
+                        attending.join('<br>') : 'None';
+                    document.getElementById('notAttending').innerHTML = notAttending.length ? 
+                        notAttending.join('<br>') : 'None';
+                    document.getElementById('maybe').innerHTML = maybe.length ? 
+                        maybe.join('<br>') : 'None';
+                    document.getElementById('noResponse').innerHTML = noResponse.length ? 
+                        noResponse.join('<br>') : 'None';
+
+                    // Update total count
+                    document.getElementById('totalCount').innerHTML = `
+                        Total Confirmed: ${attending.length} | 
+                        Not Attending: ${notAttending.length} | 
+                        Maybe: ${maybe.length} | 
+                        No Response: ${noResponse.length}
+                    `;
                 }
             });
         }
     </script>
+
+    <style>
+        .attendance-section {
+            margin-bottom: 20px;
+        }
+        .attendance-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .total-section {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-weight: bold;
+        }
+        #attending, #notAttending, #maybe, #noResponse {
+            line-height: 1.6;
+        }
+    </style>
 </body>
 </html>
