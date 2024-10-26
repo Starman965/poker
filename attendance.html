@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .attendance-trophy {
+            font-size: 1.2em;
+            margin-left: 5px;
+        }
+        .perfect-attendance {
+            color: gold;
+        }
+        .high-attendance {
+            color: silver;
+        }
+        .good-attendance {
+            color: #cd7f32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2024 Attendance Report</h1>
+        
+        <div class="card">
+            <div id="attendanceReport"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules and config
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { firebaseConfig } from './firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function calculateAttendance() {
+            const dbRef = ref(database);
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val();
+                const currentDate = new Date();
+                const oneYearAgo = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
+
+                // Filter events from the past year
+                const recentEvents = Object.values(data.schedule || {}).filter(event => 
+                    new Date(event.date) >= oneYearAgo && new Date(event.date) <= currentDate
+                );
+
+                // Calculate attendance for each member
+                const attendanceCounts = {};
+                Object.values(data.members || {}).forEach(member => {
+                    attendanceCounts[member.name] = {
+                        attended: 0,
+                        total: recentEvents.length
+                    };
+                });
+
+                // Count attendance
+                recentEvents.forEach(event => {
+                    Object.entries(event.rsvps || {}).forEach(([member, status]) => {
+                        if (status === 'attending' && attendanceCounts[member]) {
+                            attendanceCounts[member].attended++;
+                        }
+                    });
+                });
+
+                // Display results
+                const reportContainer = document.getElementById('attendanceReport');
+                let tableHTML = `
+                    <table class="attendance-report">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Events Attended</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                // Sort by attendance percentage (descending)
+                const sortedMembers = Object.entries(attendanceCounts)
+                    .sort(([, a], [, b]) => {
+                        const percentA = (a.attended / a.total) * 100;
+                        const percentB = (b.attended / b.total) * 100;
+                        return percentB - percentA;
+                    });
+
+                sortedMembers.forEach(([member, data]) => {
+                    const percentage = (data.attended / data.total * 100).toFixed(1);
+                    let trophy = '';
+                    if (percentage >= 90) {
+                        trophy = '<span class="attendance-trophy perfect-attendance">🏆</span>';
+                    } else if (percentage >= 75) {
+                        trophy = '<span class="attendance-trophy high-attendance">🥈</span>';
+                    } else if (percentage >= 60) {
+                        trophy = '<span class="attendance-trophy good-attendance">🥉</span>';
+                    }
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${member}${trophy}</td>
+                            <td>${data.attended}</td>
+                            <td>${percentage}%</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += '</tbody></table>';
+                reportContainer.innerHTML = tableHTML;
+            });
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', calculateAttendance);
+    </script>
+</body>
+</html>
