@@ -2,6 +2,106 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .rsvp-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+            background: linear-gradient(45deg, #2980b9, #2c3e50);
+        }
+        
+        .rsvp-card.yes {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+        
+        .rsvp-card.no {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+        }
+        
+        .rsvp-card.maybe {
+            background: linear-gradient(45deg, #f39c12, #f1c40f);
+        }
+        
+        .rsvp-card h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: white;
+        }
+        
+        .rsvp-card .message {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .rsvp-card .icon {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        .calendar-dropdown {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .calendar-options {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        .calendar-dropdown:hover .calendar-options {
+            display: block;
+        }
+
+        .calendar-options button {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .calendar-options button:hover {
+            background-color: #f1f1f1;
+        }
+
+        .calendar-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .attendance-section {
+            margin-bottom: 20px;
+        }
+        .attendance-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .total-section {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-weight: bold;
+        }
+        #attending, #notAttending, #maybe, #noResponse {
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -10,7 +110,15 @@
         <div class="card">
             <div id="rsvpImage" class="rsvp-image-container"></div>
             <div id="addToCalendarContainer">
-                <button id="addToCalendar" style="margin-bottom: 15px;">Add to Calendar</button>
+                <div class="calendar-dropdown">
+                    <button class="calendar-button">Add to Calendar ▼</button>
+                    <div class="calendar-options">
+                        <button onclick="generateCalendarEvent('google')">Google Calendar</button>
+                        <button onclick="generateCalendarEvent('outlook')">Outlook</button>
+                        <button onclick="generateCalendarEvent('ical')">iCal/Apple Calendar</button>
+                        <button onclick="generateCalendarEvent('yahoo')">Yahoo Calendar</button>
+                    </div>
+                </div>
             </div>
             <p>Change your RSVP as needed <a href="rsvp.html" id="rsvpLink">HERE</a> or from the email.</p>
         </div>
@@ -69,23 +177,88 @@
             
             if (status === 'attending') {
                 content = `
-                    <h3>See you at the tables! 🎉</h3>
-                    <img src="images/poker-yes.gif" alt="Poker success" style="max-width: 300px;">
+                    <div class="rsvp-card yes">
+                        <div class="icon">♠️</div>
+                        <h3>You're In!</h3>
+                        <div class="message">See you at the tables! 🎉</div>
+                        <div class="icon">♣️</div>
+                    </div>
                 `;
             } else if (status === 'not-attending') {
                 content = `
-                    <h3>Sorry you can't make it! 😢</h3>
-                    <img src="images/poker-no.gif" alt="Maybe next time" style="max-width: 300px;">
+                    <div class="rsvp-card no">
+                        <div class="icon">♥️</div>
+                        <h3>Maybe Next Time</h3>
+                        <div class="message">Sorry you can't make it! 😢</div>
+                        <div class="icon">♦️</div>
+                    </div>
                 `;
             } else if (status === 'maybe') {
                 content = `
-                    <h3>Hope you can make it! 🤞</h3>
-                    <img src="images/poker-maybe.gif" alt="Maybe" style="max-width: 300px;">
+                    <div class="rsvp-card maybe">
+                        <div class="icon">🃏</div>
+                        <h3>We'll See!</h3>
+                        <div class="message">Hope you can make it! 🤞</div>
+                        <div class="icon">🎲</div>
+                    </div>
                 `;
             }
             
             rsvpImageContainer.innerHTML = content;
         }
+
+        window.generateCalendarEvent = function(calendarType) {
+            const eventData = window.currentEventData;
+            if (!eventData) return;
+
+            const eventDate = new Date(eventData.date + 'T19:00:00');
+            const endDate = new Date(eventDate.getTime() + (4 * 60 * 60 * 1000));
+
+            const event = {
+                title: 'Danville Poker Night',
+                description: `Host: ${eventData.host}\nLocation: ${eventData.location}`,
+                location: eventData.location,
+                start: eventDate,
+                end: endDate
+            };
+
+            let calendarUrl = '';
+
+            switch(calendarType) {
+                case 'google':
+                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}/${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
+                    break;
+                case 'outlook':
+                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${event.start.toISOString()}&enddt=${event.end.toISOString()}&body=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
+                    break;
+                case 'yahoo':
+                    calendarUrl = `https://calendar.yahoo.com/?v=60&title=${encodeURIComponent(event.title)}&st=${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}&et=${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}&desc=${encodeURIComponent(event.description)}&in_loc=${encodeURIComponent(event.location)}`;
+                    break;
+                case 'ical':
+                    const icalContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}
+DTEND:${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}
+LOCATION:${event.location}
+END:VEVENT
+END:VCALENDAR`;
+                    const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = 'poker_night.ics';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    return;
+            }
+
+            if (calendarUrl) {
+                window.open(calendarUrl, '_blank');
+            }
+        };
 
         // Get event ID and member name from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -102,10 +275,8 @@
             onValue(eventRef, (snapshot) => {
                 const eventData = snapshot.val();
                 if (eventData) {
-                    // Add calendar button event listener
-                    document.getElementById('addToCalendar').addEventListener('click', () => {
-                        generateCalendarEvent(eventData);
-                    });
+                    // Store event data globally for calendar functions
+                    window.currentEventData = eventData;
 
                     // Update host information
                     document.getElementById('hostName').textContent = eventData.host;
@@ -161,57 +332,6 @@
                 }
             });
         }
-
-        function generateCalendarEvent(eventData) {
-            const eventDate = new Date(eventData.date + 'T19:00:00'); // 7:00 PM
-            const endDate = new Date(eventDate.getTime() + (4 * 60 * 60 * 1000)); // 4 hours duration
-
-            const event = {
-                title: 'Danville Poker Night',
-                description: `Host: ${eventData.host}\nLocation: ${eventData.location}`,
-                location: eventData.location,
-                start: eventDate.toISOString(),
-                end: endDate.toISOString()
-            };
-
-            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.replace(/[-:]/g, '').replace('.000', '')}/${event.end.replace(/[-:]/g, '').replace('.000', '')}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
-
-            window.open(googleCalendarUrl, '_blank');
-        }
     </script>
-
-    <style>
-        .attendance-section {
-            margin-bottom: 20px;
-        }
-        .attendance-section h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-        .total-section {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-            font-weight: bold;
-        }
-        #attending, #notAttending, #maybe, #noResponse {
-            line-height: 1.6;
-        }
-        #addToCalendar {
-            display: block;
-            margin: 10px 0;
-        }
-        .rsvp-image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .rsvp-image-container h3 {
-            margin-bottom: 15px;
-        }
-        .rsvp-image-container img {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
 </body>
 </html>
