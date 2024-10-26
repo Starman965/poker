@@ -1,336 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Confirmation</title>
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/add-to-calendar-button@2" async defer></script>
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .rsvp-card {
-            text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            color: white;
-            background: linear-gradient(45deg, #2980b9, #2c3e50);
+        .rsvp-summary {
+            margin-top: 20px;
         }
-        
-        .rsvp-card.yes {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
-        }
-        
-        .rsvp-card.no {
-            background: linear-gradient(45deg, #c0392b, #e74c3c);
-        }
-        
-        .rsvp-card.maybe {
-            background: linear-gradient(45deg, #f39c12, #f1c40f);
-        }
-        
-        .rsvp-card h3 {
-            margin: 0;
-            font-size: 1.5em;
-            color: white;
-        }
-        
-        .rsvp-card .message {
-            font-size: 1.2em;
-            margin: 10px 0;
-        }
-        
-        .rsvp-card .icon {
-            font-size: 2em;
-            margin: 10px 0;
-        }
-
-        .calendar-dropdown {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        .calendar-options {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 5px;
-        }
-
-        .calendar-dropdown:hover .calendar-options {
-            display: block;
-        }
-
-        .calendar-options button {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            text-align: left;
-            border: none;
-            background: none;
-            cursor: pointer;
-        }
-
-        .calendar-options button:hover {
-            background-color: #f1f1f1;
-        }
-
-        .calendar-button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .attendance-section {
-            margin-bottom: 20px;
-        }
-        .attendance-section h3 {
-            color: var(--primary-color);
+        .rsvp-category {
             margin-bottom: 10px;
         }
-        .total-section {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
+        .rsvp-category h3 {
+            margin-bottom: 5px;
+        }
+        .rsvp-list {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
             font-weight: bold;
         }
-        #attending, #notAttending, #maybe, #noResponse {
-            line-height: 1.6;
+        #addToCalendarContainer {
+            margin-top: 20px;
+            display: none;
+        }
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-container button:hover {
+            background-color: #3a7bc8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>RSVP Confirmation</h1>
-        
         <div class="card">
-            <div id="rsvpImage" class="rsvp-image-container"></div>
-            <div id="addToCalendarContainer">
-                <div class="calendar-dropdown">
-                    <button class="calendar-button">Add to Calendar ▼</button>
-                    <div class="calendar-options">
-                        <button onclick="generateCalendarEvent('google')">Google Calendar</button>
-                        <button onclick="generateCalendarEvent('outlook')">Outlook</button>
-                        <button onclick="generateCalendarEvent('ical')">iCal/Apple Calendar</button>
-                        <button onclick="generateCalendarEvent('yahoo')">Yahoo Calendar</button>
-                    </div>
-                </div>
-            </div>
-            <p>Change your RSVP as needed <a href="rsvp.html" id="rsvpLink">HERE</a> or from the email.</p>
+            <p id="confirmationMessage"></p>
+            <div id="rsvpImage"></div>
+            <div id="addToCalendarContainer"></div>
+            <p>Update your RSVP <a href="rsvp.html" id="rsvpLink">HERE</a> or from the email.</p>
         </div>
-
-        <div class="card host-info">
-            <h2>Event Details</h2>
-            <div id="hostInfo">
-                <p>Host: <span id="hostName"></span></p>
-                <p>Time: 7:00 PM</p>
-                <p>Location: <a id="addressLink" target="_blank"><span id="hostAddress"></span></a></p>
-            </div>
+        <div class="card rsvp-summary">
+            <h2>Current RSVP Summary</h2>
+            <div id="rsvpSummary"></div>
         </div>
-
-        <div class="card attendance-details">
-            <h2>Event Attendance</h2>
-            <div id="attendanceDetails">
-                <div class="attendance-section">
-                    <h3>Attending</h3>
-                    <div id="attending"></div>
-                </div>
-                <div class="attendance-section">
-                    <h3>Not Attending</h3>
-                    <div id="notAttending"></div>
-                </div>
-                <div class="attendance-section">
-                    <h3>Maybe</h3>
-                    <div id="maybe"></div>
-                </div>
-                <div class="attendance-section">
-                    <h3>No Response</h3>
-                    <div id="noResponse"></div>
-                </div>
-                <div id="totalCount" class="total-section"></div>
-            </div>
-        </div>
-
-        <div class="button-container" style="margin-top: 20px;">
-            <button onclick="window.open('attendance.html', '_blank')" style="margin-right: 10px;">Attendance History</button>
+        <div class="button-container">
+            <button onclick="window.open('attendance.html', '_blank')">Attendance History</button>
             <button onclick="window.open('scheduled.html', '_blank')">Hosting Schedule</button>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase modules and config
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase,
+            ref, 
+            get
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        function updateRsvpImage(status) {
-            const rsvpImageContainer = document.getElementById('rsvpImage');
-            let content = '';
-            
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const token = urlParams.get('token');
+
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            confirmationMessage.textContent = `Your RSVP is: "${status}"`;
+
+            const rsvpLink = document.getElementById('rsvpLink');
+            rsvpLink.href = `rsvp.html?token=${token}`;
+
+            // Add image based on RSVP status
+            const imageElement = document.getElementById('rsvpImage');
             if (status === 'attending') {
-                content = `
-                    <div class="rsvp-card yes">
-                        <div class="icon">♠️</div>
-                        <h3>You're In!</h3>
-                        <div class="message">See you at the tables! 🎉</div>
-                        <div class="icon">♣️</div>
-                    </div>
-                `;
+                imageElement.innerHTML = '<img src="https://www.danvillepokergroup.com/thumbsup.png" alt="Thumbs up" style="max-width: 200px;">';
             } else if (status === 'not-attending') {
-                content = `
-                    <div class="rsvp-card no">
-                        <div class="icon">♥️</div>
-                        <h3>Maybe Next Time</h3>
-                        <div class="message">Sorry you can't make it! 😢</div>
-                        <div class="icon">♦️</div>
-                    </div>
-                `;
-            } else if (status === 'maybe') {
-                content = `
-                    <div class="rsvp-card maybe">
-                        <div class="icon">🃏</div>
-                        <h3>We'll See!</h3>
-                        <div class="message">Hope you can make it! 🤞</div>
-                        <div class="icon">🎲</div>
-                    </div>
-                `;
+                imageElement.innerHTML = '<img src="https://www.danvillepokergroup.com/thumbsdown.png" alt="Thumbs down" style="max-width: 200px;">';
             }
-            
-            rsvpImageContainer.innerHTML = content;
+
+            // Show Add to Calendar button for 'attending' and 'maybe' statuses
+            if (status === 'attending' || status === 'maybe') {
+                showAddToCalendarButton(token);
+            }
+
+            // Fetch and display RSVP summary
+            fetchRSVPSummary(token);
+        });
+
+        function showAddToCalendarButton(eventToken) {
+            get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
+                const event = snapshot.val();
+                if (event) {
+                    const calendarContainer = document.getElementById('addToCalendarContainer');
+                    calendarContainer.innerHTML = `
+                        <add-to-calendar-button
+                            name="Danville Poker Night"
+                            description="Poker night with the Danville Poker Group"
+                            startDate="${event.date}"
+                            startTime="19:00"
+                            endTime="23:00"
+                            timeZone="America/Los_Angeles"
+                            location="${event.location}"
+                            options="'Apple','Google','iCal','Microsoft365','Outlook.com','Yahoo'"
+                            lightMode="dark"
+                        ></add-to-calendar-button>
+                    `;
+                    calendarContainer.style.display = 'block';
+                }
+            }).catch((error) => {
+                console.error('Error fetching event details:', error);
+            });
         }
 
-        window.generateCalendarEvent = function(calendarType) {
-            const eventData = window.currentEventData;
-            if (!eventData) return;
+        function fetchRSVPSummary(eventToken) {
+            get(ref(database, `schedule/${eventToken}`)).then((snapshot) => {
+                const event = snapshot.val();
+                if (event && event.rsvps) {
+                    displayRSVPSummary(event.rsvps);
+                } else {
+                    console.error('No RSVP data found for this event.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching RSVP data:', error);
+            });
+        }
 
-            const eventDate = new Date(eventData.date + 'T19:00:00');
-            const endDate = new Date(eventDate.getTime() + (4 * 60 * 60 * 1000));
-
-            const event = {
-                title: 'Danville Poker Night',
-                description: `Host: ${eventData.host}\nLocation: ${eventData.location}`,
-                location: eventData.location,
-                start: eventDate,
-                end: endDate
+        function displayRSVPSummary(rsvps) {
+            const summary = {
+                attending: [],
+                notAttending: [],
+                maybe: [],
+                noResponse: []
             };
 
-            let calendarUrl = '';
-
-            switch(calendarType) {
-                case 'google':
-                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}/${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
-                    break;
-                case 'outlook':
-                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${event.start.toISOString()}&enddt=${event.end.toISOString()}&body=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
-                    break;
-                case 'yahoo':
-                    calendarUrl = `https://calendar.yahoo.com/?v=60&title=${encodeURIComponent(event.title)}&st=${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}&et=${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}&desc=${encodeURIComponent(event.description)}&in_loc=${encodeURIComponent(event.location)}`;
-                    break;
-                case 'ical':
-                    const icalContent = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${event.start.toISOString().replace(/[-:]/g, '').replace('.000', '')}
-DTEND:${event.end.toISOString().replace(/[-:]/g, '').replace('.000', '')}
-SUMMARY:${event.title}
-DESCRIPTION:${event.description}
-LOCATION:${event.location}
-END:VEVENT
-END:VCALENDAR`;
-                    const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
-                    const link = document.createElement('a');
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = 'poker_night.ics';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    return;
-            }
-
-            if (calendarUrl) {
-                window.open(calendarUrl, '_blank');
-            }
-        };
-
-        // Get event ID and member name from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const eventId = urlParams.get('token');
-        const memberName = urlParams.get('member');
-
-        // Update the RSVP link with the token
-        if (eventId) {
-            const rsvpLink = document.getElementById('rsvpLink');
-            rsvpLink.href = `rsvp.html?token=${eventId}`;
-
-            // Get event details
-            const eventRef = ref(database, `schedule/${eventId}`);
-            onValue(eventRef, (snapshot) => {
-                const eventData = snapshot.val();
-                if (eventData) {
-                    // Store event data globally for calendar functions
-                    window.currentEventData = eventData;
-
-                    // Update host information
-                    document.getElementById('hostName').textContent = eventData.host;
-                    document.getElementById('hostAddress').textContent = eventData.location;
-                    const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventData.location)}`;
-                    document.getElementById('addressLink').href = mapsLink;
-
-                    // Process RSVPs
-                    const rsvps = eventData.rsvps || {};
-                    const attending = [];
-                    const notAttending = [];
-                    const maybe = [];
-                    const noResponse = [];
-
-                    Object.entries(rsvps).forEach(([name, status]) => {
-                        switch(status) {
-                            case 'attending':
-                                attending.push(name);
-                                break;
-                            case 'not-attending':
-                                notAttending.push(name);
-                                break;
-                            case 'maybe':
-                                maybe.push(name);
-                                break;
-                            default:
-                                noResponse.push(name);
-                        }
-                    });
-
-                    // Update attendance lists
-                    document.getElementById('attending').innerHTML = attending.length ? 
-                        attending.join('<br>') : 'None';
-                    document.getElementById('notAttending').innerHTML = notAttending.length ? 
-                        notAttending.join('<br>') : 'None';
-                    document.getElementById('maybe').innerHTML = maybe.length ? 
-                        maybe.join('<br>') : 'None';
-                    document.getElementById('noResponse').innerHTML = noResponse.length ? 
-                        noResponse.join('<br>') : 'None';
-
-                    // Update total count
-                    document.getElementById('totalCount').innerHTML = `
-                        Total Confirmed: ${attending.length} | 
-                        Not Attending: ${notAttending.length} | 
-                        Maybe: ${maybe.length} | 
-                        No Response: ${noResponse.length}
-                    `;
-
-                    // Show RSVP image if member name is provided
-                    if (memberName && eventData.rsvps[memberName]) {
-                        updateRsvpImage(eventData.rsvps[memberName]);
-                    }
+            // Categorize RSVPs
+            Object.entries(rsvps).forEach(([name, status]) => {
+                switch(status) {
+                    case 'attending':
+                        summary.attending.push(name);
+                        break;
+                    case 'not-attending':
+                        summary.notAttending.push(name);
+                        break;
+                    case 'maybe':
+                        summary.maybe.push(name);
+                        break;
+                    default:
+                        summary.noResponse.push(name);
                 }
             });
+
+            // Create HTML for summary
+            const summaryHTML = `
+                <div class="rsvp-category">
+                    <h3>Attending (${summary.attending.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.attending.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>Not Attending (${summary.notAttending.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.notAttending.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>Maybe (${summary.maybe.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.maybe.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="rsvp-category">
+                    <h3>No Response (${summary.noResponse.length})</h3>
+                    <ul class="rsvp-list">
+                        ${summary.noResponse.map(name => `<li>${name}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('rsvpSummary').innerHTML = summaryHTML;
         }
     </script>
 </body>
