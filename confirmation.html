@@ -10,7 +10,7 @@
         <div class="card">
             <div id="rsvpImage"></div>
             <div id="addToCalendarContainer"></div>
-            <p>Update your RSVP <a href="rsvp.html" id="rsvpLink">HERE</a> or from the email.</p>
+            <p>Change your RSVP as needed <a href="rsvp.html" id="rsvpLink">HERE</a> or from the email.</p>
         </div>
         <div class="card host-info">
             <h2>Event Details</h2>
@@ -64,7 +64,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('token');
 
+        // Update the RSVP link with the token
         if (eventId) {
+            const rsvpLink = document.getElementById('rsvpLink');
+            rsvpLink.href = `rsvp.html?token=${eventId}`;
+
             // Get event details
             const eventRef = ref(database, `schedule/${eventId}`);
             onValue(eventRef, (snapshot) => {
