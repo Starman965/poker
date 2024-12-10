@@ -158,10 +158,29 @@
             });
         }
 
-        // Format date
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString('en-US', options);
+           function formatDate(dateString) {
+            // Assuming dateString format from DB is "YYYY-MM-DD HH:mm"
+            const [datePart, timePart] = dateString.split(' ');
+            const dateParts = datePart.split('-');
+            const timeParts = timePart ? timePart.split(':') : ['19', '00']; // Default to 7:00 PM if no time
+            
+            const date = new Date(
+                dateParts[0], 
+                dateParts[1] - 1, 
+                dateParts[2],
+                timeParts[0],
+                timeParts[1]
+            );
+        
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+            });
+        
+            return `${formatter.format(date)} PT`;
         }
 
         // Handle member selection
