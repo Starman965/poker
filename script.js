@@ -225,8 +225,9 @@ function renderSchedule() {
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const currentDate = new Date();
-    const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
-    const currentEvent = upcomingEvents[0];
+    const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDateWithoutTime);
+    const currentEvent = upcomingEvents.find(event => new Date(event.date) > currentDateWithoutTime) || upcomingEvents[0];
 
     // Populate the edit event dropdown with all upcoming events
     upcomingEvents.forEach(event => {
@@ -234,7 +235,6 @@ function renderSchedule() {
     });
 
     function renderEvent(event, isCurrent) {
-        console.log('Rendering event:', event);  // Debug log
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item';
         eventDiv.innerHTML = `
@@ -275,10 +275,6 @@ function renderSchedule() {
     function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
-        
-        console.log('Display mode:', displayMode);  // Debug log
-        console.log('Current event:', currentEvent);  // Debug log
-        console.log('Upcoming events:', upcomingEvents);  // Debug log
 
         if (displayMode === 'current' && currentEvent) {
             renderEvent(currentEvent, true);
@@ -290,7 +286,6 @@ function renderSchedule() {
     eventDisplaySelector.addEventListener('change', displayEvents);
     displayEvents();
 }
-    
 function createNewEvent(date, host, location) {
     const newEvent = {
         date,
