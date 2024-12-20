@@ -226,60 +226,52 @@ function renderSchedule() {
 
     const currentDate = new Date();
     const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
-    const currentEvent = upcomingEvents[0];
+    const currentEvent = upcomingEvents.find(event => new Date(event.date) > currentDate) || upcomingEvents[0];
 
-    // Populate the edit event dropdown with all upcoming events
-    upcomingEvents.forEach(event => {
-        editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
-    });
-
-    function renderEvent(event, isCurrent) {
-        console.log('Rendering event:', event);  // Debug log
-        const eventDiv = document.createElement('div');
-        eventDiv.className = 'event-item';
-        eventDiv.innerHTML = `
-            <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-                <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
-                <span class="expand-icon">▼</span>
+   function renderEvent(event, isCurrent) {
+    console.log('Event Date:', event.date);  // Log the date to check what's being passed
+    const eventDiv = document.createElement('div');
+    eventDiv.className = 'event-item';
+    eventDiv.innerHTML = `
+        <div class="event-header" onclick="toggleEventDetails('${event.id}')">
+            <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
+            <span class="expand-icon">▼</span>
+        </div>
+        <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+            <div class="rsvp-details">
+                ${Object.entries(event.rsvps).map(([name, status]) => `
+                    <div class="event-rsvp">
+                        <p>${name}:</p>
+                        <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
+                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
+                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                        </select>
+                    </div>
+                `).join('')}
             </div>
-            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-                <div class="rsvp-details">
-                    ${Object.entries(event.rsvps).map(([name, status]) => `
-                        <div class="event-rsvp">
-                            <p>${name}:</p>
-                            <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
-                                <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                                <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                                <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                                <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                            </select>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="rsvp-totals" id="rsvpTotals-${event.id}">
-                    <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
-                    <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
-                    <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
-                    <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
-                </div>
-                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-                <button onclick="composeNonRespondersEmail('${event.id}')">Email Non-Responders</button>
-                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
+            <div class="rsvp-totals" id="rsvpTotals-${event.id}">
+                <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
+                <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
+                <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
+                <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
             </div>
-        `;
-        scheduleContainer.appendChild(eventDiv);
-        updateTotalAttending(event.id);
-    }
-
-    function displayEvents() {
+            <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+            <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+            <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
+        </div>
+    `;
+    scheduleContainer.appendChild(eventDiv);
+    editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
+    
+    // Update totals immediately after rendering
+    updateTotalAttending(event.id);
+}
+function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
         
-        console.log('Display mode:', displayMode);  // Debug log
-        console.log('Current event:', currentEvent);  // Debug log
-        console.log('Upcoming events:', upcomingEvents);  // Debug log
-
         if (displayMode === 'current' && currentEvent) {
             renderEvent(currentEvent, true);
         } else if (displayMode === 'future') {
@@ -693,51 +685,6 @@ Nasser`);
     window.open(gmailUrl, '_blank');
 }
 
-function composeNonRespondersEmail(eventId) {
-    const event = schedule.find(e => e.id === eventId);
-    if (!event) {
-        console.error(`Event with ID ${eventId} not found`);
-        return;
-    }
-
-    const rsvpLink = `https://www.danvillepokergroup.com/rsvp.html?token=${eventId}`;
-    
-    // Filter non-responders and get their email addresses
-    const nonResponders = members.filter(member => 
-        event.rsvps[member.name] === 'no-response'
-    );
-
-    if (nonResponders.length === 0) {
-        alert('Everyone has responded to this event!');
-        return;
-    }
-
-    // Compose the email addresses string
-    const toEmails = nonResponders.map(member => member.email).join(',');
-
-    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night -  ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
-    const body = encodeURIComponent(`Danville Poker Group,
-
-We still haven't received your RSVP for our upcoming poker night:
-
-Date: ${formatDate(event.date)}
-Time: 7:00 PM
-Location: ${event.location}
-Host: ${event.host}
-
-Your response is important for planning. Please take a moment to RSVP using the link below:
-
-${rsvpLink}
-
-We're looking forward to a great night of poker and hope you can join us!
-
-Best regards,
-Nasser`);
-    
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${subject}&body=${body}`;
-    window.open(gmailUrl, '_blank');
-}
-
 function showPastEventsReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
@@ -904,6 +851,7 @@ function showHostingReport() {
     });
 
     let reportHTML = '<h3 class="report-title">Hosting Report</h3>';
+    reportHTML += '<p><a href="https://www.danvillepokergroup.com/scheduled.html" target="_blank">View Upcoming Schedule</a></p>';
     reportHTML += `<table class="hosting-report">
         <thead>
             <tr>
@@ -992,9 +940,6 @@ function loadEventForEditing() {
         document.getElementById('editEventLocation').value = '';
     }
 }
-window.openHostingSchedule = function() {
-    window.open('https://www.danvillepokergroup.com/scheduled.html', '_blank');
-};
 /*
 function sendSms(phoneNumber, message) {
     fetch('/api/send-sms', {
@@ -1236,10 +1181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editEventHost = document.getElementById('editEventHost');
     const editEventSelect = document.getElementById('editEventSelect');
     const eventDisplaySelector = document.getElementById('eventDisplaySelector');
-    const hostingScheduleBtn = document.querySelector('button[onclick="openHostingSchedule()"]');
-    if (hostingScheduleBtn) {
-        hostingScheduleBtn.addEventListener('click', window.openHostingSchedule);
-    }
+
     if (newEventHost) {
         newEventHost.addEventListener('change', updateHostLocation);
     }
@@ -1317,5 +1259,3 @@ window.showPollResults = showPollResults;
 window.composePollInvitationEmail = composePollInvitationEmail;
 window.composePollResultsEmail = composePollResultsEmail;
 window.deletePoll = deletePoll;
-window.openHostingSchedule = openHostingSchedule;
-window.composeNonRespondersEmail = composeNonRespondersEmail;
