@@ -222,12 +222,16 @@ function renderSchedule() {
     scheduleContainer.innerHTML = '';
     editEventSelect.innerHTML = '<option value="">Select an event</option>';
 
+    // Sort events by date
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const currentDate = new Date();
+    // Filter events to get upcoming events
     const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
+    // Find the current event, which is the first upcoming event that is strictly after the current date
     const currentEvent = upcomingEvents.find(event => new Date(event.date) > currentDate) || upcomingEvents[0];
 
+   
    function renderEvent(event, isCurrent) {
     console.log('Event Date:', event.date);  // Log the date to check what's being passed
     const eventDiv = document.createElement('div');
