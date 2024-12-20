@@ -226,60 +226,71 @@ function renderSchedule() {
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const currentDate = new Date();
-    // Filter events to get upcoming events
-    const upcomingEvents = schedule.filter(event => new Date(event.date) >= currentDate);
-    // Find the current event, which is the first upcoming event that is strictly after the current date
-    const currentEvent = upcomingEvents.find(event => new Date(event.date) > currentDate) || upcomingEvents[0];
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
 
-   
-   function renderEvent(event, isCurrent) {
-    console.log('Event Date:', event.date);  // Log the date to check what's being passed
-    const eventDiv = document.createElement('div');
-    eventDiv.className = 'event-item';
-    eventDiv.innerHTML = `
-        <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-            <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
-            <span class="expand-icon">▼</span>
-        </div>
-        <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
-            <div class="rsvp-details">
-                ${Object.entries(event.rsvps).map(([name, status]) => `
-                    <div class="event-rsvp">
-                        <p>${name}:</p>
-                        <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
-                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                        </select>
-                    </div>
-                `).join('')}
+    // Filter events to get the current month's event and the next month's event
+    const currentMonthEvents = schedule.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+    });
+
+    const nextMonthEvents = schedule.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate.getMonth() === (currentMonth + 1) % 12 && eventDate.getFullYear() === (currentMonth === 11 ? currentYear + 1 : currentYear);
+    });
+
+    const currentEvent = currentMonthEvents[0];
+    const nextEvent = nextMonthEvents[0];
+
+    function renderEvent(event, isCurrent) {
+        const eventDiv = document.createElement('div');
+        eventDiv.className = 'event-item';
+        eventDiv.innerHTML = `
+            <div class="event-header" onclick="toggleEventDetails('${event.id}')">
+                <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
+                <span class="expand-icon">▼</span>
             </div>
-            <div class="rsvp-totals" id="rsvpTotals-${event.id}">
-                <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
-                <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
-                <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
-                <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
+            <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
+                <div class="rsvp-details">
+                    ${Object.entries(event.rsvps).map(([name, status]) => `
+                        <div class="event-rsvp">
+                            <p>${name}:</p>
+                            <select onchange="updateRSVP('${event.id}', '${name}', this.value)" style="color: ${getStatusColor(status)}">
+                                <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                                <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending</option>
+                                <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                                <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                            </select>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="rsvp-totals" id="rsvpTotals-${event.id}">
+                    <p>Total Attending: <span id="totalAttending-${event.id}">0</span></p>
+                    <p>Total Not Attending: <span id="totalNotAttending-${event.id}">0</span></p>
+                    <p>Total No Response: <span id="totalNoResponse-${event.id}">0</span></p>
+                    <p>Total Maybe: <span id="totalMaybe-${event.id}">0</span></p>
+                </div>
+                <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
+                <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
+                <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
             </div>
-            <button onclick="composeInvitationEmail('${event.id}')">Send Invitation</button>
-            <button onclick="composeReminderEmail('${event.id}')">Send Reminder</button>
-            <button onclick="composeFinalConfirmationEmail('${event.id}')">Send Final Confirmation</button>
-        </div>
-    `;
-    scheduleContainer.appendChild(eventDiv);
-    editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
-    
-    // Update totals immediately after rendering
-    updateTotalAttending(event.id);
-}
-function displayEvents() {
+        `;
+        scheduleContainer.appendChild(eventDiv);
+        editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
+        
+        // Update totals immediately after rendering
+        updateTotalAttending(event.id);
+    }
+
+    function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
         
         if (displayMode === 'current' && currentEvent) {
             renderEvent(currentEvent, true);
-        } else if (displayMode === 'future') {
-            upcomingEvents.forEach((event, index) => renderEvent(event, index === 0));
+        } else if (displayMode === 'future' && nextEvent) {
+            renderEvent(nextEvent, false);
         }
     }
 
