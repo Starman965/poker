@@ -226,18 +226,18 @@ function renderSchedule() {
     schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getUTCMonth();
+    const currentYear = currentDate.getUTCFullYear();
 
     // Filter events to get the current month's event and the next month's event
     const currentMonthEvents = schedule.filter(event => {
         const eventDate = new Date(event.date);
-        return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+        return eventDate.getUTCMonth() === currentMonth && eventDate.getUTCFullYear() === currentYear;
     });
 
     const nextMonthEvents = schedule.filter(event => {
         const eventDate = new Date(event.date);
-        return eventDate.getMonth() === (currentMonth + 1) % 12 && eventDate.getFullYear() === (currentMonth === 11 ? currentYear + 1 : currentYear);
+        return eventDate.getUTCMonth() === (currentMonth + 1) % 12 && eventDate.getUTCFullYear() === (currentMonth === 11 ? currentYear + 1 : currentYear);
     });
 
     const currentEvent = currentMonthEvents[0];
@@ -248,7 +248,7 @@ function renderSchedule() {
         eventDiv.className = 'event-item';
         eventDiv.innerHTML = `
             <div class="event-header" onclick="toggleEventDetails('${event.id}')">
-                <h3>${isCurrent ? '<strong>' : ''}${formatDate(event.date)} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
+                <h3>${isCurrent ? '<strong>' : ''}${new Date(event.date).toISOString().split('T')[0]} - ${event.location} (Host: ${event.host})${isCurrent ? '</strong>' : ''}</h3>
                 <span class="expand-icon">▼</span>
             </div>
             <div class="event-details" id="eventDetails-${event.id}" style="display: none;">
@@ -277,7 +277,7 @@ function renderSchedule() {
             </div>
         `;
         scheduleContainer.appendChild(eventDiv);
-        editEventSelect.innerHTML += `<option value="${event.id}">${formatDate(event.date)} - ${event.location} (Host: ${event.host})</option>`;
+        editEventSelect.innerHTML += `<option value="${event.id}">${new Date(event.date).toISOString().split('T')[0]} - ${event.location} (Host: ${event.host})</option>`;
         
         // Update totals immediately after rendering
         updateTotalAttending(event.id);
