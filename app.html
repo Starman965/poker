@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danville Poker Group Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-container">
+            <h1>Danville Poker Group Manager</h1>
+            <button id="signOutButton" class="signout-btn" style="display:none">Sign Out</button>
+        </div>
+  <!-- Main Content -->
+        <div id="adminContent" style="display:none">
+            <!-- Events section -->
+            <div class="card">
+                <div class="section-header" onclick="toggleEventList()">
+                    <h2>Events</h2>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div id="eventListContainer" class="section-content">
+                    <select id="eventDisplaySelector">
+                        <option value="current">Current Event</option>
+                        <option value="future">Future Events</option>
+                    </select>
+                    <div id="scheduleContainer"></div>
+                </div>
+            </div>
+        </div>
+
+  <!-- Polls section -->
+<div class="card">
+    <div class="section-header" onclick="togglePolls()">
+        <h2>Polls</h2>
+        <span class="expand-icon">▼</span>
+    </div>
+    <div id="pollsContainer" class="section-content" style="display: none;">
+        <h3>Polls</h3>
+        <div id="pollsList">
+            <!-- Polls will be rendered here dynamically -->
+        </div>
+
+        <!-- Button to show poll creation form -->
+        <button id="createPollBtn" onclick="showCreatePollForm()">Create New Poll</button>
+        
+        <!-- Poll creation form (hidden by default) -->
+        <div id="createPollForm" style="display: none;">
+            <input type="text" id="pollQuestion" placeholder="Enter poll question">
+            <div id="pollOptions">
+                <input type="text" class="pollOption" placeholder="Option A">
+                <input type="text" class="pollOption" placeholder="Option B">
+            </div>
+
+            <!-- Add option button -->
+            <button id="addPollOptionBtn">Add Poll Option</button>
+
+            <!-- Submit poll button -->
+            <button id="submitPollBtn">Save Poll</button>
+        </div>
+    </div>
+</div>
+   <!-- Memebers section -->
+
+            <div class="card">
+                <div class="section-header" onclick="toggleMemberList()">
+                    <h2>Members (<span id="memberCount">0</span>)</h2>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div id="memberListContainer" class="section-content" style="display: none;">
+                    <div id="membersList" class="members-grid"></div>
+                </div>
+            </div>
+
+            <div class="admin-panel">
+                <h2>Member and Event Manager</h2>
+
+                <div id="addEditMemberCard" class="card">
+                    <h3 id="addEditMemberTitle">Add New Member</h3>
+                    <input type="text" id="newMemberName" placeholder="Name">
+                    <input type="email" id="newMemberEmail" placeholder="Email">
+                    <input type="text" id="newMemberLocation" placeholder="Location">
+                    <button onclick="addMember()">Add Member</button>
+                </div>
+
+                <div class="card">
+                    <h3>Add New Event</h3>
+                    <input type="date" id="newEventDate">
+                    <select id="newEventHost"></select>
+                    <input type="text" id="newEventLocation" placeholder="Location">
+                    <button onclick="addEvent()">Add Event</button>
+                </div>
+
+                <div class="card">
+                    <h3>Edit/Delete Event</h3>
+                    <select id="editEventSelect"></select>
+                    <input type="date" id="editEventDate">
+                    <select id="editEventHost"></select>
+                    <input type="text" id="editEventLocation" placeholder="Location">
+                    <button onclick="saveEventEdits()">Save Edits</button>
+                    <button onclick="deleteEvent()">Delete Event</button>
+                </div>
+
+            <!-- Reports Section -->
+            <div class="card">
+                <div class="section-header">
+                    <h2>Reports</h2>
+                </div>
+                <div id="reportsContainer" class="section-content">
+                    <button onclick="showPastEventsReport()">Past Events Report</button>
+                    <button onclick="showAttendanceReport()">Past 12 Month Attendance</button>
+                    <button onclick="showHostingReport()">Hosting Report</button>
+                    <button onclick="openHostingSchedule()">Hosting Schedule</button>
+                    <div id="reportContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+    
+        // Authorized admin emails
+        const allowedAdmins = ['demandgendave@gmail.com', 'davew102@yahoo.com', 'nasser@gcuniverse.com', 'nasser.gaemi@bigdates.com'];
+    
+        // Show admin content with null checks
+        function showAdminContent() {
+            const adminContent = document.getElementById('adminContent');
+            const signOutButton = document.getElementById('signOutButton');
+            
+            if (adminContent) adminContent.style.display = 'block';
+            if (signOutButton) signOutButton.style.display = 'inline-block';
+        }
+    
+        // Check auth state on page load
+        onAuthStateChanged(auth, (user) => {
+            if (user && allowedAdmins.includes(user.email)) {
+                console.log('Admin session active:', user.email);
+                // Ensure DOM is loaded before showing content
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', showAdminContent);
+                } else {
+                    showAdminContent();
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    
+        // Handle sign-out
+        const signOutButton = document.getElementById('signOutButton');
+        if (signOutButton) {
+            signOutButton.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    console.log('User signed out');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Sign-out error:', error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

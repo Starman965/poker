@@ -15,7 +15,6 @@ import {
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
 const database = getDatabase(app);
 
 let members = [];
@@ -32,12 +31,16 @@ onValue(connectedRef, (snap) => {
 });
 
 function formatDate(dateString) {
-    const dateParts = dateString.split('-');  // Split 'YYYY-MM-DD' to avoid time zone shifts
-    const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);  // Treat the date as local
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+    const dateParts = dateString.split('-');
+    const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        timeZone: 'America/Los_Angeles'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
 }
-
 
 function loadDataFromFirebase() {
     const dbRef = ref(database, '/');
@@ -275,15 +278,22 @@ function renderSchedule() {
     function displayEvents() {
         scheduleContainer.innerHTML = '';
         const displayMode = eventDisplaySelector.value;
+        const today = new Date();
         
-        console.log('Display mode:', displayMode);  // Debug log
-        console.log('Current event:', currentEvent);  // Debug log
-        console.log('Upcoming events:', upcomingEvents);  // Debug log
-
-        if (displayMode === 'current' && currentEvent) {
-            renderEvent(currentEvent, true);
+        console.log('Display mode:', displayMode);
+    
+        if (displayMode === 'current') {
+            // Filter events for current month
+            const currentMonthEvents = schedule.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getMonth() === today.getMonth() && 
+                       eventDate.getFullYear() === today.getFullYear();
+            }).sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+            console.log('Current month events:', currentMonthEvents);
+            currentMonthEvents.forEach(event => renderEvent(event, true));
         } else if (displayMode === 'future') {
-            upcomingEvents.forEach((event, index) => renderEvent(event, index === 0));
+            upcomingEvents.forEach((event, index) => renderEvent(event, false));
         }
     }
 
@@ -772,44 +782,90 @@ function showPastEventsReport() {
 
     reportContainer.innerHTML = reportHTML;
 }
-function showAttendanceReport() {
-    const reportContainer = document.getElementById('reportContainer');
-    if (!reportContainer) return;
-    const currentDate = new Date();
-    const oneYearAgo = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
+// Function to fetch event data from Firebase
+async function fetchEventData() {
+    try {
+        const eventsRef = ref(database, 'events');
+        const snapshot = await get(eventsRef);
+        if (snapshot.exists()) {
+            console.log("Event data fetched successfully:", snapshot.val());
+            return snapshot.val();
+        } else {
+            console.log("No event data available.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching event data:", error);
+        return null;
+    }
+}
 
-    const recentEvents = schedule.filter(event => new Date(event.date) >= oneYearAgo && new Date(event.date) <= currentDate);
+// Function to compute past 12 month attendance report
+async function showAttendanceReport() {
+    try {
+        // Use 'schedule' instead of 'events' since that's what we use elsewhere
+        const attendance = {};
+        
+        // Get the date 12 months ago from today
+        const today = new Date();
+        const twelveMonthsAgo = new Date(today);
+        twelveMonthsAgo.setMonth(today.getMonth() - 12);
 
-    const attendanceCounts = {};
-    members.forEach(member => attendanceCounts[member.name] = 0);
+        console.log('Fetching attendance data...'); // Debug log
+        console.log('Current schedule:', schedule); // Debug log
 
-    recentEvents.forEach(event => {
-        Object.entries(event.rsvps).forEach(([member, status]) => {
-            if (status === 'attending') {
-                attendanceCounts[member]++;
+        // Filter events for the past 12 months from our schedule array
+        const recentEvents = schedule.filter(event => {
+            const eventDate = new Date(event.date);
+            return eventDate >= twelveMonthsAgo && eventDate <= today;
+        });
+
+        console.log('Recent events:', recentEvents); // Debug log
+
+        // Aggregate attendance data
+        recentEvents.forEach(event => {
+            if (event.rsvps) {
+                Object.entries(event.rsvps).forEach(([member, status]) => {
+                    if (status === 'attending') {
+                        if (!attendance[member]) {
+                            attendance[member] = 0;
+                        }
+                        attendance[member]++;
+                    }
+                });
             }
         });
-    });
 
-  let reportHTML = '<h3 class="report-title">2024 Attendance Report</h3>';
-  reportHTML += '<table class="attendance-report"><thead><tr><th>Member</th><th>Events Attended</th></tr></thead><tbody>';
+        // Sort by attendance count (highest to lowest)
+        const sortedAttendance = Object.entries(attendance)
+            .sort(([,a], [,b]) => b - a);
 
-    // Sort the members alphabetically by name
-    const sortedMembers = Object.keys(attendanceCounts).sort((a, b) => a.localeCompare(b));
-
-    sortedMembers.forEach(member => {
-        const count = attendanceCounts[member];
-        const percentage = (count / recentEvents.length * 100).toFixed(2);
-        reportHTML += `
-            <tr>
-                <td>${member}</td>
-                <td>${count} / ${percentage}%</td>
-            </tr>
+        // Display the results
+        const reportContainer = document.getElementById('reportContainer');
+        reportContainer.innerHTML = `
+            <h3>Past 12 Month Attendance Report</h3>
+            <table class="attendance-report">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Events Attended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sortedAttendance.map(([member, count]) => `
+                        <tr>
+                            <td>${member}</td>
+                            <td>${count}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         `;
-    });
 
-    reportHTML += '</tbody></table>';
-    reportContainer.innerHTML = reportHTML;
+    } catch (error) {
+        console.error('Error generating attendance report:', error);
+        alert('Error generating attendance report. Please try again.');
+    }
 }
 function editPastEventAttendees(eventId) {
     const event = schedule.find(e => e.id === eventId);
@@ -880,16 +936,16 @@ function showHostingReport() {
     const reportContainer = document.getElementById('reportContainer');
     if (!reportContainer) return;
 
-    const currentYear = new Date().getFullYear();
-    const yearsToShow = [currentYear, currentYear + 1, currentYear + 2];
+    const yearsToShow = [2024, 2025, 2026, 2027];
 
     const hostingCounts = {};
     members.forEach(member => {
         hostingCounts[member.name] = {
             total: 0,
-            [currentYear]: 0,
-            [currentYear + 1]: 0,
-            [currentYear + 2]: 0
+            2024: 0,
+            2025: 0,
+            2026: 0,
+            2027: 0
         };
     });
 
@@ -909,9 +965,10 @@ function showHostingReport() {
             <tr>
                 <th>Member</th>
                 <th>Total</th>
-                <th>${currentYear}</th>
-                <th>${currentYear + 1}</th>
-                <th>${currentYear + 2}</th>
+                <th>2024</th>
+                <th>2025</th>
+                <th>2026</th>
+                <th>2027</th>
             </tr>
         </thead>
         <tbody>`;
@@ -923,9 +980,10 @@ function showHostingReport() {
                 <tr class="${index % 2 === 0 ? 'even-row' : 'odd-row'}">
                     <td>${member}</td>
                     <td>${years.total}</td>
-                    <td>${years[currentYear]}</td>
-                    <td>${years[currentYear + 1]}</td>
-                    <td>${years[currentYear + 2]}</td>
+                    <td>${years[2024]}</td>
+                    <td>${years[2025]}</td>
+                    <td>${years[2026]}</td>
+                    <td>${years[2027]}</td>
                 </tr>
             `;
         });
@@ -995,33 +1053,6 @@ function loadEventForEditing() {
 window.openHostingSchedule = function() {
     window.open('https://www.danvillepokergroup.com/scheduled.html', '_blank');
 };
-/*
-function sendSms(phoneNumber, message) {
-    fetch('/api/send-sms', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            phoneNumber: phoneNumber,  // Example: '+1234567890'
-            message: message           // Example: 'Poker night reminder!'
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('SMS sent successfully:', data.messageSid);
-            alert('SMS sent successfully!');
-        } else {
-            console.error('Failed to send SMS:', data.error);
-            alert('Failed to send SMS.');
-        }
-    })
-    .catch(error => {
-        console.error('Error sending SMS:', error);
-    });
-}
-*/
 
 // New Functions for Polls
 let polls = [];
