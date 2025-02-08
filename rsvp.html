@@ -23,15 +23,19 @@
         .logo {
             display: block;
             margin: 0 auto 20px;
-            max-width: 150px;
+            max-width: 120px;
         }
         .card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px; /* Reduced from 15px */
+        margin-bottom: 15px; /* Reduced from 20px */
+    }
+    .card p {
+        margin: 5px 0; /* Reduced space between paragraphs */
+        line-height: 1.4; /* Tightened line height */
+    }
         select, button {
             width: 100%;
             padding: 15px;  /* Increased from 10px */
@@ -91,10 +95,7 @@
                     <option value="attending">Attending</option>
                     <option value="not-attending">Not Attending</option>
                     <option value="maybe">Maybe</option>
-                </select>
-                
-                <p>By submitting this form, you consent to receive SMS confirmations of your RSVP.</p>
-                
+                </select>                
                 <button id="submitRSVP">Submit RSVP</button>
             </div>
         </div>
