@@ -16,6 +16,10 @@ body {
     color: var(--text-color);
 }
 
+body {
+    font-family: "Lato", sans-serif;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -371,4 +375,90 @@ input[type="text"], input[type="email"], input[type="date"], select {
 
 .signout-btn:hover {
     background-color: #d32f2f;
+}
+
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidebar a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #f1f1f1;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.openbtn {
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #111;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+}
+
+.openbtn:hover {
+    background-color: #444;
+}
+
+#main {
+    transition: margin-left .5s;
+    padding: 16px;
+}
+
+.tab-content {
+    display: none;
+}
+
+/* Report Card Styles */
+.report-card {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.report-card h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.report-card button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.report-card button:hover {
+    background-color: #3a7bc8;
 }
