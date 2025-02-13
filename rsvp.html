@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -109,7 +110,10 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
+        
+        // Google Sheets API URL
+        const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxEDZp0cXLQze00OH4mpLbCVQANLd2EHE3DR7snv3NxVBgLiiFfRznwhSrNQAQo1PRL/exec';
+        
         // Initialize Realtime Database and get a reference to the service
         const database = firebase.database();
 
@@ -223,29 +227,57 @@
         });
 
         // Handle RSVP submission
-        document.getElementById('submitRSVP').addEventListener('click', function() {
-            const memberSelect = document.getElementById('memberSelect');
-            const rsvpStatus = document.getElementById('rsvpStatus');
-            
-            if (memberSelect.value === "" || rsvpStatus.value === "") {
-                alert('Please select your name and RSVP status.');
-                return;
-            }
+        document.getElementById('submitRSVP').addEventListener('click', async function() {
+    const memberSelect = document.getElementById('memberSelect');
+    const rsvpStatus = document.getElementById('rsvpStatus');
+    
+    if (memberSelect.value === "" || rsvpStatus.value === "") {
+        alert('Please select your name and RSVP status.');
+        return;
+    }
 
-            const selectedMember = members[memberSelect.value];
-            const updatedRsvp = {
-                [selectedMember.name]: rsvpStatus.value
-            };
+    const selectedMember = members[memberSelect.value];
+    const updatedRsvp = {
+        [selectedMember.name]: rsvpStatus.value
+    };
 
-            database.ref(`/schedule/${eventId}/rsvps`).update(updatedRsvp).then(() => {
-                console.log('RSVP submitted successfully');
-                // Redirect to the confirmation page
-                window.location.href = `confirmation.html?token=${eventId}&name=${encodeURIComponent(selectedMember.name)}&status=${rsvpStatus.value}`;
-            }).catch((error) => {
-                console.error('Error updating RSVP:', error);
-                alert('There was an error submitting your RSVP. Please try again.');
-            });
+    try {
+        // Update Firebase
+        await database.ref(`/schedule/${eventId}/rsvps`).update(updatedRsvp);
+
+        // Send to Google Sheets
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                eventDate: document.getElementById('eventDate').textContent,
+                memberName: selectedMember.name,
+                rsvpStatus: rsvpStatus.value,
+                eventHost: document.getElementById('eventHost').textContent,
+                eventLocation: document.getElementById('eventLocation').textContent
+            })
         });
+
+        console.log('RSVP submitted successfully to both Firebase and Google Sheets');
+        
+        // Redirect to confirmation page
+        window.location.href = `confirmation.html?token=${eventId}&name=${encodeURIComponent(selectedMember.name)}&status=${rsvpStatus.value}`;
+    } catch (error) {
+        console.error('Error submitting RSVP:', error);
+        alert('There was an error submitting your RSVP. Please try again.');
+    }
+});
+
+// Add this function to validate responses
+function validateResponse(response) {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response;
+}
     </script>
 </body>
 </html>
