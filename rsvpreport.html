@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,92 +99,120 @@
         }
 
         async function loadCurrentMonthEvents() {
-            const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
 
-            try {
-                const scheduleSnapshot = await database.ref('/schedule').once('value');
-                const scheduleData = scheduleSnapshot.val();
-                const eventsContainer = document.getElementById('events-container');
+        try {
+            // First fetch all members
+            const membersSnapshot = await database.ref('/members').once('value');
+            const membersData = membersSnapshot.val();
+            const allMembers = Object.values(membersData).map(member => member.name);
 
-                for (const [eventId, event] of Object.entries(scheduleData)) {
-                    const eventDate = new Date(event.date.split(' ')[0]);
-                    if (eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear) {
-                        const eventCard = createEventCard(event);
-                        eventsContainer.appendChild(eventCard);
-                    }
+            // Then fetch schedule
+            const scheduleSnapshot = await database.ref('/schedule').once('value');
+            const scheduleData = scheduleSnapshot.val();
+            const eventsContainer = document.getElementById('events-container');
+
+            for (const [eventId, event] of Object.entries(scheduleData)) {
+                const eventDate = new Date(event.date.split(' ')[0]);
+                if (eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear) {
+                    const eventCard = createEventCard(event, allMembers);
+                    eventsContainer.appendChild(eventCard);
                 }
-            } catch (error) {
-                console.error('Error loading events:', error);
             }
+        } catch (error) {
+            console.error('Error loading events:', error);
         }
+    }
 
-        function createEventCard(event) {
-            const card = document.createElement('div');
-            card.className = 'event-card';
+    function createEventCard(event, allMembers) {
+        const card = document.createElement('div');
+        card.className = 'event-card';
 
-            const dateElement = document.createElement('div');
-            dateElement.className = 'event-date';
-            dateElement.textContent = formatDate(event.date);
+        const dateElement = document.createElement('div');
+        dateElement.className = 'event-date';
+        dateElement.textContent = formatDate(event.date);
 
-            const hostElement = document.createElement('div');
-            hostElement.className = 'event-host';
-            hostElement.textContent = `Host: ${event.host}`;
+        const hostElement = document.createElement('div');
+        hostElement.className = 'event-host';
+        hostElement.textContent = `Host: ${event.host}`;
 
-            const rsvpLists = createRsvpLists(event.rsvps || {});
+        const rsvpLists = createRsvpLists(event.rsvps || {}, allMembers);
 
-            card.appendChild(dateElement);
-            card.appendChild(hostElement);
-            card.appendChild(rsvpLists);
+        card.appendChild(dateElement);
+        card.appendChild(hostElement);
+        card.appendChild(rsvpLists);
 
-            return card;
-        }
+        return card;
+    }
 
-        function createRsvpLists(rsvps) {
-            const container = document.createElement('div');
-            container.className = 'rsvp-list';
+    function createRsvpLists(rsvps, allMembers) {
+        const container = document.createElement('div');
+        container.className = 'rsvp-list';
 
-            const categories = {
-                attending: { title: 'Attending', class: 'attending' },
-                'not-attending': { title: 'Not Attending', class: 'not-attending' },
-                maybe: { title: 'Maybe', class: 'no-response' }
-            };
+        // Create sets for each RSVP status
+        const attending = [];
+        const notAttending = [];
+        const maybe = [];
+        const noResponse = [];
 
-            for (const [status, config] of Object.entries(categories)) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'rsvp-category';
+        // Sort members into appropriate lists
+        allMembers.forEach(memberName => {
+            const status = rsvps[memberName];
+            switch(status) {
+                case 'attending':
+                    attending.push(memberName);
+                    break;
+                case 'not-attending':
+                    notAttending.push(memberName);
+                    break;
+                case 'maybe':
+                    maybe.push(memberName);
+                    break;
+                default:
+                    noResponse.push(memberName);
+            }
+        });
 
-                const title = document.createElement('h3');
-                title.className = config.class;
-                title.textContent = config.title;
+        // Create sections for each status
+        const categories = [
+            { title: 'Attending', class: 'attending', members: attending },
+            { title: 'Not Attending', class: 'not-attending', members: notAttending },
+            { title: 'Maybe', class: 'no-response', members: maybe },
+            { title: 'No Response', class: 'no-response', members: noResponse }
+        ];
 
-                const memberList = document.createElement('ul');
-                memberList.className = 'member-list';
+        categories.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'rsvp-category';
 
-                const members = Object.entries(rsvps)
-                    .filter(([_, memberStatus]) => memberStatus === status)
-                    .map(([name]) => name);
+            const title = document.createElement('h3');
+            title.className = category.class;
+            title.textContent = `${category.title}: ${category.members.length}`;
 
-                if (members.length > 0) {
-                    members.forEach(name => {
-                        const li = document.createElement('li');
-                        li.textContent = name;
-                        memberList.appendChild(li);
-                    });
-                } else {
+            const memberList = document.createElement('ul');
+            memberList.className = 'member-list';
+
+            if (category.members.length > 0) {
+                category.members.sort().forEach(name => {
                     const li = document.createElement('li');
-                    li.textContent = 'None';
+                    li.textContent = name;
                     memberList.appendChild(li);
-                }
-
-                categoryDiv.appendChild(title);
-                categoryDiv.appendChild(memberList);
-                container.appendChild(categoryDiv);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'None';
+                memberList.appendChild(li);
             }
 
-            return container;
-        }
+            categoryDiv.appendChild(title);
+            categoryDiv.appendChild(memberList);
+            container.appendChild(categoryDiv);
+        });
+
+        return container;
+    }
 
         // Load events when the page loads
         window.addEventListener('load', loadCurrentMonthEvents);
