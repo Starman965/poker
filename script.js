@@ -43,19 +43,24 @@ function formatDate(dateString) {
 }
 
 function loadDataFromFirebase() {
-    const dbRef = ref(database, '/');
-    get(dbRef).then((snapshot) => {
-        const data = snapshot.val();
-        
-        if (data && data.members) {
-            members = Object.values(data.members);
+    Promise.all([
+        get(ref(database, 'members')),
+        get(ref(database, 'schedule')),
+        get(ref(database, 'polls'))
+    ]).then(([membersSnapshot, scheduleSnapshot, pollsSnapshot]) => {
+        // Load members
+        const membersData = membersSnapshot.val();
+        if (membersData) {
+            members = Object.values(membersData);
         } else {
             members = [];
             console.warn('No members data found or invalid structure');
         }
         
-        if (data && data.schedule) {
-            schedule = Object.entries(data.schedule).map(([key, value]) => ({
+        // Load schedule
+        const scheduleData = scheduleSnapshot.val();
+        if (scheduleData) {
+            schedule = Object.entries(scheduleData).map(([key, value]) => ({
                 id: key,
                 ...value
             }));
@@ -64,8 +69,10 @@ function loadDataFromFirebase() {
             console.warn('No schedule data found or invalid structure');
         }
         
-        if (data && data.polls) {
-            polls = Object.entries(data.polls).map(([key, value]) => ({
+        // Load polls
+        const pollsData = pollsSnapshot.val();
+        if (pollsData) {
+            polls = Object.entries(pollsData).map(([key, value]) => ({
                 id: key,
                 ...value
             }));
