@@ -121,6 +121,7 @@ function renderMembers() {
             <div class="member-info">
                 <div class="member-name">${member.name}</div>
                 <div class="member-email">${member.email}</div>
+                <div class="member-phone">${member.phoneNumber || 'No phone'}</div>
                 <div class="member-location">${member.location}</div>
             </div>
             <div class="member-actions">
@@ -135,10 +136,11 @@ function renderMembers() {
 function addMember() {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
+    const phoneNumber = document.getElementById('newMemberPhone').value.trim();
     const location = document.getElementById('newMemberLocation').value.trim();
 
     if (name && email && location) {
-        const newMember = { name, email, location };
+        const newMember = { name, email, phoneNumber, location };
         const membersRef = ref(database, 'members');
         
         // Get the current number of members to use as the new index
@@ -157,6 +159,7 @@ function addMember() {
         // Clear input fields
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
+        document.getElementById('newMemberPhone').value = '';
         document.getElementById('newMemberLocation').value = '';
     } else {
         alert('Please fill in all fields for the new member.');
@@ -166,6 +169,7 @@ function startEditMember(index) {
     const member = members[index];
     document.getElementById('newMemberName').value = member.name;
     document.getElementById('newMemberEmail').value = member.email;
+    document.getElementById('newMemberPhone').value = member.phoneNumber || '';
     document.getElementById('newMemberLocation').value = member.location;
     
     const addButton = document.querySelector('button[onclick="addMember()"]');
@@ -180,10 +184,11 @@ function startEditMember(index) {
 function updateMember(index) {
     const name = document.getElementById('newMemberName').value.trim();
     const email = document.getElementById('newMemberEmail').value.trim();
+    const phoneNumber = document.getElementById('newMemberPhone').value.trim();
     const location = document.getElementById('newMemberLocation').value.trim();
 
     if (name && email && location) {
-        const updatedMember = { name, email, location };
+        const updatedMember = { name, email, phoneNumber, location };
         update(ref(database, `members/${index}`), updatedMember)
             .then(() => {
                 console.log('Member updated successfully');
@@ -194,6 +199,7 @@ function updateMember(index) {
         // Reset the form
         document.getElementById('newMemberName').value = '';
         document.getElementById('newMemberEmail').value = '';
+        document.getElementById('newMemberPhone').value = '';
         document.getElementById('newMemberLocation').value = '';
         const addButton = document.querySelector('button[onclick="addMember()"]');
         addButton.textContent = 'Add Member';

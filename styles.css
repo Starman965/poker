@@ -71,6 +71,12 @@ h1, h2, h3 {
     color: #666;
 }
 
+.member-phone {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 500;
+}
+
 .member-actions {
     display: flex;
     justify-content: flex-start;
