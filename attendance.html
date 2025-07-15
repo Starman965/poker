@@ -38,20 +38,30 @@
         const database = getDatabase(app);
 
         function calculateAttendance() {
-            const dbRef = ref(database);
-            onValue(dbRef, (snapshot) => {
-                const data = snapshot.val();
+            // Read from specific paths instead of root
+            Promise.all([
+                new Promise((resolve) => {
+                    onValue(ref(database, 'schedule'), (snapshot) => {
+                        resolve(snapshot.val() || {});
+                    });
+                }),
+                new Promise((resolve) => {
+                    onValue(ref(database, 'members'), (snapshot) => {
+                        resolve(snapshot.val() || {});
+                    });
+                })
+            ]).then(([scheduleData, membersData]) => {
                 const currentDate = new Date();
                 const oneYearAgo = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
 
                 // Filter events from the past year
-                const recentEvents = Object.values(data.schedule || {}).filter(event => 
+                const recentEvents = Object.values(scheduleData).filter(event => 
                     new Date(event.date) >= oneYearAgo && new Date(event.date) <= currentDate
                 );
 
                 // Calculate attendance for each member
                 const attendanceCounts = {};
-                Object.values(data.members || {}).forEach(member => {
+                Object.values(membersData).forEach(member => {
                     attendanceCounts[member.name] = {
                         attended: 0,
                         total: recentEvents.length
@@ -111,6 +121,9 @@
 
                 tableHTML += '</tbody></table>';
                 reportContainer.innerHTML = tableHTML;
+            }).catch((error) => {
+                console.error('Error loading attendance data:', error);
+                document.getElementById('attendanceReport').innerHTML = '<p>Error loading attendance data. Please try again later.</p>';
             });
         }
 
