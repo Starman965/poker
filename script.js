@@ -31,8 +31,13 @@ onValue(connectedRef, (snap) => {
 });
 
 function formatDate(dateString) {
-    const dateParts = dateString.split('-');
-    const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+    // Handle date string format "YYYY-MM-DD" or "YYYY-MM-DD HH:mm"
+    const [datePart] = dateString.split(' ');
+    const dateParts = datePart.split('-');
+    
+    // Create date at noon to avoid timezone issues
+    const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], 12, 0, 0);
+    
     const options = { 
         year: 'numeric', 
         month: 'long', 
@@ -134,10 +139,20 @@ function renderMembers() {
     });
 }
 function addMember() {
-    const name = document.getElementById('newMemberName').value.trim();
-    const email = document.getElementById('newMemberEmail').value.trim();
-    const phoneNumber = document.getElementById('newMemberPhone').value.trim();
-    const location = document.getElementById('newMemberLocation').value.trim();
+    const nameEl = document.getElementById('newMemberName');
+    const emailEl = document.getElementById('newMemberEmail');
+    const phoneEl = document.getElementById('newMemberPhone');
+    const locationEl = document.getElementById('newMemberLocation');
+
+    if (!phoneEl) {
+        alert('Error: Phone input field not found. Please refresh the page and try again.');
+        return;
+    }
+
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim();
+    const phoneNumber = phoneEl.value.trim();
+    const location = locationEl.value.trim();
 
     if (name && email && location) {
         const newMember = { name, email, phoneNumber, location };
@@ -153,7 +168,10 @@ function addMember() {
                     console.log('Member added successfully');
                     loadDataFromFirebase(); // Reload data to reflect changes
                 })
-                .catch((error) => console.error('Error adding member:', error));
+                .catch((error) => {
+                    console.error('Error adding member:', error);
+                    alert('Error adding member: ' + error.message);
+                });
         }).catch((error) => console.error('Error getting member count:', error));
 
         // Clear input fields
@@ -194,7 +212,10 @@ function updateMember(index) {
                 console.log('Member updated successfully');
                 loadDataFromFirebase(); // Reload data to reflect changes
             })
-            .catch((error) => console.error('Error updating member:', error));
+            .catch((error) => {
+                console.error('Error updating member:', error);
+                alert('Error updating member: ' + error.message);
+            });
 
         // Reset the form
         document.getElementById('newMemberName').value = '';
@@ -250,7 +271,6 @@ function renderSchedule() {
     });
 
     function renderEvent(event, isCurrent) {
-        console.log('Rendering event:', event);  // Debug log
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item';
         eventDiv.innerHTML = `
