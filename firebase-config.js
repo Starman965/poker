@@ -4,7 +4,7 @@ const firebaseConfig = {
     authDomain: "poker-a2e1c.firebaseapp.com",
     databaseURL: "https://poker-a2e1c-default-rtdb.firebaseio.com",
     projectId: "poker-a2e1c",
-    storageBucket: "poker-a2e1c.appspot.com",
+    storageBucket: "poker-a2e1c.firebasestorage.app",
     messagingSenderId: "813172723871",
     appId: "1:813172723871:web:8595f1cb0ffdecd4a5d2aa",
     measurementId: "G-NSL5SLKE5H"
