@@ -708,6 +708,28 @@ body {
     font-size: 0.95rem;
 }
 
+.two-column-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.two-column-list ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.two-column-list li {
+    margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .two-column-list {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
 /* Poker Bylaws */
 .bylaws-container {
     max-width: 900px;
