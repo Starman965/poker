@@ -1014,13 +1014,20 @@ async function loadAdminGallery() {
             item.innerHTML = `
                 <img src="${photo.url}" alt="${photo.albumName}" loading="lazy">
                 <div class="gallery-item-overlay">
-                    <p><strong>${photo.albumName}</strong></p>
+                    <p><strong id="albumName-${photo.id}">${photo.albumName}</strong></p>
                     <p>${new Date(photo.uploadedAt).toLocaleDateString()}</p>
-                    <button class="btn btn-danger btn-sm" 
-                            onclick="deletePhoto('${photo.id}', '${photo.storagePath}')" 
-                            style="margin-top: 10px;">
-                        Delete
-                    </button>
+                    <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary btn-sm" 
+                                onclick="editAlbumName('${photo.id}', '${photo.albumName.replace(/'/g, "\\'")}')" 
+                                style="flex: 1;">
+                            Edit Name
+                        </button>
+                        <button class="btn btn-danger btn-sm" 
+                                onclick="deletePhoto('${photo.id}', '${photo.storagePath}')" 
+                                style="flex: 1;">
+                            Delete
+                        </button>
+                    </div>
                 </div>
             `;
             
@@ -1134,6 +1141,37 @@ async function uploadPhotos() {
         setTimeout(() => {
             document.body.removeChild(progressDiv);
         }, 5000);
+    }
+}
+
+async function editAlbumName(photoId, currentName) {
+    const newName = prompt('Edit Album Name:', currentName);
+    
+    if (newName === null || newName.trim() === '') {
+        return; // User cancelled or entered empty string
+    }
+    
+    if (newName === currentName) {
+        return; // No change
+    }
+    
+    try {
+        // Update in Database
+        await database.ref(`gallery/${photoId}`).update({
+            albumName: newName.trim()
+        });
+        
+        // Update the display immediately
+        const albumNameElement = document.getElementById(`albumName-${photoId}`);
+        if (albumNameElement) {
+            albumNameElement.textContent = newName.trim();
+        }
+        
+        alert('Album name updated successfully!');
+        
+    } catch (error) {
+        console.error('Error updating album name:', error);
+        alert('Error updating album name: ' + error.message);
     }
 }
 
