@@ -513,10 +513,14 @@ function setupRSVPPage() {
         eventSelect.appendChild(option);
     });
     
-    // Auto-select event if provided in URL
+    // Auto-select event: from URL token, or default to next upcoming event
     if (eventIdFromUrl && upcomingEvents.find(e => e.id === eventIdFromUrl)) {
+        // Event from URL token
         eventSelect.value = eventIdFromUrl;
-        // Trigger change event to show event details
+        eventSelect.dispatchEvent(new Event('change'));
+    } else if (upcomingEvents.length > 0) {
+        // Default to next upcoming event
+        eventSelect.value = upcomingEvents[0].id;
         eventSelect.dispatchEvent(new Event('change'));
     }
     
