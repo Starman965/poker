@@ -943,6 +943,9 @@ function backToReports() {
 
 // ==================== GALLERY ====================
 
+let galleryPhotos = [];
+let currentPhotoIndex = 0;
+
 async function loadGallery() {
     const container = document.getElementById('galleryGrid');
     container.innerHTML = '<div class="loading">Loading photos...</div>';
@@ -957,12 +960,12 @@ async function loadGallery() {
         }
         
         container.innerHTML = '';
-        const photos = Object.entries(photosData).map(([id, data]) => ({ id, ...data }));
+        galleryPhotos = Object.entries(photosData).map(([id, data]) => ({ id, ...data }));
         
         // Sort by upload date (newest first)
-        photos.sort((a, b) => b.uploadedAt - a.uploadedAt);
+        galleryPhotos.sort((a, b) => b.uploadedAt - a.uploadedAt);
         
-        photos.forEach(photo => {
+        galleryPhotos.forEach((photo, index) => {
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.innerHTML = `
@@ -973,9 +976,9 @@ async function loadGallery() {
                 </div>
             `;
             
-            // Click to view full size
+            // Click to view in lightbox
             item.addEventListener('click', () => {
-                window.open(photo.url, '_blank');
+                openLightbox(index);
             });
             
             container.appendChild(item);
@@ -984,6 +987,87 @@ async function loadGallery() {
     } catch (error) {
         console.error('Error loading gallery:', error);
         container.innerHTML = '<p class="text-muted">Error loading photos. Please try again later.</p>';
+    }
+}
+
+function openLightbox(index) {
+    currentPhotoIndex = index;
+    const photo = galleryPhotos[currentPhotoIndex];
+    
+    // Create lightbox if it doesn't exist
+    let lightbox = document.getElementById('photoLightbox');
+    if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'photoLightbox';
+        lightbox.className = 'lightbox';
+        lightbox.innerHTML = `
+            <div class="lightbox-content">
+                <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+                <button class="lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</button>
+                <button class="lightbox-next" onclick="navigateLightbox(1)">&#10095;</button>
+                <img id="lightboxImage" src="" alt="">
+                <div class="lightbox-info">
+                    <p id="lightboxAlbum"></p>
+                    <p id="lightboxDate"></p>
+                    <p id="lightboxCounter"></p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(lightbox);
+        
+        // Close on background click
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', handleLightboxKeyboard);
+    }
+    
+    updateLightboxImage();
+    lightbox.style.display = 'flex';
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('photoLightbox');
+    if (lightbox) {
+        lightbox.style.display = 'none';
+    }
+}
+
+function navigateLightbox(direction) {
+    currentPhotoIndex += direction;
+    
+    // Loop around
+    if (currentPhotoIndex < 0) {
+        currentPhotoIndex = galleryPhotos.length - 1;
+    } else if (currentPhotoIndex >= galleryPhotos.length) {
+        currentPhotoIndex = 0;
+    }
+    
+    updateLightboxImage();
+}
+
+function updateLightboxImage() {
+    const photo = galleryPhotos[currentPhotoIndex];
+    document.getElementById('lightboxImage').src = photo.url;
+    document.getElementById('lightboxAlbum').innerHTML = `<strong>${photo.albumName}</strong>`;
+    document.getElementById('lightboxDate').textContent = new Date(photo.uploadedAt).toLocaleDateString();
+    document.getElementById('lightboxCounter').textContent = `${currentPhotoIndex + 1} of ${galleryPhotos.length}`;
+}
+
+function handleLightboxKeyboard(e) {
+    const lightbox = document.getElementById('photoLightbox');
+    if (!lightbox || lightbox.style.display === 'none') return;
+    
+    if (e.key === 'Escape') {
+        closeLightbox();
+    } else if (e.key === 'ArrowLeft') {
+        navigateLightbox(-1);
+    } else if (e.key === 'ArrowRight') {
+        navigateLightbox(1);
     }
 }
 
