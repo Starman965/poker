@@ -10,16 +10,24 @@ let editingMemberIndex = null;
 document.addEventListener('DOMContentLoaded', () => {
     initializeAuth();
     initializeNavigation();
-    loadData();
     
     // Check for event parameter and navigate to RSVP page if present
     const urlParams = new URLSearchParams(window.location.search);
     const eventIdFromUrl = urlParams.get('event');
-    if (eventIdFromUrl && window.location.hash === '#rsvp') {
-        // Navigate to RSVP page after data loads
-        setTimeout(() => {
-            navigateToPage('rsvp');
-        }, 500); // Small delay to ensure data is loaded
+    
+    if (eventIdFromUrl) {
+        // Load data first, then navigate to RSVP
+        loadData().then(() => {
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+                navigateToPage('rsvp');
+                // Re-run setupRSVPPage to ensure event is selected
+                setupRSVPPage();
+            }, 100);
+        });
+    } else {
+        // Normal page load
+        loadData();
     }
 });
 
