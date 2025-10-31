@@ -513,17 +513,6 @@ function setupRSVPPage() {
         eventSelect.appendChild(option);
     });
     
-    // Auto-select event: from URL token, or default to next upcoming event
-    if (eventIdFromUrl && upcomingEvents.find(e => e.id === eventIdFromUrl)) {
-        // Event from URL token
-        eventSelect.value = eventIdFromUrl;
-        eventSelect.dispatchEvent(new Event('change'));
-    } else if (upcomingEvents.length > 0) {
-        // Default to next upcoming event
-        eventSelect.value = upcomingEvents[0].id;
-        eventSelect.dispatchEvent(new Event('change'));
-    }
-    
     // Populate member dropdown
     memberSelect.innerHTML = '<option value="">Select your name...</option>';
     members.forEach((member, index) => {
@@ -533,7 +522,7 @@ function setupRSVPPage() {
         memberSelect.appendChild(option);
     });
     
-    // Event selection handler
+    // Event selection handler (must be attached before triggering)
     eventSelect.addEventListener('change', function() {
         const eventDetails = document.getElementById('rsvpEventDetails');
         if (this.value) {
@@ -546,6 +535,17 @@ function setupRSVPPage() {
             eventDetails.style.display = 'none';
         }
     });
+    
+    // Auto-select event: from URL token, or default to next upcoming event
+    if (eventIdFromUrl && upcomingEvents.find(e => e.id === eventIdFromUrl)) {
+        // Event from URL token
+        eventSelect.value = eventIdFromUrl;
+        eventSelect.dispatchEvent(new Event('change'));
+    } else if (upcomingEvents.length > 0) {
+        // Default to next upcoming event
+        eventSelect.value = upcomingEvents[0].id;
+        eventSelect.dispatchEvent(new Event('change'));
+    }
     
     // Member selection handler
     memberSelect.addEventListener('change', function() {
