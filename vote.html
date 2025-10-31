@@ -3,26 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danville Poker Group Poll</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Vote - Danville Poker Group</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            display: block;
+            border-radius: 50%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .poll-question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .member-select-container {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .member-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .member-image img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .options-container {
+            display: none;
+            margin: 30px 0;
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .option-button:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .option-button.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: none;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #060;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Danville Poker Group Poll</h1>
-        <div id="pollContainer" class="card">
-            <h2 id="pollQuestion"></h2>
-            <select id="memberSelect">
-                <option value="">Select Your Name</option>
-                <!-- Member options will be populated dynamically -->
-            </select>
-            
-            <img id="memberImage" src="" alt="Member Image" style="display: none;">
-            <div id="pollOptions"></div>
-            <button>Submit Vote</button>
+        <img src="assets/images/dpg.png" alt="DPG Logo" class="logo">
+        
+        <div id="loadingContainer" class="loading">
+            Loading poll...
+        </div>
 
+        <div id="pollContainer" style="display: none;">
+            <h1>DPG Poll</h1>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div class="poll-question" id="pollQuestion"></div>
+            
+            <div class="member-select-container">
+                <label for="memberSelect">Select Your Name:</label>
+                <select id="memberSelect">
+                    <option value="">Choose your name...</option>
+                </select>
+            </div>
+            
+            <div id="memberImageContainer" class="member-image" style="display: none;">
+                <img id="memberImage" src="" alt="Member">
+            </div>
+            
+            <div id="optionsContainer" class="options-container"></div>
+            
+            <button id="submitBtn" class="submit-btn">Submit Vote</button>
+        </div>
+
+        <div id="successContainer" style="display: none;">
+            <div class="success-message">
+                <h2>✓ Vote Submitted!</h2>
+                <p style="margin-top: 10px;">Thank you for participating in the poll.</p>
+            </div>
         </div>
     </div>
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="vote.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        let members = [];
+        let pollData = null;
+        let selectedOption = null;
+        let selectedMember = null;
+
+        // Get poll token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pollToken = urlParams.get('token');
+
+        if (!pollToken) {
+            showError('No poll token provided. Please use the link from your email.');
+        } else {
+            loadPollData();
+        }
+
+        async function loadPollData() {
+            try {
+                // Load members
+                const membersSnapshot = await database.ref('members').once('value');
+                const membersData = membersSnapshot.val();
+                members = membersData ? Object.values(membersData) : [];
+
+                // Load poll by token
+                const pollsSnapshot = await database.ref('polls').once('value');
+                const pollsData = pollsSnapshot.val();
+                
+                if (pollsData) {
+                    const pollEntry = Object.entries(pollsData).find(([id, data]) => data.token === pollToken);
+                    
+                    if (pollEntry) {
+                        pollData = {
+                            id: pollEntry[0],
+                            ...pollEntry[1]
+                        };
+                        
+                        displayPoll();
+                    } else {
+                        showError('Poll not found. The link may be invalid or expired.');
+                    }
+                } else {
+                    showError('No polls available.');
+                }
+                
+            } catch (error) {
+                console.error('Error loading poll:', error);
+                showError('Error loading poll. Please try again later.');
+            }
+        }
+
+        function displayPoll() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('pollContainer').style.display = 'block';
+            
+            document.getElementById('pollQuestion').textContent = pollData.question;
+            
+            // Populate members dropdown
+            const memberSelect = document.getElementById('memberSelect');
+            members.forEach((member, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = member.name;
+                memberSelect.appendChild(option);
+            });
+            
+            // Member selection handler
+            memberSelect.addEventListener('change', function() {
+                if (this.value !== '') {
+                    selectedMember = members[this.value];
+                    
+                    // Show member image
+                    const imagePath = `assets/images/pokerboys/${selectedMember.name.split(' ')[0].toLowerCase()}.png`;
+                    document.getElementById('memberImage').src = imagePath;
+                    document.getElementById('memberImageContainer').style.display = 'block';
+                    
+                    // Show options
+                    displayOptions();
+                } else {
+                    document.getElementById('memberImageContainer').style.display = 'none';
+                    document.getElementById('optionsContainer').style.display = 'none';
+                    document.getElementById('submitBtn').style.display = 'none';
+                }
+            });
+        }
+
+        function displayOptions() {
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            container.style.display = 'block';
+            
+            // Check if user has already voted
+            if (pollData.votes && pollData.votes[selectedMember.name]) {
+                const previousVote = pollData.votes[selectedMember.name].option;
+                selectedOption = previousVote;
+            }
+            
+            pollData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                
+                if (selectedOption === index) {
+                    button.classList.add('selected');
+                }
+                
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    button.classList.add('selected');
+                    selectedOption = index;
+                    document.getElementById('submitBtn').style.display = 'block';
+                });
+                
+                container.appendChild(button);
+            });
+        }
+
+        async function submitVote() {
+            if (selectedOption === null || !selectedMember) {
+                alert('Please select an option.');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                await database.ref(`polls/${pollData.id}/votes/${selectedMember.name}`).set({
+                    memberId: selectedMember.name,
+                    option: selectedOption,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Show success message
+                document.getElementById('pollContainer').style.display = 'none';
+                document.getElementById('successContainer').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error submitting vote:', error);
+                alert('Error submitting vote. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Vote';
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loadingContainer').innerHTML = `
+                <div class="error-message" style="display: block;">
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Submit button handler
+        document.getElementById('submitBtn').addEventListener('click', submitVote);
+    </script>
 </body>
 </html>
+
