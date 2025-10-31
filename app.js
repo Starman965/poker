@@ -358,18 +358,21 @@ function createEventCard(event, isCurrent = false) {
     const noResponseList = [];
     
     Object.entries(event.rsvps || {}).forEach(([name, status]) => {
+        // Display Russell as "attending (in spirit)"
+        const displayName = name === 'Russell Hyzen' ? 'Russell Hyzen (in spirit)' : name;
+        
         switch(status) {
             case 'attending':
-                attendingList.push(name);
+                attendingList.push(displayName);
                 break;
             case 'not-attending':
-                notAttendingList.push(name);
+                notAttendingList.push(displayName);
                 break;
             case 'maybe':
-                maybeList.push(name);
+                maybeList.push(displayName);
                 break;
             default:
-                noResponseList.push(name);
+                noResponseList.push(displayName);
         }
     });
     
@@ -513,13 +516,15 @@ function setupRSVPPage() {
         eventSelect.appendChild(option);
     });
     
-    // Populate member dropdown
+    // Populate member dropdown (exclude Russell as he always attends in spirit)
     memberSelect.innerHTML = '<option value="">Select your name...</option>';
     members.forEach((member, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = member.name;
-        memberSelect.appendChild(option);
+        if (member.name !== 'Russell Hyzen') {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = member.name;
+            memberSelect.appendChild(option);
+        }
     });
     
     // Event selection handler (must be attached before triggering)
@@ -1371,12 +1376,18 @@ function displayAdminEventsList() {
     upcomingEvents.forEach(event => {
         const rsvpCounts = getRSVPCounts(event.rsvps || {});
         const rsvpList = Object.entries(event.rsvps || {})
-            .map(([name, status]) => `
-                <div style="display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee;">
-                    <span>${name}</span>
-                    <span style="color: ${getStatusColor(status)}; font-weight: bold;">${status.toUpperCase()}</span>
-                </div>
-            `).join('');
+            .map(([name, status]) => {
+                // Display Russell as "attending (in spirit)"
+                const displayName = name === 'Russell Hyzen' ? 'Russell Hyzen (in spirit)' : name;
+                const displayStatus = name === 'Russell Hyzen' && status === 'attending' ? 'ATTENDING (IN SPIRIT)' : status.toUpperCase();
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee;">
+                        <span>${displayName}</span>
+                        <span style="color: ${getStatusColor(status)}; font-weight: bold;">${displayStatus}</span>
+                    </div>
+                `;
+            }).join('');
         
         html += `
             <div class="card" style="margin-bottom: 20px;">
@@ -1434,7 +1445,12 @@ async function addEvent() {
     
     // Initialize RSVPs for all members
     members.forEach(member => {
-        newEvent.rsvps[member.name] = 'no-response';
+        // Russell Hyzen always attends in spirit
+        if (member.name === 'Russell Hyzen') {
+            newEvent.rsvps[member.name] = 'attending';
+        } else {
+            newEvent.rsvps[member.name] = 'no-response';
+        }
     });
     
     try {
