@@ -8,31 +8,39 @@
     <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png">
 </head>
 <body>
+    <!-- Hamburger Menu Button (Mobile) -->
+    <button class="hamburger-menu" id="hamburgerMenu" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
     <!-- Left Navigation -->
     <nav class="left-nav" id="leftNav">
         <div class="nav-header">
             <img src="assets/images/dpg.png" alt="DPG Logo" class="nav-logo">
             <h2>Danville Poker</h2>
-            <button class="nav-toggle" id="navToggle">
-                <span></span>
-                <span></span>
-                <span></span>
+            <button class="nav-close" id="navClose" aria-label="Close Menu">
+                <span>&times;</span>
             </button>
         </div>
         
         <div class="nav-content" id="navContent">
-            <!-- Admin Info Badge (top of nav) -->
-            <div id="adminInfo" class="admin-info" style="display: none;">
+            <!-- Admin Info Badge (top of nav) - clickable to sign out -->
+            <div id="adminInfo" class="admin-info admin-info-clickable" style="display: none;">
                 <div class="admin-badge">
                     <span class="admin-icon">👤</span>
                     <div class="admin-details">
                         <span class="admin-label">Logged in as</span>
                         <span id="adminEmail" class="admin-email"></span>
                     </div>
+                    <span class="admin-signout-hint">Click to sign out</span>
                 </div>
             </div>
             <div class="nav-section">
-                <h3>Public</h3>
                 <ul>
                     <li><a href="#" data-page="home" class="nav-link active">
                         <span class="nav-icon">🏠</span>
@@ -78,7 +86,6 @@
             </div>
             
             <div class="nav-section admin-section" id="adminNav" style="display: none;">
-                <h3>Admin</h3>
                 <ul>
                     <li><a href="#" data-page="admin-events" class="nav-link">
                         <span class="nav-icon">⚙️</span>
@@ -98,22 +105,20 @@
                     </a></li>
                 </ul>
             </div>
-            
-            <div class="nav-footer">
-                <button id="authButton" class="auth-button">Admin Login</button>
-            </div>
         </div>
     </nav>
+    
+    <!-- Auth Button - Fixed at bottom -->
+    <button id="authButton" class="auth-button-fixed">Admin Login</button>
 
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
         <div class="content-container">
             <!-- Home Page -->
             <div id="home-page" class="page active">
-                <h1>Welcome to Danville Poker Group</h1>
                 <div class="welcome-card">
                     <img src="assets/images/dpg.png" alt="DPG Logo" class="welcome-logo">
-                    <p>Welcome to the official website for the Danville Poker Group. We're a group of friends who meet monthly for poker nights in the Danville/Alamo area.</p>
+                    <p>Welcome to the official website for the Danville Poker Group.</p>
                     
                     <div class="quick-links">
                         <a href="#" data-page="events" class="quick-link-card">
@@ -135,6 +140,16 @@
                             <span class="quick-link-icon">📊</span>
                             <h3>Reports</h3>
                             <p>Stats & history</p>
+                        </a>
+                        <a href="#" data-page="poker-games" class="quick-link-card">
+                            <span class="quick-link-icon">🃏</span>
+                            <h3>Poker Games</h3>
+                            <p>Games we play</p>
+                        </a>
+                        <a href="#" data-page="how-to-host" class="quick-link-card">
+                            <span class="quick-link-icon">🏠</span>
+                            <h3>How to Host</h3>
+                            <p>Hosting guide</p>
                         </a>
                     </div>
                 </div>
@@ -298,6 +313,24 @@
                     
                     <div class="guide-section">
                         <div class="guide-header">
+                            <span class="guide-icon">⭕</span>
+                            <h2>Tic Tac Toe</h2>
+                        </div>
+                        <div class="guide-content">
+                            <p>A strategic game with community cards arranged in a 3x3 grid like Tic Tac Toe.</p>
+                            <p><strong>How to Play:</strong></p>
+                            <ul>
+                                <li>Each player is dealt either 2 or 4 hole cards</li>
+                                <li>9 community cards are dealt on the table in a Tic Tac Toe layout (3x3 grid)</li>
+                                <li>Players must use exactly 3 community cards in a row (horizontal, vertical, or diagonal)</li>
+                                <li>Players use 2 cards from their hand and 3 from any line on the board</li>
+                                <li>Multiple winning lines possible - choose your best!</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-section">
+                        <div class="guide-header">
                             <span class="guide-icon">🌆</span>
                             <h2>Cincinnati</h2>
                         </div>
@@ -306,7 +339,7 @@
                             <p><strong>How to Play:</strong></p>
                             <ul>
                                 <li>Each player receives 4 hole cards</li>
-                                <li>4 community cards are dealt face-down, then revealed one at a time</li>
+                                <li>5 community cards are dealt face-down, then revealed one at a time</li>
                                 <li>Players make the best 5-card hand using their hole cards and community cards</li>
                                 <li>More cards = more possibilities!</li>
                             </ul>
@@ -324,8 +357,7 @@
                             <ul>
                                 <li>Two cards are dealt face-up to a player</li>
                                 <li>Player bets whether the third card will fall in-between the first two</li>
-                                <li>Wider spreads are safer but pay less; narrow spreads are riskier but more rewarding</li>
-                                <li>Aces are high</li>
+                                <li>If an Ace is dealt as the first card, player decides if high or low</li>
                                 <li>If the third card matches either of the first two, player typically pays double!</li>
                             </ul>
                         </div>
@@ -340,12 +372,22 @@
                             <p>A high-stakes game of nerves where you decide if you're in or out!</p>
                             <p><strong>How to Play:</strong></p>
                             <ul>
-                                <li>Players are dealt cards (typically 2 or 3)</li>
-                                <li>Each player decides simultaneously (usually by holding cards in/out) if they're "in" or "out"</li>
+                                <li>Dealer must put in one chip at the start of the deal</li>
+                                <li><strong>Penalty:</strong> If dealer forgets to put in a chip and starts the game after everyone has been dealt cards, they must put in two chips as a penalty</li>
+                                <li>Dealer calls if the guts hand is a low hand or high hand before the cards are dealt</li>
+                                <li>Players are dealt 3 cards</li>
+                                <li>Players decide if they are "in" or "out" by placing a chip in their hand to be IN</li>
+                                <li>Dealer says "1-2-3 drop" and everyone who drops a chip is in</li>
+                                <li>People not holding a chip are out</li>
                                 <li>Players who are "in" reveal their cards</li>
                                 <li>Best hand wins the pot</li>
                                 <li><strong>The Twist:</strong> Losers who were "in" must match the pot!</li>
                                 <li>Game continues until only one player stays in, or everyone folds</li>
+                            </ul>
+                            <p><strong>Pussy Guts Variant:</strong></p>
+                            <ul>
+                                <li>If no one stays in (everyone folds), the person with the best hand must match the pot for being a "Pussy"</li>
+                                <li>This prevents everyone from folding and keeps the action going!</li>
                             </ul>
                             <p><em>Warning: Pots can grow exponentially! Play with caution.</em></p>
                         </div>
@@ -659,7 +701,7 @@
                                 <li>Classic Rock is the group favorite</li>
                                 <li>Several Spotify poker night playlists have been created and work great</li>
                                 <li><strong>David Lewis is the Group DJ</strong> - consult him for playlist recommendations</li>
-                                <li>A great portable speaker is available for those without music systems</li>
+                                <li>A portable speaker is available from Nasser or David for those without music systems</li>
                             </ul>
                         </div>
                     </div>

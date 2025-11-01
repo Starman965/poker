@@ -38,24 +38,38 @@ function initializeAuth() {
     const adminInfo = document.getElementById('adminInfo');
     const adminEmail = document.getElementById('adminEmail');
     
+    // Make admin info badge clickable to sign out
+    adminInfo.addEventListener('click', () => {
+        if (currentUser && isAdmin) {
+            if (confirm('Sign out?')) {
+                signOut();
+            }
+        }
+    });
+    
     auth.onAuthStateChanged(user => {
         currentUser = user;
         
         if (user) {
             isAdmin = ADMIN_EMAILS.includes(user.email);
-            authButton.textContent = 'Sign Out';
-            authButton.onclick = signOut;
             
             if (isAdmin) {
-                // Show admin info
+                // Show admin info badge, hide auth button
                 adminInfo.style.display = 'block';
                 adminEmail.textContent = user.email;
+                authButton.style.display = 'none';
                 showAdminNavigation();
             } else {
+                // Non-admin user - show sign out button
                 adminInfo.style.display = 'none';
+                authButton.style.display = 'block';
+                authButton.textContent = 'Sign Out';
+                authButton.onclick = signOut;
             }
         } else {
+            // Not logged in - show login button
             isAdmin = false;
+            authButton.style.display = 'block';
             authButton.textContent = 'Admin Login';
             authButton.onclick = signIn;
             adminInfo.style.display = 'none';
@@ -200,13 +214,35 @@ function hideAdminNavigation() {
 // ==================== NAVIGATION ====================
 
 function initializeNavigation() {
-    // Navigation toggle for mobile
-    const navToggle = document.getElementById('navToggle');
+    // Hamburger menu toggle for mobile
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const navClose = document.getElementById('navClose');
     const leftNav = document.getElementById('leftNav');
+    const navOverlay = document.getElementById('navOverlay');
     
-    navToggle.addEventListener('click', () => {
-        leftNav.classList.toggle('mobile-open');
+    // Open menu
+    hamburgerMenu.addEventListener('click', () => {
+        leftNav.classList.add('mobile-open');
+        navOverlay.classList.add('active');
+        hamburgerMenu.classList.add('active');
     });
+    
+    // Close menu via close button
+    navClose.addEventListener('click', () => {
+        closeMenu();
+    });
+    
+    // Close menu via overlay click
+    navOverlay.addEventListener('click', () => {
+        closeMenu();
+    });
+    
+    // Helper function to close menu
+    function closeMenu() {
+        leftNav.classList.remove('mobile-open');
+        navOverlay.classList.remove('active');
+        hamburgerMenu.classList.remove('active');
+    }
     
     // Page navigation
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -217,7 +253,7 @@ function initializeNavigation() {
             
             // Close mobile menu
             if (window.innerWidth <= 768) {
-                leftNav.classList.remove('mobile-open');
+                closeMenu();
             }
         });
     });
