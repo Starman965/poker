@@ -252,7 +252,7 @@ function initializeNavigation() {
             navigateToPage(page);
             
             // Close mobile menu
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth <= 1024) {
                 closeMenu();
             }
         });
@@ -264,6 +264,11 @@ function initializeNavigation() {
             e.preventDefault();
             const page = link.dataset.page;
             navigateToPage(page);
+            
+            // Close mobile menu
+            if (window.innerWidth <= 1024) {
+                closeMenu();
+            }
         });
     });
 }

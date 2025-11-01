@@ -1223,11 +1223,11 @@ body {
     color: var(--light-text);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    /* Show hamburger menu on mobile */
+/* Responsive Design - Tablet and Mobile */
+@media screen and (max-width: 1024px) {
+    /* Show hamburger menu on mobile/tablet */
     .hamburger-menu {
-        display: flex;
+        display: flex !important;
     }
     
     /* Hide nav by default on mobile */
@@ -1235,6 +1235,7 @@ body {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        width: var(--nav-width);
     }
     
     /* Show nav when open */
@@ -1263,9 +1264,13 @@ body {
     
     /* Main content takes full width on mobile */
     .main-content {
-        margin-left: 0;
+        margin-left: 0 !important;
         padding: 80px 20px 20px 20px;
     }
+}
+
+/* Additional mobile-specific styles */
+@media screen and (max-width: 768px) {
     
     .quick-links {
         grid-template-columns: 1fr;
