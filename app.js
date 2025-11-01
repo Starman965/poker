@@ -1391,15 +1391,25 @@ function displayAdminEventsList() {
     upcomingEvents.forEach(event => {
         const rsvpCounts = getRSVPCounts(event.rsvps || {});
         const rsvpList = Object.entries(event.rsvps || {})
+            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
             .map(([name, status]) => {
                 // Display Russell as "attending (in spirit)"
                 const displayName = name === 'Russell Hyzen' ? 'Russell Hyzen (in spirit)' : name;
-                const displayStatus = name === 'Russell Hyzen' && status === 'attending' ? 'ATTENDING (IN SPIRIT)' : status.toUpperCase();
+                const isRussell = name === 'Russell Hyzen';
                 
                 return `
-                    <div style="display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee;">
-                        <span>${displayName}</span>
-                        <span style="color: ${getStatusColor(status)}; font-weight: bold;">${displayStatus}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+                        <span style="flex: 1;">${displayName}</span>
+                        <select 
+                            class="form-select" 
+                            style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px;"
+                            onchange="updateRSVP('${event.id}', '${name.replace(/'/g, "\\'")}', this.value)"
+                            ${isRussell ? 'disabled' : ''}>
+                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending${isRussell ? ' (in spirit)' : ''}</option>
+                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                        </select>
                     </div>
                 `;
             }).join('');
@@ -1422,7 +1432,7 @@ function displayAdminEventsList() {
                     <button class="btn btn-sm btn-secondary" onclick="sendFinalConfirmationEmail('${event.id}')">Final Confirmation</button>
                 </div>
                 <details>
-                    <summary style="cursor: pointer; font-weight: bold; margin: 15px 0;">View All RSVPs</summary>
+                    <summary style="cursor: pointer; font-weight: bold; margin: 15px 0;">View/Edit All RSVPs</summary>
                     <div style="margin-top: 10px;">${rsvpList}</div>
                 </details>
             </div>
@@ -1548,6 +1558,25 @@ async function deleteEvent() {
     } catch (error) {
         console.error('Error deleting event:', error);
         alert('Error deleting event. Please try again.');
+    }
+}
+
+async function updateRSVP(eventId, memberName, newStatus) {
+    try {
+        // Update the RSVP status in Firebase
+        await database.ref(`schedule/${eventId}/rsvps/${memberName}`).set(newStatus);
+        
+        // Update local data
+        await loadData();
+        
+        // Re-render the admin events list to show updated counts
+        displayAdminEventsList();
+        
+        console.log(`Updated RSVP for ${memberName} to ${newStatus}`);
+        
+    } catch (error) {
+        console.error('Error updating RSVP:', error);
+        alert('Error updating RSVP. Please try again.');
     }
 }
 
