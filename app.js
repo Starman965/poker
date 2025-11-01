@@ -1070,7 +1070,7 @@ function showPastEventsReport() {
     if (pastEvents.length === 0) {
         html += '<p class="text-muted">No past events found.</p>';
     } else {
-        html += '<table><thead><tr><th>Date</th><th>Host</th><th>Location</th><th>Attendees</th></tr></thead><tbody>';
+        html += '<table><thead><tr><th>Date</th><th>Host</th><th>Attendees</th></tr></thead><tbody>';
         
         pastEvents.forEach(event => {
             const attendees = Object.entries(event.rsvps || {})
@@ -1080,7 +1080,6 @@ function showPastEventsReport() {
             html += `<tr>
                 <td>${formatDate(event.date)}</td>
                 <td>${event.host}</td>
-                <td>${event.location}</td>
                 <td>${attendees.length} (${attendees.join(', ')})</td>
             </tr>`;
         });
