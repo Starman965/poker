@@ -431,7 +431,6 @@ function createEventCard(event, isCurrent = false) {
         </div>
         <div class="event-info">
             <p><strong>Host:</strong> ${event.host}</p>
-            <p><strong>Location:</strong> ${event.location}</p>
             <p><strong>Time:</strong> 7:00 PM</p>
         </div>
         <div class="rsvp-summary">
@@ -580,7 +579,6 @@ function setupRSVPPage() {
             const event = schedule.find(e => e.id === this.value);
             document.getElementById('rsvpEventDate').textContent = formatDate(event.date);
             document.getElementById('rsvpEventHost').textContent = event.host;
-            document.getElementById('rsvpEventLocation').textContent = event.location;
             eventDetails.style.display = 'block';
         } else {
             eventDetails.style.display = 'none';
@@ -642,23 +640,127 @@ async function submitRSVP() {
     try {
         await database.ref(`schedule/${eventId}/rsvps/${member.name}`).set(status);
         
-        // Show success message
-        alert(`RSVP submitted successfully! You are marked as: ${status.replace('-', ' ')}`);
-        
         // Reload data
         await loadData();
         
-        // Reset form
-        document.getElementById('rsvpEventSelect').value = '';
-        document.getElementById('rsvpMemberSelect').value = '';
-        document.getElementById('rsvpEventDetails').style.display = 'none';
-        document.getElementById('memberImageContainer').style.display = 'none';
-        document.getElementById('rsvpStatusContainer').style.display = 'none';
+        // Show confirmation section
+        showRSVPConfirmation(eventId, member.name, status);
         
     } catch (error) {
         console.error('Error submitting RSVP:', error);
         alert('Error submitting RSVP. Please try again.');
     }
+}
+
+function showRSVPConfirmation(eventId, memberName, status) {
+    // Hide form, show confirmation
+    document.getElementById('rsvpFormCard').style.display = 'none';
+    document.getElementById('rsvpConfirmation').style.display = 'block';
+    document.getElementById('rsvpSummaryCard').style.display = 'block';
+    
+    // Set confirmation message
+    const statusText = status.replace('-', ' ').toUpperCase();
+    document.getElementById('confirmationMessage').innerHTML = 
+        `✓ RSVP submitted successfully!<br>You are marked as: <strong>${statusText}</strong>`;
+    
+    // Show image based on status
+    const imageElement = document.getElementById('rsvpImage');
+    if (status === 'attending') {
+        imageElement.innerHTML = '<img src="https://www.danvillepokergroup.com/thumbsup.png" alt="Thumbs up" style="max-width: 200px;">';
+    } else if (status === 'not-attending') {
+        imageElement.innerHTML = '<img src="https://www.danvillepokergroup.com/thumbsdown.png" alt="Thumbs down" style="max-width: 200px;">';
+    } else {
+        imageElement.innerHTML = '';
+    }
+    
+    // Display RSVP summary
+    displayRSVPSummary(eventId);
+    
+    // Scroll to confirmation
+    document.getElementById('rsvpConfirmation').scrollIntoView({ behavior: 'smooth' });
+}
+
+function displayRSVPSummary(eventId) {
+    const event = schedule.find(e => e.id === eventId);
+    if (!event || !event.rsvps) {
+        return;
+    }
+    
+    const summary = {
+        attending: [],
+        notAttending: [],
+        maybe: [],
+        noResponse: []
+    };
+    
+    // Categorize RSVPs
+    Object.entries(event.rsvps).forEach(([name, status]) => {
+        switch(status) {
+            case 'attending':
+                summary.attending.push(name);
+                break;
+            case 'not-attending':
+                summary.notAttending.push(name);
+                break;
+            case 'maybe':
+                summary.maybe.push(name);
+                break;
+            default:
+                summary.noResponse.push(name);
+        }
+    });
+    
+    // Create HTML for summary
+    const summaryHTML = `
+        <div class="rsvp-category">
+            <h3>✓ Attending (${summary.attending.length})</h3>
+            <ul class="rsvp-list">
+                ${summary.attending.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+            </ul>
+        </div>
+        <div class="rsvp-category">
+            <h3>✗ Not Attending (${summary.notAttending.length})</h3>
+            <ul class="rsvp-list">
+                ${summary.notAttending.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+            </ul>
+        </div>
+        <div class="rsvp-category">
+            <h3>? Maybe (${summary.maybe.length})</h3>
+            <ul class="rsvp-list">
+                ${summary.maybe.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+            </ul>
+        </div>
+        <div class="rsvp-category">
+            <h3>No Response (${summary.noResponse.length})</h3>
+            <ul class="rsvp-list">
+                ${summary.noResponse.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">Everyone has responded!</li>'}
+            </ul>
+        </div>
+    `;
+    
+    document.getElementById('rsvpSummaryContent').innerHTML = summaryHTML;
+}
+
+function resetRSVPForm() {
+    // Show form, hide confirmation
+    document.getElementById('rsvpFormCard').style.display = 'block';
+    document.getElementById('rsvpConfirmation').style.display = 'none';
+    document.getElementById('rsvpSummaryCard').style.display = 'none';
+    
+    // Keep the event selected, just reset member selection
+    const eventSelect = document.getElementById('rsvpEventSelect');
+    if (eventSelect.value) {
+        // Trigger the change event to reload the event details
+        eventSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Reset member and status fields only
+    document.getElementById('rsvpMemberSelect').value = '';
+    document.getElementById('memberImageContainer').style.display = 'none';
+    document.getElementById('rsvpStatusContainer').style.display = 'none';
+    
+    // Scroll to top of form
+    document.getElementById('rsvpFormCard').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ==================== REPORTS ====================
