@@ -62,16 +62,10 @@ body {
     transition: all 0.3s ease;
 }
 
-.hamburger-menu.active span:nth-child(1) {
-    transform: rotate(45deg) translate(6px, 6px);
-}
-
-.hamburger-menu.active span:nth-child(2) {
+/* Hide hamburger when menu is open */
+.hamburger-menu.active {
     opacity: 0;
-}
-
-.hamburger-menu.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(6px, -6px);
+    pointer-events: none;
 }
 
 /* Nav Overlay */
@@ -138,27 +132,6 @@ body {
     opacity: 0;
 }
 
-.nav-close {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    margin-left: auto;
-    color: white;
-    font-size: 2rem;
-    line-height: 1;
-    transition: all 0.2s;
-}
-
-.nav-close:hover {
-    opacity: 0.7;
-    transform: scale(1.1);
-}
-
-.nav-close span {
-    display: block;
-}
 
 .nav-content {
     height: calc(100vh - 80px);
@@ -1243,10 +1216,6 @@ body {
         transform: translateX(0);
     }
     
-    /* Show close button when menu is open */
-    .left-nav.mobile-open .nav-close {
-        display: block;
-    }
     
     /* Auth button on mobile */
     .auth-button-fixed {
