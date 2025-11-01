@@ -330,9 +330,14 @@ function renderPublicEvents() {
     // Sort events by date
     const sortedEvents = [...schedule].sort((a, b) => new Date(a.date) - new Date(b.date));
     
-    // Filter upcoming events
+    // Filter upcoming events (compare dates only, not times)
     const now = new Date();
-    const upcomingEvents = sortedEvents.filter(event => new Date(event.date) >= now);
+    now.setHours(0, 0, 0, 0);
+    const upcomingEvents = sortedEvents.filter(event => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= now;
+    });
     
     if (upcomingEvents.length === 0) {
         container.innerHTML = '<div class="card"><p class="text-muted">No upcoming events scheduled.</p></div>';
@@ -1335,9 +1340,14 @@ function populateHostDropdowns() {
 function populateEditEventDropdown() {
     const editEventSelect = document.getElementById('editEventSelect');
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     
     const upcomingEvents = schedule
-        .filter(event => new Date(event.date) >= now)
+        .filter(event => {
+            const eventDate = new Date(event.date);
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate >= now;
+        })
         .sort((a, b) => new Date(a.date) - new Date(b.date));
     
     editEventSelect.innerHTML = '<option value="">Select an event...</option>' +
@@ -1362,9 +1372,14 @@ function populateEditEventDropdown() {
 function displayAdminEventsList() {
     const container = document.getElementById('adminEventsContainer');
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     
     const upcomingEvents = schedule
-        .filter(event => new Date(event.date) >= now)
+        .filter(event => {
+            const eventDate = new Date(event.date);
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate >= now;
+        })
         .sort((a, b) => new Date(a.date) - new Date(b.date));
     
     if (upcomingEvents.length === 0) {
