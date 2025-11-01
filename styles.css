@@ -132,6 +132,22 @@ body {
     opacity: 0;
 }
 
+.nav-close {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: auto;
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.nav-close:hover {
+    opacity: 0.7;
+}
 
 .nav-content {
     height: calc(100vh - 80px);
@@ -1216,6 +1232,10 @@ body {
         transform: translateX(0);
     }
     
+    /* Show close button when menu is open */
+    .left-nav.mobile-open .nav-close {
+        display: block;
+    }
     
     /* Auth button on mobile */
     .auth-button-fixed {

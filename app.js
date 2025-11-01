@@ -216,6 +216,7 @@ function hideAdminNavigation() {
 function initializeNavigation() {
     // Hamburger menu toggle for mobile
     const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const navClose = document.getElementById('navClose');
     const leftNav = document.getElementById('leftNav');
     const navOverlay = document.getElementById('navOverlay');
     
@@ -224,6 +225,11 @@ function initializeNavigation() {
         leftNav.classList.add('mobile-open');
         navOverlay.classList.add('active');
         hamburgerMenu.classList.add('active');
+    });
+    
+    // Close menu via close button
+    navClose.addEventListener('click', () => {
+        closeMenu();
     });
     
     // Close menu via overlay click
