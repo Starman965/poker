@@ -1853,7 +1853,9 @@ ${rsvpLink}
 Looking forward to seeing you there!
 
 Best regards,
-Nasser`);
+Nasser
+
+P.S. Don't forget to check out www.danvillepokergroup.com for photos, event calendar, game ideas, rules, bylaws, and more.`);
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
@@ -1917,7 +1919,9 @@ ${rsvpLink}
 Looking forward to seeing you all!
 
 Best regards,
-Nasser`);
+Nasser
+
+P.S. Don't forget to check out www.danvillepokergroup.com for photos, event calendar, game ideas, rules, bylaws, and more.`);
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
@@ -1962,7 +1966,9 @@ ${rsvpLink}
 We're looking forward to a great night of poker and hope you can join us!
 
 Best regards,
-Nasser`);
+Nasser
+
+P.S. Don't forget to check out www.danvillepokergroup.com for photos, event calendar, game ideas, rules, bylaws, and more.`);
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
@@ -2023,7 +2029,9 @@ ${rsvpLink}
 Looking forward to another great Poker Night!
 
 Best regards,
-Nasser`);
+Nasser
+
+P.S. Don't forget to check out www.danvillepokergroup.com for photos, event calendar, game ideas, rules, bylaws, and more.`);
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
