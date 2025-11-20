@@ -362,23 +362,41 @@ async function loadData() {
 
 // ==================== EVENTS (PUBLIC) ====================
 
+// Helper: get a Date at local midnight for an event's date string (YYYY-MM-DD)
+function getEventLocalDate(dateString) {
+    return new Date(dateString + 'T00:00:00');
+}
+
+// Helper: upcoming events grouped by month
+// Keeps showing the current month's event for the entire month,
+// and only switches to the next month once the calendar month changes.
+function getUpcomingEventsByMonth() {
+    if (!Array.isArray(schedule)) return [];
+    
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-based
+    
+    return [...schedule]
+        .filter(event => {
+            const eventDate = getEventLocalDate(event.date);
+            const year = eventDate.getFullYear();
+            const month = eventDate.getMonth();
+            
+            // Include events from the current month and any future months
+            return year > currentYear || (year === currentYear && month >= currentMonth);
+        })
+        .sort((a, b) => getEventLocalDate(a.date) - getEventLocalDate(b.date));
+}
+
 function renderPublicEvents() {
     const container = document.getElementById('eventsContainer');
     if (!container) return;
     
     container.innerHTML = '';
     
-    // Sort events by date
-    const sortedEvents = [...schedule].sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    // Filter upcoming events (compare dates only, not times)
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const upcomingEvents = sortedEvents.filter(event => {
-        const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);
-        return eventDate >= now;
-    });
+    // Get upcoming events using month-aware logic
+    const upcomingEvents = getUpcomingEventsByMonth();
     
     if (upcomingEvents.length === 0) {
         container.innerHTML = '<div class="card"><p class="text-muted">No upcoming events scheduled.</p></div>';
@@ -549,10 +567,10 @@ function setupRSVPPage() {
     
     // Populate event dropdown
     eventSelect.innerHTML = '<option value="">Select an event...</option>';
-    const now = new Date();
-    const upcomingEvents = schedule
-        .filter(event => new Date(event.date) >= now)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Use month-aware upcoming events so the current month's event
+    // stays selectable for the entire month.
+    const upcomingEvents = getUpcomingEventsByMonth();
     
     upcomingEvents.forEach(event => {
         const option = document.createElement('option');
@@ -1017,7 +1035,7 @@ function showHostingReport() {
     });
     
     schedule.forEach(event => {
-        const year = new Date(event.date).getFullYear();
+        const year = getEventLocalDate(event.date).getFullYear();
         if (hostingCounts[event.host]) {
             hostingCounts[event.host].total++;
             if (hostingCounts[event.host][year] !== undefined) {
@@ -1062,8 +1080,8 @@ function showPastEventsReport() {
     const now = new Date();
     
     const pastEvents = schedule
-        .filter(event => new Date(event.date) < now)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+        .filter(event => getEventLocalDate(event.date) < now)
+        .sort((a, b) => getEventLocalDate(b.date) - getEventLocalDate(a.date));
     
     let html = '<h2>Past Events Report</h2>';
     
@@ -1481,16 +1499,9 @@ function populateHostDropdowns() {
 
 function populateEditEventDropdown() {
     const editEventSelect = document.getElementById('editEventSelect');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
     
-    const upcomingEvents = schedule
-        .filter(event => {
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
-            return eventDate >= now;
-        })
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Use month-aware upcoming events for editing
+    const upcomingEvents = getUpcomingEventsByMonth();
     
     editEventSelect.innerHTML = '<option value="">Select an event...</option>' +
         upcomingEvents.map(event => 
@@ -1513,16 +1524,9 @@ function populateEditEventDropdown() {
 
 function displayAdminEventsList() {
     const container = document.getElementById('adminEventsContainer');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
     
-    const upcomingEvents = schedule
-        .filter(event => {
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
-            return eventDate >= now;
-        })
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Use month-aware upcoming events for admin list
+    const upcomingEvents = getUpcomingEventsByMonth();
     
     if (upcomingEvents.length === 0) {
         container.innerHTML = '<p class="text-muted">No upcoming events.</p>';
@@ -2032,7 +2036,7 @@ function sendReminderEmail(eventId) {
         }
     });
     
-    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is a reminder about our upcoming poker night:
@@ -2091,7 +2095,7 @@ function sendNonRespondersEmail(eventId) {
     // Compose the email addresses string
     const toEmails = nonResponders.map(member => member.email).join(',');
     
-    const subject = encodeURIComponent(`[DanvillePoker] Reminder: Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 We still haven't received your RSVP for our upcoming poker night:
@@ -2144,7 +2148,7 @@ function sendFinalConfirmationEmail(eventId) {
     
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
     
-    const subject = encodeURIComponent(`[DanvillePoker] Final Confirmation: Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
