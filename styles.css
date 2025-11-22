@@ -833,7 +833,6 @@ body {
     border: 1px solid var(--border-color);
     max-height: 400px;
     overflow-y: auto;
-    white-space: pre-wrap;
 }
 
 .lyrics-box p {
