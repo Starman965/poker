@@ -3,69 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
     <title>Danville Poker Group</title>
-    
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="Danville Poker Group">
-    <meta property="og:description" content="Official website for the Danville Poker Group">
-    <meta property="og:image" content="https://www.danvillepokergroup.com/assets/images/dpg2.png">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.danvillepokergroup.com">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Danville Poker Group">
-    <meta name="twitter:description" content="Official website for the Danville Poker Group">
-    <meta name="twitter:image" content="https://www.danvillepokergroup.com/assets/images/dpg2.png">
-    
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png">
 </head>
 <body>
-    <!-- Hamburger Menu Button (Mobile) -->
-    <button class="hamburger-menu" id="hamburgerMenu" aria-label="Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-    <!-- Mobile Overlay -->
-    <div class="nav-overlay" id="navOverlay"></div>
-
     <!-- Left Navigation -->
     <nav class="left-nav" id="leftNav">
         <div class="nav-header">
             <img src="assets/images/dpg.png" alt="DPG Logo" class="nav-logo">
             <h2>Danville Poker</h2>
-            <button class="nav-close" id="navClose" aria-label="Close Menu">×</button>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
         
         <div class="nav-content" id="navContent">
-            <!-- Admin Info Badge (top of nav) - clickable to sign out -->
-            <div id="adminInfo" class="admin-info admin-info-clickable" style="display: none;">
+            <!-- Admin Info Badge (top of nav) -->
+            <div id="adminInfo" class="admin-info" style="display: none;">
                 <div class="admin-badge">
                     <span class="admin-icon">👤</span>
                     <div class="admin-details">
                         <span class="admin-label">Logged in as</span>
                         <span id="adminEmail" class="admin-email"></span>
                     </div>
-                    <span class="admin-signout-hint">Click to sign out</span>
                 </div>
             </div>
             <div class="nav-section">
+                <h3>Public</h3>
                 <ul>
                     <li><a href="#" data-page="home" class="nav-link active">
                         <span class="nav-icon">🏠</span>
                         <span class="nav-text">Home</span>
                     </a></li>
-                    <li><a href="#" data-page="rsvp" class="nav-link">
-                        <span class="nav-icon">✓</span>
-                        <span class="nav-text">RSVP</span>
+                    <li><a href="#" data-page="every-bet-win" class="nav-link">
+                        <span class="nav-icon">🎵</span>
+                        <span class="nav-text">Every Bet Win</span>
                     </a></li>
                     <li><a href="#" data-page="events" class="nav-link">
                         <span class="nav-icon">📅</span>
                         <span class="nav-text">Events</span>
+                    </a></li>
+                    <li><a href="#" data-page="rsvp" class="nav-link">
+                        <span class="nav-icon">✓</span>
+                        <span class="nav-text">RSVP</span>
                     </a></li>
                     <li><a href="#" data-page="reports" class="nav-link">
                         <span class="nav-icon">📊</span>
@@ -75,14 +58,6 @@
                         <span class="nav-icon">📸</span>
                         <span class="nav-text">Gallery</span>
                     </a></li>
-                    <li><a href="#" data-page="poker-games" class="nav-link">
-                        <span class="nav-icon">🃏</span>
-                        <span class="nav-text">Poker Games</span>
-                    </a></li>
-                    <li><a href="#" data-page="poker-basics" class="nav-link">
-                        <span class="nav-icon">🎓</span>
-                        <span class="nav-text">Poker Basics</span>
-                    </a></li>
                     <li><a href="#" data-page="how-to-host" class="nav-link">
                         <span class="nav-icon">🏠</span>
                         <span class="nav-text">How to Host</span>
@@ -91,14 +66,11 @@
                         <span class="nav-icon">⚖️</span>
                         <span class="nav-text">Poker Bylaws</span>
                     </a></li>
-                    <li><a href="#" data-page="russell-memorial" class="nav-link">
-                        <span class="nav-icon">💙</span>
-                        <span class="nav-text">In Memory of Russell</span>
-                    </a></li>
                 </ul>
             </div>
             
             <div class="nav-section admin-section" id="adminNav" style="display: none;">
+                <h3>Admin</h3>
                 <ul>
                     <li><a href="#" data-page="admin-events" class="nav-link">
                         <span class="nav-icon">⚙️</span>
@@ -118,20 +90,22 @@
                     </a></li>
                 </ul>
             </div>
+            
+            <div class="nav-footer">
+                <button id="authButton" class="auth-button">Admin Login</button>
+            </div>
         </div>
     </nav>
-    
-    <!-- Auth Button - Fixed at bottom -->
-    <button id="authButton" class="auth-button-fixed">Admin Login</button>
 
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
         <div class="content-container">
             <!-- Home Page -->
             <div id="home-page" class="page active">
+                <h1>Welcome to Danville Poker Group</h1>
                 <div class="welcome-card">
                     <img src="assets/images/dpg.png" alt="DPG Logo" class="welcome-logo">
-                    <p>Welcome to the official website for the Danville Poker Group.</p>
+                    <p>Welcome to the official website for the Danville Poker Group. We're a group of friends who meet monthly for poker nights in the Danville/Alamo area.</p>
                     
                     <div class="quick-links">
                         <a href="#" data-page="events" class="quick-link-card">
@@ -154,16 +128,181 @@
                             <h3>Reports</h3>
                             <p>Stats & history</p>
                         </a>
-                        <a href="#" data-page="poker-games" class="quick-link-card">
-                            <span class="quick-link-icon">🃏</span>
-                            <h3>Poker Games</h3>
-                            <p>Games we play</p>
-                        </a>
-                        <a href="#" data-page="how-to-host" class="quick-link-card">
-                            <span class="quick-link-icon">🏠</span>
-                            <h3>How to Host</h3>
-                            <p>Hosting guide</p>
-                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Every Bet Win Song Page -->
+            <div id="every-bet-win-page" class="page">
+                <h1>Every Bet Win</h1>
+                <p class="page-subtitle">An original DPG anthem written and recorded for poker night.</p>
+
+                <div class="card song-card">
+                    <div class="song-layout">
+                        <div class="song-player-column">
+                            <h2>Listen</h2>
+                            <p class="text-muted">Hit play to listen to the track. Works on desktop, tablet, and mobile.</p>
+                            <div class="audio-player">
+                                <audio controls preload="metadata">
+                                    <source src="every_bet_win.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <a class="download-link" href="every_bet_win.mp3" download>Download MP3</a>
+                            </div>
+                        </div>
+
+                        <div class="song-lyrics-column">
+                            <h2>Lyrics</h2>
+                            <div class="lyrics-box" id="every-bet-win-lyrics">
+                                <p>I've sat with many men in many towns,<br>
+                                Shuffled cards and chased the run,<br>
+                                But there's a group in Danville I call my brothers<br>
+                                On the third Thursday of every month.</p>
+
+                                <p>I walked into that Danville garage,<br>
+                                Same folding chairs, same friends,<br>
+                                Those tables we bought from China<br>
+                                Still read &quot;Every Bet Win&quot; on the ends.</p>
+
+                                <p>Nasser called the night together,<br>
+                                &quot;Sit on down boys, here we go again.&quot;<br>
+                                The chips were stacked, the cocktails cold,<br>
+                                Classic rock and country blend,<br>
+                                And every man who pulled up a seat<br>
+                                Brought a story waiting to begin.</p>
+
+                                <p>You gotta know when to deal it,<br>
+                                Know when to feel it,<br>
+                                Know when the pot gets big<br>
+                                And someone's gonna steal it.<br>
+                                You never count your money<br>
+                                When you're sittin' with the men,<br>
+                                There'll be time enough for countin'<br>
+                                When the night comes to an end.</p>
+
+                                <p>Brad plays calculated, conservative,<br>
+                                Counts odds in Acey Deucey on the fly,<br>
+                                We call him Brad GPT,<br>
+                                Smartest fella of all the guys.</p>
+
+                                <p>And Bobby starts the night on fire,<br>
+                                Stackin' chips like he can't lose,<br>
+                                But after whiskey and a joint,<br>
+                                He drifts right off the cruise.</p>
+
+                                <p>Still he writes the perfect recap,<br>
+                                Sends an email home at dawn,<br>
+                                And we laugh and say,<br>
+                                &quot;How the hell does he remember what went on?&quot;</p>
+
+                                <p>Nasser's the proud commissioner,<br>
+                                The glue that keeps us strong,<br>
+                                He loves big pots and bigger... well,<br>
+                                Use your imagination, son.</p>
+
+                                <p>And Dan, the elder gambler,<br>
+                                Carries hundreds in his coat,<br>
+                                Just in case a monster hand<br>
+                                Makes the whole damn table choke.</p>
+
+                                <p>Greg Narvick brings the edibles,<br>
+                                His father-in-law right by his side,<br>
+                                They fill the air with laughter<br>
+                                As the cards and jokes collide.</p>
+
+                                <p>And Dave Williams, standing six foot one,<br>
+                                Cigar glowing in his hand,<br>
+                                Makes barbecue with a coffee rub<br>
+                                That's the best in all the land.</p>
+
+                                <p>Now Jim's wife Kelle makes cheesesteaks<br>
+                                That taste like Philly gold,<br>
+                                And Jim sings Johnny Cash so true<br>
+                                It stops the room stone-cold.</p>
+
+                                <p>And Rob Thomas loves a good bar,<br>
+                                Craft cocktails poured just right,<br>
+                                His Old Fashioneds hit so smooth<br>
+                                They warm you through the night.</p>
+
+                                <p>Now Doug's the hip-hop patriot,<br>
+                                Up in Blackhawk's Tuscan skies,<br>
+                                Sports cars lined like a flex parade,<br>
+                                A heart red, white and blue with pride.<br>
+                                Knows every rap verse ever made —<br>
+                                Hell, E-40's his neighbor, so the beat stays tight.</p>
+
+                                <p>And Damon's got that auction voice,<br>
+                                Big presence in the room,<br>
+                                He calls the bets like bidding wars,<br>
+                                Brings that auctioneer boom.</p>
+
+                                <p>We still talk about old Coalter,<br>
+                                How his wife walked out one night,<br>
+                                White shirt, rock-hard nipples —<br>
+                                Boys, those things were quite a sight.</p>
+
+                                <p>When we road-trip up to Tahoe,<br>
+                                Or visit Timmy B in AZ,<br>
+                                We ski, play golf, eat barbecue,<br>
+                                And drink beer like family.</p>
+
+                                <p>Hit Twin Peaks for the busty servers,<br>
+                                Tight shirts and country flair,<br>
+                                And every time we hike Pinnacle Peak<br>
+                                We leave a little friendship there.</p>
+
+                                <p>Bender deals out his favorite game,<br>
+                                Looks up with a silly grin —<br>
+                                &quot;Alright boys, you pay now,&quot; he says,<br>
+                                &quot;Say Wow, or Fuck, and pay a buck,&quot;<br>
+                                And the chips start flowing in.</p>
+
+                                <p>And Charlie's got a warrior's heart,<br>
+                                A firefighter through and through,<br>
+                                He's fighting back from a heavy stroke,<br>
+                                Showing strength we always knew.</p>
+
+                                <p>There's Jerry, Don, and Mark and Jeff,<br>
+                                And all the boys who've joined the game,<br>
+                                You've shared the cards, the jokes, the nights —<br>
+                                And earned a place in this hall of fame.</p>
+
+                                <p>Now David's on the playlist,<br>
+                                Self-proclaimed DJ of the night,<br>
+                                He'll bet it bold in Acey Duecy,<br>
+                                Win it back or lose it right.</p>
+
+                                <p>Says, &quot;AI and I wrote this song for all you boys,<br>
+                                So when these memories start to fade,<br>
+                                We'll have a tune to bring us back<br>
+                                To the nights we always made.&quot;</p>
+
+                                <p>But there's a chair we keep in spirit<br>
+                                For the brother we called &quot;Fuckin' Russell&quot;...<br>
+                                Not out of spite, but deep affection<br>
+                                For his laugh and poker hustle.</p>
+
+                                <p>Although he's gone, his laugh lives on —<br>
+                                You gotta know when to deal it,<br>
+                                Know when to feel it,<br>
+                                Know when to toast the ones<br>
+                                Who never truly leave us.</p>
+
+                                <p>You never count your blessings<br>
+                                Till you're sittin' with these men,<br>
+                                And the Danville Poker brotherhood<br>
+                                Will ride again and again.</p>
+
+                                <p>So shuffle up new memories, boys,<br>
+                                And let the good times spin,<br>
+                                'Cause we ain't just playin' poker —<br>
+                                We're playin' life to win.</p>
+
+                                <p>Love you boys...<br>
+                                Not in a gay way.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,8 +319,7 @@
             <div id="rsvp-page" class="page">
                 <h1>RSVP to Event</h1>
                 <div class="rsvp-container">
-                    <!-- RSVP Form -->
-                    <div class="card" id="rsvpFormCard">
+                    <div class="card">
                         <h2>Select Event</h2>
                         <select id="rsvpEventSelect" class="form-select">
                             <option value="">Select an event...</option>
@@ -191,6 +329,7 @@
                             <div class="event-info">
                                 <p><strong>Date:</strong> <span id="rsvpEventDate"></span></p>
                                 <p><strong>Host:</strong> <span id="rsvpEventHost"></span></p>
+                                <p><strong>Location:</strong> <span id="rsvpEventLocation"></span></p>
                             </div>
                             
                             <h3>Your Information</h3>
@@ -214,20 +353,6 @@
                                 <button id="submitRsvpBtn" class="btn btn-primary">Submit RSVP</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- RSVP Confirmation -->
-                    <div class="card" id="rsvpConfirmation" style="display: none;">
-                        <h2>RSVP Confirmation</h2>
-                        <div id="confirmationMessage" class="confirmation-message"></div>
-                        <div id="rsvpImage" style="text-align: center; margin: 20px 0;"></div>
-                        <p style="margin-top: 20px;">Want to change your RSVP? <button class="btn btn-secondary" onclick="resetRSVPForm()">Update RSVP</button></p>
-                    </div>
-                    
-                    <!-- Current RSVP Summary -->
-                    <div class="card" id="rsvpSummaryCard" style="display: none;">
-                        <h2>Current RSVP Summary</h2>
-                        <div id="rsvpSummaryContent"></div>
                     </div>
                 </div>
             </div>
@@ -270,396 +395,6 @@
                 </div>
             </div>
 
-            <!-- Poker Games Page -->
-            <div id="poker-games-page" class="page">
-                <h1>🃏 Poker Games We Play</h1>
-                <p class="page-subtitle">A guide to the various poker games played at Danville Poker Group</p>
-                
-                <div class="hosting-guide">
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🎴</span>
-                            <h2>Omaha Hi-Lo</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p><strong>The most popular game at DPG!</strong> A high-low split pot game that keeps things exciting.</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player receives 4 hole cards</li>
-                                <li>5 community cards are dealt: the flop (3 cards), turn (1 card), and river (1 card)</li>
-                                <li>Players must use exactly 2 cards from their hand and 3 from the table</li>
-                                <li>The pot is split between the best high hand and the best low hand</li>
-                            </ul>
-                            <p><strong>Low Hand Rules:</strong></p>
-                            <ul>
-                                <li>Best possible low hand: A-2-3-4-5 (the "wheel")</li>
-                                <li>Aces count as low (A = 1)</li>
-                                <li>Standard rule: Highest card in low hand must be 8 or lower</li>
-                                <li><strong>"To The Doug" Rule:</strong> If called, highest card can be a 9 (easier to make a low)</li>
-                                <li>There must be at least 3 cards on the table that are 8-or-lower (or 9-or-lower for "To The Doug")</li>
-                                <li>If no qualifying low hand exists, the high hand wins the entire pot</li>
-                            </ul>
-                            <p><em>Note: The same player can win both high and low, "scooping" the entire pot!</em></p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">♠️</span>
-                            <h2>Texas Hold'em</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>The classic poker game you see on TV.</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player receives 2 hole cards</li>
-                                <li>5 community cards are dealt: the flop (3 cards), turn (1 card), and river (1 card)</li>
-                                <li>Players make the best 5-card hand using any combination of their 2 hole cards and the 5 community cards</li>
-                                <li>Best high hand wins the pot</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">✖️</span>
-                            <h2>Criss Cross</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A wild and unpredictable game with community cards arranged in a cross pattern.</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player receives 4 hole cards</li>
-                                <li>5 community cards are dealt in a cross/plus (+) pattern on the table</li>
-                                <li>Players can use either the vertical line (3 cards) or horizontal line (3 cards) from the cross</li>
-                                <li>Combine your hole cards with one line to make your best hand</li>
-                                <li>Often played as a high-low split game</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">⭕</span>
-                            <h2>Tic Tac Toe</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A strategic game with community cards arranged in a 3x3 grid like Tic Tac Toe.</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player is dealt either 2 or 4 hole cards</li>
-                                <li>9 community cards are dealt on the table in a Tic Tac Toe layout (3x3 grid)</li>
-                                <li>Players must use exactly 3 community cards in a row (horizontal, vertical, or diagonal)</li>
-                                <li>Players use 2 cards from their hand and 3 from any line on the board</li>
-                                <li>Multiple winning lines possible - choose your best!</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🌆</span>
-                            <h2>Cincinnati</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Similar to Omaha but with more cards and action!</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player receives 4 hole cards</li>
-                                <li>5 community cards are dealt: the flop (3 cards), turn (1 card), and river (1 card)</li>
-                                <li>Players can use 0-4 of their hole cards to make the best 5-card hand</li>
-                                <li>More cards = more possibilities!</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🎲</span>
-                            <h2>Acey Deucey (In-Between)</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A fast-paced betting game that's all about odds and guts.</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Two cards are dealt face-up to a player</li>
-                                <li>Player bets whether the third card will fall in-between the first two</li>
-                                <li>If an Ace is dealt as the first card, player decides if high or low</li>
-                                <li>If the player is dealt matching cards (e.g., 8 and 8), they must pay $2</li>
-                                <li>If the third card matches either of the first two, player typically pays double!</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">💪</span>
-                            <h2>Guts</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A high-stakes game of nerves where you decide if you're in or out!</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Dealer must put in one chip at the start of the deal</li>
-                                <li><strong>Penalty:</strong> If dealer forgets to put in a chip and starts the game after everyone has been dealt cards, they must put in two chips as a penalty</li>
-                                <li>Dealer calls if the guts hand is a low hand or high hand before the cards are dealt</li>
-                                <li>Players are dealt 3 cards</li>
-                                <li>Players decide if they are "in" or "out" by placing a chip in their hand to be IN</li>
-                                <li>Dealer says "1-2-3 drop" and everyone who drops a chip is in</li>
-                                <li>People not holding a chip are out</li>
-                                <li>Players who are "in" reveal their cards</li>
-                                <li>Best hand wins the pot</li>
-                                <li><strong>The Twist:</strong> Losers who were "in" must match the pot!</li>
-                                <li>Game continues until only one player stays in, or everyone folds</li>
-                            </ul>
-                            <p><strong>Pussy Guts Variant:</strong></p>
-                            <ul>
-                                <li>If no one stays in (everyone folds), the person with the best hand must match the pot for being a "Pussy"</li>
-                                <li>This prevents everyone from folding and keeps the action going!</li>
-                            </ul>
-                            <p><em>Warning: Pots can grow exponentially! Play with caution.</em></p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">😮</span>
-                            <h2>WOW</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A thrilling high-stakes game where managing your emotions is just as important as managing your cards!</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player is dealt 3 hole cards</li>
-                                <li>5 community cards are flopped one at a time, with a round of betting after each card</li>
-                                <li>When a community card is turned over, anyone holding a matching card must turn it in (discard it)</li>
-                                <li><strong>Card Values:</strong> Face cards (J, Q, K) = 10 points, Aces = 1 or 15 points, all others = face value</li>
-                                <li>At the end, the player with the <strong>most</strong> points and the player with the <strong>least</strong> points split the pot</li>
-                                <li><strong>Winner Takes All:</strong> If a player discards all of their cards during the game, they win the entire pot!</li>
-                            </ul>
-                            <p><strong>The WOW Rule:</strong></p>
-                            <ul>
-                                <li>If anyone says "Wow" or "Fuck" during the game, they must pay $2 to the pot immediately as an infraction</li>
-                                <li>This rule applies every single time—multiple infractions = multiple $2 payments</li>
-                                <li>The game tests your poker face AND your vocabulary control!</li>
-                            </ul>
-                            <p><em>Pro tip: Bite your tongue and count to ten. That outburst could cost you more than the hand itself.</em></p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🦅</span>
-                            <h2>7-27 (Ca-Caw)</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>A unique game nicknamed "Ca-Caw" (like a crow) where you're aiming for either 7 or 27 points!</p>
-                            <p><strong>How to Play:</strong></p>
-                            <ul>
-                                <li>Each player is dealt 2 cards to start: first card face down, second card face up</li>
-                                <li>Players can draw additional cards on each turn—all drawn cards are dealt face up</li>
-                                <li>Players can pass (not take a card) up to 3 times maximum</li>
-                                <li>Once no one takes a card, it's showdown time—players flip over their face-down cards</li>
-                                <li><strong>Card Values:</strong> Face cards (J, Q, K) = 0.5 or 10 points, Aces = 1 or 11 points, all others = face value</li>
-                                <li>Goal: Get as close to either <strong>7</strong> or <strong>27</strong> as possible</li>
-                                <li><strong>Tie-Breaker:</strong> Being under beats being over—26.5 is better than 27.5</li>
-                                <li>Split pot between the player closest to 7 and the player closest to 27</li>
-                            </ul>
-                            <p><strong>7-17 Variant:</strong></p>
-                            <ul>
-                                <li>Same rules, but players aim for <strong>7</strong> or <strong>17</strong> instead of 7 or 27</li>
-                                <li>Card values and dealing remain the same</li>
-                                <li>Being under still beats being over</li>
-                            </ul>
-                            <p><em>DPG Trivia - Nasser hates the 7-27 Ca Caw version and will cry like a little bitch when played.</em></p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🎰</span>
-                            <h2>Other Fun Games</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Keep things interesting with these occasional variants:</p>
-                            <ul>
-                                <li><strong>7-Card Stud:</strong> Classic poker with no community cards, just personal cards dealt up and down</li>
-                                <li><strong>Razz:</strong> Lowball stud poker where the worst hand wins</li>
-                                <li><strong>Follow the Queen:</strong> Stud variant where cards matching the rank after a queen become wild</li>
-                                <li><strong>Baseball:</strong> 7-card stud with 3s and 9s wild, 4s get an extra card</li>
-                                <li><strong>Pineapple:</strong> Like Hold'em but you get 3 cards and discard one after the flop</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Poker Basics Page -->
-            <div id="poker-basics-page" class="page">
-                <h1>🎓 Poker for Dummies</h1>
-                <p class="page-subtitle">New to poker? Start here to learn the fundamentals</p>
-                
-                <div class="hosting-guide">
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">📚</span>
-                            <h2>The Basics</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Poker is a card game where players bet on the strength of their cards. The goal is to win chips by either having the best hand or convincing others you do!</p>
-                            <p><strong>Key Concepts:</strong></p>
-                            <ul>
-                                <li><strong>The Deck:</strong> Standard 52 cards (no jokers in most games)</li>
-                                <li><strong>Suits:</strong> ♠️ Spades, ♥️ Hearts, ♦️ Diamonds, ♣️ Clubs (all equal in poker)</li>
-                                <li><strong>Ranks:</strong> 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K, A (Ace is typically high, but can be low)</li>
-                                <li><strong>The Pot:</strong> All the chips/money bet during a hand</li>
-                                <li><strong>Betting Rounds:</strong> Times when players can check, bet, call, raise, or fold</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🎯</span>
-                            <h2>Betting Actions</h2>
-                        </div>
-                        <div class="guide-content">
-                            <ul>
-                                <li><strong>Check:</strong> Pass the action without betting (only if no one has bet yet)</li>
-                                <li><strong>Bet:</strong> Put chips into the pot</li>
-                                <li><strong>Call:</strong> Match the current bet</li>
-                                <li><strong>Raise:</strong> Increase the current bet</li>
-                                <li><strong>Fold:</strong> Give up your hand and forfeit the pot</li>
-                                <li><strong>All-In:</strong> Bet all your remaining chips</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">👑</span>
-                            <h2>Poker Hand Rankings</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>From best to worst:</p>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>1. Royal Flush</strong> 🏆</p>
-                                <p>A-K-Q-J-10, all of the same suit</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: A♠️ K♠️ Q♠️ J♠️ 10♠️</p>
-                                <p><em>The best possible hand in poker!</em></p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>2. Straight Flush</strong></p>
-                                <p>Five cards in sequence, all of the same suit</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: 9♥️ 8♥️ 7♥️ 6♥️ 5♥️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>3. Four of a Kind (Quads)</strong></p>
-                                <p>Four cards of the same rank</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: K♠️ K♥️ K♦️ K♣️ 7♠️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>4. Full House (Boat)</strong></p>
-                                <p>Three of a kind plus a pair</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: J♠️ J♥️ J♦️ 4♣️ 4♠️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>5. Flush</strong></p>
-                                <p>Five cards of the same suit, not in sequence</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: A♦️ J♦️ 9♦️ 6♦️ 3♦️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>6. Straight</strong></p>
-                                <p>Five cards in sequence, mixed suits</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: 10♠️ 9♥️ 8♣️ 7♦️ 6♠️</p>
-                                <p><em>Note: A-2-3-4-5 is the lowest straight (the "wheel")</em></p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>7. Three of a Kind (Trips/Set)</strong></p>
-                                <p>Three cards of the same rank</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: 8♠️ 8♥️ 8♦️ A♣️ 5♠️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>8. Two Pair</strong></p>
-                                <p>Two different pairs</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: Q♠️ Q♥️ 5♦️ 5♣️ 9♠️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>9. One Pair</strong></p>
-                                <p>Two cards of the same rank</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: 7♠️ 7♥️ K♦️ 10♣️ 3♠️</p>
-                            </div>
-                            
-                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid var(--primary-color);">
-                                <p><strong>10. High Card</strong></p>
-                                <p>When you have none of the above, your highest card plays</p>
-                                <p style="font-size: 1.2rem; margin: 5px 0;">Example: A♠️ J♦️ 9♣️ 6♥️ 2♠️</p>
-                                <p><em>This hand is called "Ace-high"</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🤔</span>
-                            <h2>Breaking Ties</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>When two players have the same type of hand:</p>
-                            <ul>
-                                <li><strong>Compare the highest cards:</strong> A pair of Kings beats a pair of Queens</li>
-                                <li><strong>If those match, go to the next card:</strong> K-K-A-7-2 beats K-K-Q-J-9</li>
-                                <li><strong>Suits don't matter:</strong> A♠️ is equal to A♥️</li>
-                                <li><strong>Identical hands split the pot</strong></li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">💰</span>
-                            <h2>Money Management</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>New players always ask how much money to bring. Here's the truth: it's hard to win or lose a <em>lot</em> of money unless you dive into the wild games like Acey Deucey or Guts. On average, you might win or lose around $200 over the course of the night—nothing that'll make or break your mortgage payment.</p>
-                            <p>That said, be smart like Dan Evans and show up with a wallet full of crisp hundreds "just in case." Why? Because you never know when Lady Luck will smile on you, when a guts pot will spiral out of control, or when you'll need to look like a baller at the table. Plus, nothing says confidence like peeling off fresh Benjamins while your opponents nervously eye their chip stacks.</p>
-                            <p><strong>Pro tip:</strong> Bring enough to feel comfortable, but not so much that you'll cry on the drive home. And remember, the real jackpot isn't the money—it's the memories and the trash talk that lasts for months.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">💡</span>
-                            <h2>Quick Tips for Beginners</h2>
-                        </div>
-                        <div class="guide-content">
-                            <ul>
-                                <li><strong>Position matters:</strong> Acting last gives you more information</li>
-                                <li><strong>Don't play every hand:</strong> Fold weak starting hands</li>
-                                <li><strong>Watch your opponents:</strong> Look for patterns and tells</li>
-                                <li><strong>Manage your chips:</strong> Don't go all-in on marginal hands</li>
-                                <li><strong>It's okay to fold:</strong> Live to play another hand</li>
-                                <li><strong>If you don't understand something ask Brad.</strong> He's like ChatGPT but smarter</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-footer">
-                        <p><strong>🎲 Remember:</strong> Poker is part skill, part luck, and all fun! The best way to learn is to play.</p>
-                        <p style="margin-top: 15px;"><em>"You gotta know when to hold 'em, know when to fold 'em..." - Kenny Rogers</em></p>
-                    </div>
-                </div>
-            </div>
-
             <!-- How to Host Page -->
             <div id="how-to-host-page" class="page">
                 <h1>Hosting Playbook</h1>
@@ -668,30 +403,7 @@
                 <div class="hosting-guide">
                     <div class="guide-section" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; text-align: center; padding: 40px;">
                         <h2 style="color: white; border: none; padding: 0; margin: 0 0 10px 0;">⏰ Start Time: 7:00 PM PT</h2>
-                        <p style="margin: 10px 0; font-size: 1.1rem;">Dessert served between 10:00-10:30 PM</p>
-                        <p style="margin: 20px auto 0; font-size: 1rem; max-width: 800px; line-height: 1.6; font-style: italic;">
-                            Listen up: You only host once a year, so this is your moment to shine (or embarrass yourself). Hot food should actually be <em>hot</em>—invest in warming plates, not lukewarm disappointment. Balance your proteins and carbs like an adult; nobody wants another massive Mexican carb-fest that leaves everyone in a food coma by 8:30 PM. Some legends fire up the grill for BBQ, craft homemade Philly cheesesteaks, or go all-out with culinary masterpieces. So man up, spoil your friends, and make your one night count. Your reputation depends on it.
-                        </p>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🔧</span>
-                            <h2>Setup</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p><strong>Before the event starts:</strong></p>
-                            <ul>
-                                <li>Set up tables and chairs for all attending players</li>
-                                <li>Pre-arrange at least one rack of 100 chips per person</li>
-                                <li>Contact the previous month's host several days prior to arrange pickup and transport of tables, chairs, chips, and other equipment</li>
-                            </ul>
-                            <p><strong>Location:</strong></p>
-                            <ul>
-                                <li>Hosting can be in the garage or inside your home</li>
-                                <li>If hosting in the garage during colder months, ensure player comfort with heaters</li>
-                            </ul>
-                        </div>
+                        <p style="margin: 0; font-size: 1.1rem;">Dessert served between 10:00-10:30 PM</p>
                     </div>
                     
                     <div class="guide-section">
@@ -709,7 +421,7 @@
                                         <li>Knives</li>
                                         <li>Spoons</li>
                                         <li>Napkins</li>
-                                        <li>Plastic Cups</li>
+                                        <li>Solo Cups</li>
                                     </ul>
                                 </div>
                                 <div>
@@ -719,7 +431,7 @@
                                         <li>Poker Tables</li>
                                         <li>Poker Chairs</li>
                                         <li>Poker Chips</li>
-                                        <li>Two Decks of Cards<br><span style="font-size: 0.9em; color: var(--text-muted);">- Different color backings</span></li>
+                                        <li>Two Decks of Cards</li>
                                         <li>Music</li>
                                     </ul>
                                 </div>
@@ -736,21 +448,21 @@
                             <div class="two-column-list">
                                 <div>
                                     <ul>
-                                        <li><strong>Main Dish</strong><br><span style="font-size: 0.9em; color: var(--text-muted);">- Pizza can NOT be the main dish unless it's Zachary's</span></li>
-                                        <li>Side Dishes</li>
-                                        <li>Two Flavors of Ice Cream<br><span style="font-size: 0.9em; color: var(--text-muted);">- Vanilla or French Vanilla required as one of the flavors</span></li>
-                                        <li>Cookies, Brownies, or Cake<br><span style="font-size: 0.9em; color: var(--text-muted);">- If a member's birthday occurs within 7 days of hosting, include a birthday cake</span></li>
+                                        <li><strong>Main Dish</strong></li>
+                                        <li>Sides</li>
+                                        <li>Two Flavors of Ice Cream<br><span style="font-size: 0.9em; color: var(--text-muted);">- Vanilla required</span></li>
+                                        <li>Cookies or Brownies</li>
+                                        <li>Dessert Cake (optional)</li>
                                     </ul>
                                 </div>
                                 <div>
                                     <ul>
-                                        <li>M & M (peanut required)</li>
+                                        <li>M & M (plain and peanut)</li>
                                         <li>Mixed Nuts</li>
                                         <li>Chips</li>
-                                        <li>Pretzels (Pro Host - Peanut Butter Filled)</li>
-                                        <li>Red Vines (Pro Host - Red and Black)<br><span style="font-size: 0.9em; color: var(--text-muted);">- Not Twizzlers</span></li>
+                                        <li>Pretzels</li>
+                                        <li>Red Vines</li>
                                         <li>Lollipops (Sees or Tootsie)</li>
-                                        <li>See's Candies Bridge Mix (Pro Host)</li>
                                     </ul>
                                 </div>
                             </div>
@@ -767,17 +479,14 @@
                                 <div>
                                     <ul>
                                         <li>Ice</li>
-                                        <li>Beer - Regular & Light<br><span style="font-size: 0.9em; color: var(--text-muted);">- IPA as a bonus<br>- Max 24 beers total</span></li>
+                                        <li>Beer (2 kinds)</li>
                                         <li>Vodka</li>
                                         <li>Tequila</li>
                                         <li>Whiskey</li>
-                                        <li>Wine (Pro Host)</li>
-                                        <li>Bitters & Cherries<br><span style="font-size: 0.9em; color: var(--text-muted);">- For Old Fashioneds</span></li>
                                     </ul>
                                 </div>
                                 <div>
                                     <ul>
-                                        <li>Bottled Water</li>
                                         <li>Cranberry Juice</li>
                                         <li>Lemon, Lime, Oranges</li>
                                         <li>Red Bull (Diet, Regular)</li>
@@ -795,14 +504,25 @@
                             <h2>Music</h2>
                         </div>
                         <div class="guide-content">
-                            <p>Background music helps set the atmosphere! Keep the volume at a level where conversation is easy.</p>
+                            <p>Background music helps set the atmosphere! Keep the volume at a level where conversation is easy. Consider:</p>
                             <ul>
-                                <li>Classic Rock is the group favorite</li>
-                                <li>Several Spotify poker night playlists have been created and work great</li>
-                                <li><strong>David Lewis is the Group DJ</strong> - consult him for playlist recommendations</li>
-                                <li>A portable speaker is available from Nasser or David for those without music systems</li>
+                                <li>Classic rock or jazz playlists</li>
+                                <li>Low-key instrumental music</li>
+                                <li>Avoid heavy bass or loud vocals</li>
+                                <li>Spotify poker night playlists work great</li>
                             </ul>
                         </div>
+                    </div>
+                    
+                    <div class="guide-footer">
+                        <p><strong>💡 Pro Tips:</strong></p>
+                        <ul style="text-align: left; max-width: 600px; margin: 10px auto 0;">
+                            <li>Set up food and bar areas away from poker tables</li>
+                            <li>Have trash cans easily accessible</li>
+                            <li>Keep extra supplies handy (napkins, cups, ice)</li>
+                            <li>Label drinks with permanent markers if needed</li>
+                            <li>Start dessert service around 10:00-10:30 PM</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -877,81 +597,6 @@
                         <p><strong>Ratified:</strong> Some time ago, probably<br>
                         <strong>Last Amended:</strong> Every poker night<br>
                         <strong>Enforcement:</strong> Selective</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Russell Memorial Page -->
-            <div id="russell-memorial-page" class="page">
-                <h1>💙 In Loving Memory of Russell Hyzen</h1>
-                <p class="page-subtitle">Forever a part of our poker family</p>
-                
-                <div class="hosting-guide">
-                    <div class="guide-section" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; text-align: center; padding: 40px;">
-                        <img src="assets/images/russell-and-david.jpg" alt="Russell Hyzen and David" style="max-width: 500px; width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 20px;">
-                        <h2 style="color: white; border: none; padding: 0; margin: 20px 0 10px 0; font-size: 2rem;">Russell Hyzen</h2>
-                        <p style="margin: 0; font-size: 1.2rem; font-style: italic;">October 21, 2025</p>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🎴</span>
-                            <h2>"Fuck'n Russell"</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Russell earned his legendary nickname not from any flaw, but from a personality trait we all came to love and cherish. Every time it was his turn, he'd look up with that easy-going smile and ask, "What's the bet?" as he glanced at his cards for the first time. He was never quite ready—and that was perfectly Russell.</p>
-                            <p>While others were calculating odds and studying their opponents, Russell was doing what he did best: building friendships, sharing laughs, and reminding us all that poker night was about so much more than the cards we were dealt. For Russell, camaraderie always trumped competition.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">🌉</span>
-                            <h2>A Bay Area Pioneer</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Russell joined the Danville Poker Group when he moved to the Bay Area during the exciting dot-com era. A true serial entrepreneur with vision and drive, he brought that same innovative spirit to our poker table—though he was far more interested in the people around it than the chips in front of him.</p>
-                            <p>His easy-going nature and genuine warmth made him an instant fit with our group. Russell had a gift for making everyone feel welcome, for turning a card game into a gathering of friends, and for reminding us to enjoy the moment.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">💔</span>
-                            <h2>The Battle Within</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>Behind Russell's warm smile and laid-back demeanor was a battle that many didn't see. He struggled with depression and anxiety—invisible opponents far more formidable than any poker hand. On October 21, 2025, those struggles became too much to bear, and Russell made the heartbreaking decision to end his life.</p>
-                            <p>His loss reminds us that even those who bring light to others can be fighting darkness within. It's a call to check in on our friends, to ask how they're really doing, and to remember that it's okay to not be okay.</p>
-                            <p style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-left: 4px solid #3498db; font-style: italic;">
-                                <strong>If you or someone you know is struggling with depression or suicidal thoughts, please reach out:</strong><br>
-                                National Suicide Prevention Lifeline: 988<br>
-                                Crisis Text Line: Text HOME to 741741<br>
-                                You are not alone. Help is available.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-section">
-                        <div class="guide-header">
-                            <span class="guide-icon">♠️</span>
-                            <h2>Russell's Seat</h2>
-                        </div>
-                        <div class="guide-content">
-                            <p>At every Danville Poker Group gathering, we keep an empty seat for Russell. It's our way of honoring his memory and keeping his spirit present at the table where he brought so much joy.</p>
-                            <p>In our poker management system, Russell is always marked as "attending (in spirit)." He may not be physically with us, but his laughter, his friendship, and his reminder to focus on what truly matters—the people we share our time with—remain with us always.</p>
-                            <p style="text-align: center; margin-top: 30px; font-size: 1.2rem; font-weight: bold; color: var(--primary-color);">
-                                "What's the bet?"<br>
-                                <span style="font-size: 0.9rem; font-style: italic; font-weight: normal;">— We'll always hear your voice, Russell</span>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-footer" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 30px; text-align: center;">
-                        <p style="font-size: 1.3rem; margin: 0 0 15px 0;"><strong>Russell Hyzen</strong></p>
-                        <p style="font-size: 1.1rem; margin: 0;">Friend, Entrepreneur, Poker Buddy, Loving Husband</p>
-                        <p style="font-size: 1.1rem; margin: 10px 0 0 0; font-style: italic;">"Forever in our hearts, always at our table"</p>
-                        <p style="margin-top: 25px; font-size: 2rem;">♠️ ♥️ ♦️ ♣️</p>
                     </div>
                 </div>
             </div>

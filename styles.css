@@ -783,6 +783,69 @@ body {
     font-size: 0.95rem;
 }
 
+/* Song Page */
+.song-card {
+    margin-top: 20px;
+}
+
+.song-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.song-player-column h2,
+.song-lyrics-column h2 {
+    margin-bottom: 10px;
+}
+
+.audio-player {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    background: var(--light-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.audio-player audio {
+    width: 100%;
+}
+
+.download-link {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+
+.lyrics-box {
+    margin-top: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+.lyrics-box p {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+    .song-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 .two-column-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
