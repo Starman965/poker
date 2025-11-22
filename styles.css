@@ -789,10 +789,7 @@ body {
 }
 
 .song-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
-    gap: 30px;
-    align-items: flex-start;
+    display: block;
 }
 
 .song-player-column h2,
@@ -827,12 +824,9 @@ body {
 
 .lyrics-box {
     margin-top: 10px;
-    padding: 20px;
-    border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    max-height: 400px;
-    overflow-y: auto;
+    padding: 0;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .lyrics-box p {
