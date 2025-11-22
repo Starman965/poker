@@ -680,6 +680,7 @@ function showRSVPConfirmation(eventId, memberName, status) {
     document.getElementById('rsvpFormCard').style.display = 'none';
     document.getElementById('rsvpConfirmation').style.display = 'block';
     document.getElementById('rsvpSummaryCard').style.display = 'block';
+    const addToCalContainer = document.getElementById('addToCalendarContainer');
     
     // Set confirmation message
     const statusText = status.replace('-', ' ').toUpperCase();
@@ -694,6 +695,30 @@ function showRSVPConfirmation(eventId, memberName, status) {
         imageElement.innerHTML = '<img src="https://www.danvillepokergroup.com/thumbsdown.png" alt="Thumbs down" style="max-width: 200px;">';
     } else {
         imageElement.innerHTML = '';
+    }
+
+    // Add to Calendar button for attending
+    if (addToCalContainer) {
+        const event = schedule.find(e => e.id === eventId);
+        if (status === 'attending' && event) {
+            addToCalContainer.innerHTML = `
+                <add-to-calendar-button
+                    name="Danville Poker Night"
+                    description="Poker night with the Danville Poker Group"
+                    startDate="${event.date}"
+                    startTime="19:00"
+                    endTime="23:00"
+                    timeZone="America/Los_Angeles"
+                    location="${event.location}"
+                    options="'Apple','Google','iCal','Microsoft365','Outlook.com','Yahoo'"
+                    lightMode="dark"
+                ></add-to-calendar-button>
+            `;
+            addToCalContainer.style.display = 'block';
+        } else {
+            addToCalContainer.style.display = 'none';
+            addToCalContainer.innerHTML = '';
+        }
     }
     
     // Display RSVP summary
@@ -769,6 +794,11 @@ function resetRSVPForm() {
     document.getElementById('rsvpFormCard').style.display = 'block';
     document.getElementById('rsvpConfirmation').style.display = 'none';
     document.getElementById('rsvpSummaryCard').style.display = 'none';
+    const addToCalContainer = document.getElementById('addToCalendarContainer');
+    if (addToCalContainer) {
+        addToCalContainer.style.display = 'none';
+        addToCalContainer.innerHTML = '';
+    }
     
     // Keep the event selected, just reset member selection
     const eventSelect = document.getElementById('rsvpEventSelect');
