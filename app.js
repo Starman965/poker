@@ -219,29 +219,34 @@ function initializeNavigation() {
     const navClose = document.getElementById('navClose');
     const leftNav = document.getElementById('leftNav');
     const navOverlay = document.getElementById('navOverlay');
-    
-    // Open menu
-    hamburgerMenu.addEventListener('click', () => {
-        leftNav.classList.add('mobile-open');
-        navOverlay.classList.add('active');
-        hamburgerMenu.classList.add('active');
-    });
-    
-    // Close menu via close button
-    navClose.addEventListener('click', () => {
-        closeMenu();
-    });
-    
-    // Close menu via overlay click
-    navOverlay.addEventListener('click', () => {
-        closeMenu();
-    });
-    
-    // Helper function to close menu
-    function closeMenu() {
-        leftNav.classList.remove('mobile-open');
-        navOverlay.classList.remove('active');
-        hamburgerMenu.classList.remove('active');
+
+    // If any of the mobile nav elements are missing, safely skip mobile setup
+    if (!hamburgerMenu || !navClose || !leftNav || !navOverlay) {
+        console.warn('Mobile navigation elements not found; skipping hamburger menu setup.');
+    } else {
+        // Open menu
+        hamburgerMenu.addEventListener('click', () => {
+            leftNav.classList.add('mobile-open');
+            navOverlay.classList.add('active');
+            hamburgerMenu.classList.add('active');
+        });
+        
+        // Close menu via close button
+        navClose.addEventListener('click', () => {
+            closeMenu();
+        });
+        
+        // Close menu via overlay click
+        navOverlay.addEventListener('click', () => {
+            closeMenu();
+        });
+        
+        // Helper function to close menu
+        function closeMenu() {
+            leftNav.classList.remove('mobile-open');
+            navOverlay.classList.remove('active');
+            hamburgerMenu.classList.remove('active');
+        }
     }
     
     // Page navigation
