@@ -437,21 +437,44 @@ function formatLocationShort(location) {
     // - "123 Main St, Danville, CA 94526"
     // - "Danville, CA 94526"
     // - "Danville, CA"
+    // - "123 Main St, Danville CA 94526" (missing comma between city/state)
     // Keep City + State, drop street + zip.
     if (parts.length >= 2) {
+        // Prefer parsing city/state from the last comma-part if it already contains the state token.
+        let tail = parts[parts.length - 1];
+        tail = tail.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim(); // strip ZIP
+        
+        const m = tail.match(/^(.*)\b(CA|AZ)\b$/i);
+        if (m) {
+            const city = (m[1] || '').trim().replace(/,$/, '').trim();
+            const state = (m[2] || '').toUpperCase();
+            if (city) return `${city}, ${state}`;
+            return state;
+        }
+        
+        // Otherwise fall back to city from the second-to-last part and state from the last part.
         const city = parts[parts.length - 2];
         let stateZip = parts[parts.length - 1];
-        
-        // Remove ZIP (5 or 9 digit) if present: "CA 94526" -> "CA"
         stateZip = stateZip.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim();
         
+        // If last part is just "CA" or "AZ" we return "City, ST"
+        const st = stateZip.match(/\b(CA|AZ)\b/i)?.[1];
+        if (city && st) return `${city}, ${st.toUpperCase()}`;
         if (city && stateZip) return `${city}, ${stateZip}`;
         if (city) return city;
         return stateZip;
     }
     
     // Single-part fallback: just remove ZIP if present
-    return location.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim();
+    const cleaned = location.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim();
+    const m = cleaned.match(/^(.*)\b(CA|AZ)\b$/i);
+    if (m) {
+        const city = (m[1] || '').trim().replace(/,$/, '').trim();
+        const state = (m[2] || '').toUpperCase();
+        if (city) return `${city}, ${state}`;
+        return state;
+    }
+    return cleaned;
 }
 
 function renderUpcomingHostingScheduleHTML() {
