@@ -428,6 +428,32 @@ function getPastEventsStrict() {
         .sort((a, b) => getEventLocalDate(b.date) - getEventLocalDate(a.date));
 }
 
+function formatLocationShort(location) {
+    if (!location || typeof location !== 'string') return '';
+    
+    const parts = location.split(',').map(p => p.trim()).filter(Boolean);
+    
+    // Typical formats we see:
+    // - "123 Main St, Danville, CA 94526"
+    // - "Danville, CA 94526"
+    // - "Danville, CA"
+    // Keep City + State, drop street + zip.
+    if (parts.length >= 2) {
+        const city = parts[parts.length - 2];
+        let stateZip = parts[parts.length - 1];
+        
+        // Remove ZIP (5 or 9 digit) if present: "CA 94526" -> "CA"
+        stateZip = stateZip.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim();
+        
+        if (city && stateZip) return `${city}, ${stateZip}`;
+        if (city) return city;
+        return stateZip;
+    }
+    
+    // Single-part fallback: just remove ZIP if present
+    return location.replace(/\b\d{5}(?:-\d{4})?\b/g, '').replace(/\s+/g, ' ').trim();
+}
+
 function renderUpcomingHostingScheduleHTML() {
     const upcoming = getUpcomingEventsStrict();
     
@@ -454,7 +480,7 @@ function renderUpcomingHostingScheduleHTML() {
             <tr>
                 <td><span class="member-name">${formatDateShort(event.date)}</span></td>
                 <td>${event.host}</td>
-                <td>${event.location || ''}</td>
+                <td>${formatLocationShort(event.location)}</td>
             </tr>
         `;
     });
@@ -489,7 +515,7 @@ function renderPastHostingsHTML() {
             <tr>
                 <td><span class="member-name">${formatDateShort(event.date)}</span></td>
                 <td>${event.host}</td>
-                <td>${event.location || ''}</td>
+                <td>${formatLocationShort(event.location)}</td>
             </tr>
         `;
     });
