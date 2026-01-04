@@ -402,6 +402,13 @@
                             <p>Complete attendance history since January 2024</p>
                             <span class="report-card-action">View Report →</span>
                         </div>
+
+                        <div class="report-card" onclick="showMemberAttendanceReport()">
+                            <div class="report-card-icon">👤</div>
+                            <h3>Member Report</h3>
+                            <p>12-month + all-time attendance, plus hosting history</p>
+                            <span class="report-card-action">View Report →</span>
+                        </div>
                         
                         <div class="report-card" onclick="showHostingReport()">
                             <div class="report-card-icon">🏠</div>
@@ -689,7 +696,7 @@
                             <button class="btn btn-danger" onclick="deleteEvent()">Delete Event</button>
                         </div>
                     </div>
-                    
+
                     <!-- Event List with RSVPs -->
                     <div class="card">
                         <h2>Event RSVPs</h2>
@@ -722,6 +729,17 @@
                         </div>
                         <button class="btn btn-primary" id="saveMemberBtn" onclick="addMember()">Add Member</button>
                         <button class="btn btn-secondary" id="cancelMemberBtn" onclick="cancelMemberEdit()" style="display: none;">Cancel</button>
+                    </div>
+
+                    <!-- RSVP Maintenance -->
+                    <div class="card">
+                        <h2>RSVP Maintenance</h2>
+                        <p class="text-muted">Use this to remove an old name from all saved event RSVPs (for example, if a member was deleted but still appears in historical RSVP lists).</p>
+                        <div class="form-group">
+                            <label>Name to remove from all event RSVPs</label>
+                            <input type="text" id="purgeRsvpName" class="form-input" placeholder="e.g., Russell Hyzen">
+                        </div>
+                        <button class="btn btn-danger" onclick="purgeRsvpNameFromAllEvents()">Purge name from all event RSVPs</button>
                     </div>
                     
                     <!-- Members List -->

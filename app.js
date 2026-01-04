@@ -427,21 +427,18 @@ function createEventCard(event, isCurrent = false) {
     const noResponseList = [];
     
     Object.entries(event.rsvps || {}).forEach(([name, status]) => {
-        // Display Russell as "attending (in spirit)"
-        const displayName = name === 'Russell Hyzen' ? 'Russell Hyzen (in spirit)' : name;
-        
         switch(status) {
             case 'attending':
-                attendingList.push(displayName);
+                attendingList.push(name);
                 break;
             case 'not-attending':
-                notAttendingList.push(displayName);
+                notAttendingList.push(name);
                 break;
             case 'maybe':
-                maybeList.push(displayName);
+                maybeList.push(name);
                 break;
             default:
-                noResponseList.push(displayName);
+                noResponseList.push(name);
         }
     });
     
@@ -584,15 +581,13 @@ function setupRSVPPage() {
         eventSelect.appendChild(option);
     });
     
-    // Populate member dropdown (exclude Russell as he always attends in spirit)
+    // Populate member dropdown
     memberSelect.innerHTML = '<option value="">Select your name...</option>';
     members.forEach((member, index) => {
-        if (member.name !== 'Russell Hyzen') {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = member.name;
-            memberSelect.appendChild(option);
-        }
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = member.name;
+        memberSelect.appendChild(option);
     });
     
     // Event selection handler (must be attached before triggering)
@@ -1146,6 +1141,203 @@ function showPastEventsReport() {
     output.innerHTML = html;
 }
 
+function showMemberAttendanceReport() {
+    const output = document.getElementById('reportOutput');
+
+    // Show output area and scroll
+    output.style.display = 'block';
+    setTimeout(() => {
+        output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+
+    if (!members || members.length === 0) {
+        output.innerHTML = `
+            <h2>Member Report</h2>
+            <p class="text-muted">No members found.</p>
+            <button class="btn btn-secondary back-to-reports-btn" onclick="backToReports()">← Back to Reports</button>
+        `;
+        return;
+    }
+
+    const sortedMembers = [...members].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+    output.innerHTML = `
+        <h2>Member Report</h2>
+        <p class="text-muted" style="margin-bottom: 15px;">Pick a member to see their attendance and hosting history.</p>
+        <div class="card" style="padding: 20px; margin-bottom: 15px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Select Member</label>
+                <select id="memberReportSelect" class="form-select">
+                    <option value="">Select a member...</option>
+                </select>
+            </div>
+        </div>
+        <div id="memberReportContent"></div>
+        <button class="btn btn-secondary back-to-reports-btn" onclick="backToReports()">← Back to Reports</button>
+    `;
+
+    const select = document.getElementById('memberReportSelect');
+    const content = document.getElementById('memberReportContent');
+
+    sortedMembers.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.name;
+        opt.textContent = m.name;
+        select.appendChild(opt);
+    });
+
+    select.addEventListener('change', () => {
+        renderMemberReport(select.value, content);
+    });
+}
+
+function renderMemberReport(memberName, contentEl) {
+    if (!contentEl) return;
+    if (!memberName) {
+        contentEl.innerHTML = '<p class="text-muted">Select a member to see their report.</p>';
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const twelveMonthsAgo = new Date(today);
+    twelveMonthsAgo.setMonth(today.getMonth() - 12);
+    twelveMonthsAgo.setDate(today.getDate() + 1); // match the 12-month report window
+
+    const pastEvents = (schedule || [])
+        .filter(event => {
+            const d = new Date(event.date + 'T00:00:00');
+            return d <= today;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const past12moEvents = pastEvents.filter(event => {
+        const d = new Date(event.date + 'T00:00:00');
+        return d >= twelveMonthsAgo && d <= today;
+    });
+
+    const allTime = buildMemberAttendanceBreakdown(memberName, pastEvents);
+    const last12 = buildMemberAttendanceBreakdown(memberName, past12moEvents);
+
+    const hostedAll = pastEvents.filter(e => e.host === memberName);
+    const hosted12 = past12moEvents.filter(e => e.host === memberName);
+
+    const attendancePctAll = allTime.eligible > 0 ? (allTime.attending / allTime.eligible) * 100 : 0;
+    const attendancePct12 = last12.eligible > 0 ? (last12.attending / last12.eligible) * 100 : 0;
+
+    const renderEventList = (events) => {
+        if (events.length === 0) return '<p class="text-muted">None</p>';
+        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDate(e.date)} — Host: <strong>${e.host}</strong></li>`).join('')}</ul>`;
+    };
+
+    const renderHostDates = (events) => {
+        if (events.length === 0) return '<p class="text-muted">None</p>';
+        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDate(e.date)}</li>`).join('')}</ul>`;
+    };
+
+    contentEl.innerHTML = `
+        <div class="card" style="padding: 20px;">
+            <h3 style="margin-top: 0;">${memberName}</h3>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">Past 12 Months</h3>
+                <p style="margin: 0;">
+                    <strong>Attended:</strong> ${last12.attending} / ${last12.eligible}
+                    ${last12.eligible ? `(<strong>${attendancePct12.toFixed(1)}%</strong>)` : ''}
+                </p>
+                <p style="margin: 6px 0 0 0;">
+                    <strong>Hosted:</strong> ${hosted12.length}
+                </p>
+            </div>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">All Time</h3>
+                <p style="margin: 0;">
+                    <strong>Attended:</strong> ${allTime.attending} / ${allTime.eligible}
+                    ${allTime.eligible ? `(<strong>${attendancePctAll.toFixed(1)}%</strong>)` : ''}
+                </p>
+                <p style="margin: 6px 0 0 0;">
+                    <strong>Hosted:</strong> ${hostedAll.length}
+                </p>
+            </div>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">Events Attended (All Time)</h3>
+                ${renderEventList(allTime.eventsAttending)}
+            </div>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">Events Missed (Not Attending) (All Time)</h3>
+                ${renderEventList(allTime.eventsNotAttending)}
+            </div>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">Maybe / No Response (All Time)</h3>
+                <p style="margin: 0 0 10px 0;"><strong>Maybe:</strong> ${allTime.maybe} &nbsp; | &nbsp; <strong>No Response:</strong> ${allTime.noResponse}</p>
+                ${allTime.eventsMaybe.length === 0 && allTime.eventsNoResponse.length === 0
+                    ? '<p class="text-muted">None</p>'
+                    : `
+                        <div style="display: grid; gap: 12px;">
+                            <div>
+                                <p style="margin: 0 0 6px 0;"><strong>Maybe</strong></p>
+                                ${renderEventList(allTime.eventsMaybe)}
+                            </div>
+                            <div>
+                                <p style="margin: 0 0 6px 0;"><strong>No Response</strong></p>
+                                ${renderEventList(allTime.eventsNoResponse)}
+                            </div>
+                        </div>
+                    `}
+            </div>
+
+            <div class="rsvp-category">
+                <h3 style="margin: 0 0 10px 0;">Hosted Dates (All Time)</h3>
+                ${renderHostDates(hostedAll)}
+            </div>
+        </div>
+    `;
+}
+
+function buildMemberAttendanceBreakdown(memberName, events) {
+    const breakdown = {
+        eligible: 0,
+        attending: 0,
+        notAttending: 0,
+        maybe: 0,
+        noResponse: 0,
+        eventsAttending: [],
+        eventsNotAttending: [],
+        eventsMaybe: [],
+        eventsNoResponse: []
+    };
+
+    events.forEach(event => {
+        if (!event?.rsvps || !Object.prototype.hasOwnProperty.call(event.rsvps, memberName)) {
+            return; // not eligible (member not in RSVP map for this event)
+        }
+
+        breakdown.eligible++;
+        const status = event.rsvps[memberName] || 'no-response';
+
+        if (status === 'attending') {
+            breakdown.attending++;
+            breakdown.eventsAttending.push(event);
+        } else if (status === 'not-attending') {
+            breakdown.notAttending++;
+            breakdown.eventsNotAttending.push(event);
+        } else if (status === 'maybe') {
+            breakdown.maybe++;
+            breakdown.eventsMaybe.push(event);
+        } else {
+            breakdown.noResponse++;
+            breakdown.eventsNoResponse.push(event);
+        }
+    });
+
+    return breakdown;
+}
+
 function backToReports() {
     const output = document.getElementById('reportOutput');
     const cardsGrid = document.querySelector('.report-cards-grid');
@@ -1574,22 +1766,18 @@ function displayAdminEventsList() {
         const rsvpList = Object.entries(event.rsvps || {})
             .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
             .map(([name, status]) => {
-                // Display Russell as "attending (in spirit)"
-                const displayName = name === 'Russell Hyzen' ? 'Russell Hyzen (in spirit)' : name;
-                const isRussell = name === 'Russell Hyzen';
-                
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
-                        <span style="flex: 1;">${displayName}</span>
+                        <span style="flex: 1;">${name}</span>
                         <select 
-                            class="form-select" 
-                            style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px;"
-                            onchange="updateRSVP('${event.id}', '${name.replace(/'/g, "\\'")}', this.value)"
-                            ${isRussell ? 'disabled' : ''}>
-                            <option value="no-response" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                            <option value="attending" ${status === 'attending' ? 'selected' : ''}>Attending${isRussell ? ' (in spirit)' : ''}</option>
-                            <option value="not-attending" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                            class="form-select admin-rsvp-select" 
+                            style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px; color: ${getAdminRSVPTextColor(status)};"
+                            onchange="setAdminRSVPSelectColor(this); updateRSVP('${event.id}', '${name.replace(/'/g, "\\'")}', this.value)"
+                            >
+                            <option value="no-response" style="color: ${getAdminRSVPTextColor('no-response')};" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                            <option value="attending" style="color: ${getAdminRSVPTextColor('attending')};" ${status === 'attending' ? 'selected' : ''}>Attending</option>
+                            <option value="not-attending" style="color: ${getAdminRSVPTextColor('not-attending')};" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                            <option value="maybe" style="color: ${getAdminRSVPTextColor('maybe')};" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
                         </select>
                     </div>
                 `;
@@ -1601,10 +1789,10 @@ function displayAdminEventsList() {
                 <p><strong>Location:</strong> ${event.location}</p>
                 <div style="margin: 15px 0;">
                     <strong>RSVP Summary:</strong> 
-                    <span style="color: #27ae60;">✓ ${rsvpCounts.attending}</span> | 
-                    <span style="color: #e74c3c;">✗ ${rsvpCounts.notAttending}</span> | 
-                    <span style="color: #f39c12;">? ${rsvpCounts.maybe}</span> | 
-                    <span style="color: #95a5a6;">- ${rsvpCounts.noResponse}</span>
+                    <span style="color: ${getAdminRSVPTextColor('attending')};">✓ ${rsvpCounts.attending}</span> | 
+                    <span style="color: ${getAdminRSVPTextColor('not-attending')};">✗ ${rsvpCounts.notAttending}</span> | 
+                    <span style="color: ${getAdminRSVPTextColor('maybe')};">? ${rsvpCounts.maybe}</span> | 
+                    <span style="color: ${getAdminRSVPTextColor('no-response')};">- ${rsvpCounts.noResponse}</span>
                 </div>
                 <div class="button-group" style="margin-bottom: 15px;">
                     <button class="btn btn-sm btn-secondary" onclick="sendInvitationEmail('${event.id}')">Send Invitation</button>
@@ -1632,6 +1820,28 @@ function getStatusColor(status) {
     }
 }
 
+// Admin RSVP dropdown text colors (Manage Events -> View/Edit All RSVPs)
+// Requested mapping:
+// - Not Attending: unchanged (gray)
+// - Maybe: orange
+// - Attending: green
+// - No Response: red
+function getAdminRSVPTextColor(status) {
+    switch (status) {
+        case 'attending': return '#27ae60';
+        case 'maybe': return '#f39c12';
+        case 'no-response': return '#e74c3c';
+        case 'not-attending':
+        default:
+            return '#95a5a6';
+    }
+}
+
+function setAdminRSVPSelectColor(selectEl) {
+    if (!selectEl) return;
+    selectEl.style.color = getAdminRSVPTextColor(selectEl.value);
+}
+
 async function addEvent() {
     const date = document.getElementById('newEventDate').value;
     const host = document.getElementById('newEventHost').value;
@@ -1651,12 +1861,7 @@ async function addEvent() {
     
     // Initialize RSVPs for all members
     members.forEach(member => {
-        // Russell Hyzen always attends in spirit
-        if (member.name === 'Russell Hyzen') {
-            newEvent.rsvps[member.name] = 'attending';
-        } else {
-            newEvent.rsvps[member.name] = 'no-response';
-        }
+        newEvent.rsvps[member.name] = 'no-response';
     });
     
     try {
@@ -1852,7 +2057,17 @@ async function deleteMember(index) {
     }
     
     try {
+        const member = members[index];
+        const memberName = member?.name;
+
         await database.ref(`members/${index}`).remove();
+
+        // Also remove this member from all existing event RSVP records,
+        // so they don't keep showing up in Admin -> Manage Events -> RSVPs.
+        if (memberName) {
+            await removeMemberFromAllEventRSVPs(memberName);
+        }
+
         alert('Member deleted successfully!');
         
         await loadData();
@@ -1861,6 +2076,56 @@ async function deleteMember(index) {
     } catch (error) {
         console.error('Error deleting member:', error);
         alert('Error deleting member. Please try again.');
+    }
+}
+
+async function removeMemberFromAllEventRSVPs(memberName) {
+    try {
+        const scheduleSnapshot = await database.ref('schedule').once('value');
+        const scheduleData = scheduleSnapshot.val();
+        if (!scheduleData) return;
+
+        const updates = {};
+        Object.entries(scheduleData).forEach(([eventId, event]) => {
+            if (event?.rsvps && Object.prototype.hasOwnProperty.call(event.rsvps, memberName)) {
+                updates[`schedule/${eventId}/rsvps/${memberName}`] = null;
+            }
+        });
+
+        if (Object.keys(updates).length > 0) {
+            await database.ref().update(updates);
+        }
+    } catch (error) {
+        console.error('Error removing member from event RSVPs:', error);
+        // Don't throw; member deletion already happened.
+    }
+}
+
+// Admin tool: purge an arbitrary name from all saved event RSVP lists
+async function purgeRsvpNameFromAllEvents() {
+    const input = document.getElementById('purgeRsvpName');
+    const rawName = (input?.value || '').trim();
+
+    if (!rawName) {
+        alert('Please enter a name to purge.');
+        return;
+    }
+
+    const ok = confirm(
+        `This will remove "${rawName}" from ALL event RSVP records.\n\n` +
+        `This cannot be undone (except by re-adding manually). Continue?`
+    );
+    if (!ok) return;
+
+    try {
+        await removeMemberFromAllEventRSVPs(rawName);
+        await loadData();
+        displayAdminEventsList();
+        alert(`Done. Removed "${rawName}" from all event RSVP records (if present).`);
+        if (input) input.value = '';
+    } catch (error) {
+        console.error('Error purging RSVP name:', error);
+        alert('Error purging name from RSVPs. Please try again.');
     }
 }
 
