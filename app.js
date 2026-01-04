@@ -1506,21 +1506,6 @@ function backToReports() {
 let galleryPhotos = [];
 let currentPhotoIndex = 0;
 
-function getPhotoTitle(photo) {
-    // iOS uploads no longer set albumName; keep the web UI resilient.
-    if (photo && typeof photo.albumName === 'string' && photo.albumName.trim()) {
-        return photo.albumName.trim();
-    }
-    // Fall back to upload date label
-    if (photo && photo.uploadedAt) {
-        const d = new Date(photo.uploadedAt);
-        if (!isNaN(d.getTime())) {
-            return d.toLocaleDateString();
-        }
-    }
-    return 'Photo';
-}
-
 function getBestGalleryImgUrl(photo) {
     // Prefer thumbnails when available for faster grid loading
     return (photo && photo.thumbUrl) ? photo.thumbUrl : photo.url;
@@ -1548,14 +1533,9 @@ async function loadGallery() {
         galleryPhotos.forEach((photo, index) => {
             const item = document.createElement('div');
             item.className = 'gallery-item';
-            const title = getPhotoTitle(photo);
             const imgUrl = getBestGalleryImgUrl(photo);
             item.innerHTML = `
-                <img src="${imgUrl}" alt="${title}" loading="lazy">
-                <div class="gallery-item-overlay">
-                    <p><strong>${title}</strong></p>
-                    <p>${new Date(photo.uploadedAt).toLocaleDateString()}</p>
-                </div>
+                <img src="${imgUrl}" alt="" loading="lazy">
             `;
             
             // Click to view in lightbox
@@ -1589,8 +1569,6 @@ function openLightbox(index) {
                 <button class="lightbox-next" onclick="navigateLightbox(1)">&#10095;</button>
                 <img id="lightboxImage" src="" alt="">
                 <div class="lightbox-info">
-                    <p id="lightboxAlbum"></p>
-                    <p id="lightboxDate"></p>
                     <p id="lightboxCounter"></p>
                 </div>
             </div>
@@ -1635,8 +1613,6 @@ function navigateLightbox(direction) {
 function updateLightboxImage() {
     const photo = galleryPhotos[currentPhotoIndex];
     document.getElementById('lightboxImage').src = photo.url;
-    document.getElementById('lightboxAlbum').innerHTML = `<strong>${getPhotoTitle(photo)}</strong>`;
-    document.getElementById('lightboxDate').textContent = new Date(photo.uploadedAt).toLocaleDateString();
     document.getElementById('lightboxCounter').textContent = `${currentPhotoIndex + 1} of ${galleryPhotos.length}`;
 }
 
@@ -1676,21 +1652,12 @@ async function loadAdminGallery() {
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.style.position = 'relative';
-            const title = getPhotoTitle(photo);
             const imgUrl = getBestGalleryImgUrl(photo);
-            const currentNameSafe = (photo.albumName || '').replace(/'/g, "\\'");
             
             item.innerHTML = `
-                <img src="${imgUrl}" alt="${title}" loading="lazy">
+                <img src="${imgUrl}" alt="" loading="lazy">
                 <div class="gallery-item-overlay">
-                    <p><strong id="albumName-${photo.id}">${title}</strong></p>
-                    <p>${new Date(photo.uploadedAt).toLocaleDateString()}</p>
                     <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-secondary btn-sm" 
-                                onclick="editAlbumName('${photo.id}', '${currentNameSafe}')" 
-                                style="flex: 1;">
-                            Edit Name
-                        </button>
                         <button class="btn btn-danger btn-sm" 
                                 onclick="deletePhoto('${photo.id}', '${photo.storagePath}', '${photo.thumbStoragePath || ''}')" 
                                 style="flex: 1;">
@@ -1711,15 +1678,9 @@ async function loadAdminGallery() {
 
 async function uploadPhotos() {
     const fileInput = document.getElementById('photoUpload');
-    const albumName = document.getElementById('photoAlbumName').value.trim();
     
     if (!fileInput.files.length) {
         alert('Please select at least one photo.');
-        return;
-    }
-    
-    if (!albumName) {
-        alert('Please enter an album name.');
         return;
     }
     
@@ -1767,7 +1728,6 @@ async function uploadPhotos() {
             // Save metadata to database
             await database.ref('gallery').push({
                 url: downloadURL,
-                albumName: albumName,
                 uploadedAt: Date.now(),
                 uploadedBy: currentUser.email,
                 storagePath: storagePath,
@@ -1794,7 +1754,6 @@ async function uploadPhotos() {
         
         // Clear form
         fileInput.value = '';
-        document.getElementById('photoAlbumName').value = '';
         
         // Reload gallery
         loadAdminGallery();
