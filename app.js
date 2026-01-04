@@ -1506,6 +1506,26 @@ function backToReports() {
 let galleryPhotos = [];
 let currentPhotoIndex = 0;
 
+function getPhotoTitle(photo) {
+    // iOS uploads no longer set albumName; keep the web UI resilient.
+    if (photo && typeof photo.albumName === 'string' && photo.albumName.trim()) {
+        return photo.albumName.trim();
+    }
+    // Fall back to upload date label
+    if (photo && photo.uploadedAt) {
+        const d = new Date(photo.uploadedAt);
+        if (!isNaN(d.getTime())) {
+            return d.toLocaleDateString();
+        }
+    }
+    return 'Photo';
+}
+
+function getBestGalleryImgUrl(photo) {
+    // Prefer thumbnails when available for faster grid loading
+    return (photo && photo.thumbUrl) ? photo.thumbUrl : photo.url;
+}
+
 async function loadGallery() {
     const container = document.getElementById('galleryGrid');
     container.innerHTML = '<div class="loading">Loading photos...</div>';
@@ -1528,10 +1548,12 @@ async function loadGallery() {
         galleryPhotos.forEach((photo, index) => {
             const item = document.createElement('div');
             item.className = 'gallery-item';
+            const title = getPhotoTitle(photo);
+            const imgUrl = getBestGalleryImgUrl(photo);
             item.innerHTML = `
-                <img src="${photo.url}" alt="${photo.albumName}" loading="lazy">
+                <img src="${imgUrl}" alt="${title}" loading="lazy">
                 <div class="gallery-item-overlay">
-                    <p><strong>${photo.albumName}</strong></p>
+                    <p><strong>${title}</strong></p>
                     <p>${new Date(photo.uploadedAt).toLocaleDateString()}</p>
                 </div>
             `;
@@ -1613,7 +1635,7 @@ function navigateLightbox(direction) {
 function updateLightboxImage() {
     const photo = galleryPhotos[currentPhotoIndex];
     document.getElementById('lightboxImage').src = photo.url;
-    document.getElementById('lightboxAlbum').innerHTML = `<strong>${photo.albumName}</strong>`;
+    document.getElementById('lightboxAlbum').innerHTML = `<strong>${getPhotoTitle(photo)}</strong>`;
     document.getElementById('lightboxDate').textContent = new Date(photo.uploadedAt).toLocaleDateString();
     document.getElementById('lightboxCounter').textContent = `${currentPhotoIndex + 1} of ${galleryPhotos.length}`;
 }
@@ -1654,20 +1676,23 @@ async function loadAdminGallery() {
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.style.position = 'relative';
+            const title = getPhotoTitle(photo);
+            const imgUrl = getBestGalleryImgUrl(photo);
+            const currentNameSafe = (photo.albumName || '').replace(/'/g, "\\'");
             
             item.innerHTML = `
-                <img src="${photo.url}" alt="${photo.albumName}" loading="lazy">
+                <img src="${imgUrl}" alt="${title}" loading="lazy">
                 <div class="gallery-item-overlay">
-                    <p><strong id="albumName-${photo.id}">${photo.albumName}</strong></p>
+                    <p><strong id="albumName-${photo.id}">${title}</strong></p>
                     <p>${new Date(photo.uploadedAt).toLocaleDateString()}</p>
                     <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
                         <button class="btn btn-secondary btn-sm" 
-                                onclick="editAlbumName('${photo.id}', '${photo.albumName.replace(/'/g, "\\'")}')" 
+                                onclick="editAlbumName('${photo.id}', '${currentNameSafe}')" 
                                 style="flex: 1;">
                             Edit Name
                         </button>
                         <button class="btn btn-danger btn-sm" 
-                                onclick="deletePhoto('${photo.id}', '${photo.storagePath}')" 
+                                onclick="deletePhoto('${photo.id}', '${photo.storagePath}', '${photo.thumbStoragePath || ''}')" 
                                 style="flex: 1;">
                             Delete
                         </button>
@@ -1819,15 +1844,21 @@ async function editAlbumName(photoId, currentName) {
     }
 }
 
-async function deletePhoto(photoId, storagePath) {
+async function deletePhoto(photoId, storagePath, thumbStoragePath) {
     if (!confirm('Are you sure you want to delete this photo?')) {
         return;
     }
     
     try {
         // Delete from Storage
-        const storageRef = storage.ref(storagePath);
-        await storageRef.delete();
+        if (storagePath) {
+            const storageRef = storage.ref(storagePath);
+            await storageRef.delete();
+        }
+        if (thumbStoragePath) {
+            const thumbRef = storage.ref(thumbStoragePath);
+            await thumbRef.delete();
+        }
         
         // Delete from Database
         await database.ref(`gallery/${photoId}`).remove();
