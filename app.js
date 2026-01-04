@@ -276,6 +276,20 @@ function initializeNavigation() {
             }
         });
     });
+
+    // Nav brand (logo + title) -> Home
+    const navBrand = document.getElementById('navBrand');
+    if (navBrand) {
+        navBrand.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateToPage('home');
+
+            // Close mobile menu
+            if (window.innerWidth <= 1024) {
+                closeMenu();
+            }
+        });
+    }
 }
 
 function navigateToPage(pageName) {
