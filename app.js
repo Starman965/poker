@@ -957,7 +957,13 @@ function showAttendanceReport() {
         let trophy = '';
         let trophyClass = '';
         
-        if (percentage >= 90) {
+        if (percentage <= 50) {
+            trophy = '💩';
+            trophyClass = 'trophy-poo';
+        } else if (percentage < 60) {
+            trophy = '😬';
+            trophyClass = 'trophy-grimace';
+        } else if (percentage >= 90) {
             trophy = '🏆';
             trophyClass = 'trophy-gold';
         } else if (percentage >= 75) {
@@ -989,6 +995,8 @@ function showAttendanceReport() {
             <p><span class="trophy trophy-gold">🏆</span> Gold: 90%+ attendance</p>
             <p><span class="trophy trophy-silver">🥈</span> Silver: 75-89% attendance</p>
             <p><span class="trophy trophy-bronze">🥉</span> Bronze: 60-74% attendance</p>
+            <p><span class="trophy trophy-grimace">😬</span> Barely Made It: 51-59% attendance</p>
+            <p><span class="trophy trophy-poo">💩</span> Poo: 50% or less attendance</p>
         </div>
     `;
     
@@ -1078,7 +1086,13 @@ function showAllTimeAttendanceReport() {
         let trophy = '';
         let trophyClass = '';
         
-        if (percentage >= 90) {
+        if (percentage <= 50) {
+            trophy = '💩';
+            trophyClass = 'trophy-poo';
+        } else if (percentage < 60) {
+            trophy = '😬';
+            trophyClass = 'trophy-grimace';
+        } else if (percentage >= 90) {
             trophy = '🏆';
             trophyClass = 'trophy-gold';
         } else if (percentage >= 75) {
@@ -1110,6 +1124,8 @@ function showAllTimeAttendanceReport() {
             <p><span class="trophy trophy-gold">🏆</span> Gold: 90%+ attendance</p>
             <p><span class="trophy trophy-silver">🥈</span> Silver: 75-89% attendance</p>
             <p><span class="trophy trophy-bronze">🥉</span> Bronze: 60-74% attendance</p>
+            <p><span class="trophy trophy-grimace">😬</span> Barely Made It: 51-59% attendance</p>
+            <p><span class="trophy trophy-poo">💩</span> Poo: 50% or less attendance</p>
         </div>
     `;
     
