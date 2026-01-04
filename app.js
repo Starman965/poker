@@ -574,6 +574,16 @@ function formatDate(dateString) {
     }).format(date);
 }
 
+function formatDateShort(dateString) {
+    const date = new Date(dateString + 'T00:00:00');
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'America/Los_Angeles'
+    }).format(date);
+}
+
 function toggleEventRsvpDetails(eventId) {
     const detailsElement = document.getElementById(`rsvp-details-${eventId}`);
     const toggleText = document.getElementById(`toggle-text-${eventId}`);
@@ -843,6 +853,27 @@ function resetRSVPForm() {
 
 // ==================== REPORTS ====================
 
+function getPast12FullMonthsRange() {
+    // 12 full months ending last month (exclude current month entirely)
+    const now = new Date();
+    // Last day of previous month
+    const end = new Date(now.getFullYear(), now.getMonth(), 0);
+    end.setHours(23, 59, 59, 999);
+
+    // First day of month, 11 months before end-month (inclusive) => 12 full months
+    const start = new Date(end.getFullYear(), end.getMonth() - 11, 1);
+    start.setHours(0, 0, 0, 0);
+
+    return { start, end };
+}
+
+function formatDateFromDateObj(dateObj) {
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    return formatDate(`${yyyy}-${mm}-${dd}`);
+}
+
 function showAttendanceReport() {
     const output = document.getElementById('reportOutput');
     const attendance = {};
@@ -853,16 +884,11 @@ function showAttendanceReport() {
         output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
-    
-    const twelveMonthsAgo = new Date(today);
-    twelveMonthsAgo.setMonth(today.getMonth() - 12);
-    twelveMonthsAgo.setDate(today.getDate() + 1); // Start from day after 12 months ago
-    
+    const { start, end } = getPast12FullMonthsRange();
+
     const recentEvents = schedule.filter(event => {
-        const eventDate = new Date(event.date + 'T00:00:00');
-        return eventDate >= twelveMonthsAgo && eventDate <= today;
+        const eventDate = getEventLocalDate(event.date);
+        return eventDate >= start && eventDate <= end;
     });
     
     // Count both attended and eligible events for each member
@@ -903,6 +929,7 @@ function showAttendanceReport() {
     
     // Generate HTML with trophies
     let html = '<h2>Past 12 Month Attendance Report</h2>';
+    html += `<p class="text-muted" style="margin-bottom: 20px;">Range: <strong>${formatDateFromDateObj(start)}</strong> to <strong>${formatDateFromDateObj(end)}</strong> (excludes current month) · <strong>${recentEvents.length}</strong> events</p>`;
     html += `<table class="attendance-report">
         <thead>
             <tr>
@@ -1221,6 +1248,73 @@ function showMemberAttendanceReport() {
     });
 }
 
+function showMonthlyAttendanceReport() {
+    const output = document.getElementById('reportOutput');
+
+    // Show output area and scroll
+    output.style.display = 'block';
+    setTimeout(() => {
+        output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+
+    const { start, end } = getPast12FullMonthsRange();
+
+    const eventsInRange = (schedule || [])
+        .filter(event => {
+            const d = getEventLocalDate(event.date);
+            return d >= start && d <= end;
+        })
+        .sort((a, b) => getEventLocalDate(a.date) - getEventLocalDate(b.date));
+
+    const eventRows = eventsInRange.map(event => {
+        const attendingCount = Object.values(event.rsvps || {}).filter(s => s === 'attending').length;
+        return {
+            date: event.date,
+            host: event.host,
+            attendingCount
+        };
+    });
+
+    const totalPlayers = eventRows.reduce((sum, r) => sum + r.attendingCount, 0);
+    const avgPlayers = eventRows.length ? (totalPlayers / eventRows.length) : 0;
+
+    let html = '<h2>Monthly Attendance</h2>';
+    html += `<p class="text-muted" style="margin-bottom: 10px;">Range: <strong>${formatDateFromDateObj(start)}</strong> to <strong>${formatDateFromDateObj(end)}</strong> (excludes current month)</p>`;
+    html += `<p style="margin: 0 0 20px 0;"><strong>12-month average attendance:</strong> ${avgPlayers.toFixed(1)} players per event <span class="text-muted">(${eventRows.length} events)</span></p>`;
+
+    if (eventRows.length === 0) {
+        html += '<p class="text-muted">No events found in this range.</p>';
+        html += '<button class="btn btn-secondary back-to-reports-btn" onclick="backToReports()">← Back to Reports</button>';
+        output.innerHTML = html;
+        return;
+    }
+
+    html += `<table class="attendance-report">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Host</th>
+                <th>Players</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    eventRows.forEach(row => {
+        html += `
+            <tr>
+                <td><span class="member-name">${formatDateShort(row.date)}</span></td>
+                <td>${row.host}</td>
+                <td><strong>${row.attendingCount}</strong></td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    html += '<button class="btn btn-secondary back-to-reports-btn" onclick="backToReports()">← Back to Reports</button>';
+
+    output.innerHTML = html;
+}
+
 function renderMemberReport(memberName, contentEl) {
     if (!contentEl) return;
     if (!memberName) {
@@ -1231,9 +1325,7 @@ function renderMemberReport(memberName, contentEl) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const twelveMonthsAgo = new Date(today);
-    twelveMonthsAgo.setMonth(today.getMonth() - 12);
-    twelveMonthsAgo.setDate(today.getDate() + 1); // match the 12-month report window
+    const { start: rangeStart, end: rangeEnd } = getPast12FullMonthsRange();
 
     const pastEvents = (schedule || [])
         .filter(event => {
@@ -1244,7 +1336,7 @@ function renderMemberReport(memberName, contentEl) {
 
     const past12moEvents = pastEvents.filter(event => {
         const d = new Date(event.date + 'T00:00:00');
-        return d >= twelveMonthsAgo && d <= today;
+        return d >= rangeStart && d <= rangeEnd;
     });
 
     const allTime = buildMemberAttendanceBreakdown(memberName, pastEvents);
@@ -1258,12 +1350,12 @@ function renderMemberReport(memberName, contentEl) {
 
     const renderEventList = (events) => {
         if (events.length === 0) return '<p class="text-muted">None</p>';
-        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDate(e.date)} — Host: <strong>${e.host}</strong></li>`).join('')}</ul>`;
+        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDateShort(e.date)} — Host: <strong>${e.host}</strong></li>`).join('')}</ul>`;
     };
 
     const renderHostDates = (events) => {
         if (events.length === 0) return '<p class="text-muted">None</p>';
-        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDate(e.date)}</li>`).join('')}</ul>`;
+        return `<ul class="rsvp-list">${events.map(e => `<li>${formatDateShort(e.date)}</li>`).join('')}</ul>`;
     };
 
     contentEl.innerHTML = `
