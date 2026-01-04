@@ -1285,14 +1285,10 @@ function showMonthlyAttendanceReport() {
         output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
 
-    const { start, end } = getPast12FullMonthsRange();
-
-    const eventsInRange = (schedule || [])
-        .filter(event => {
-            const d = getEventLocalDate(event.date);
-            return d >= start && d <= end;
-        })
-        .sort((a, b) => getEventLocalDate(a.date) - getEventLocalDate(b.date));
+    // Use the most recent 12 completed events (same logic as "Past 12 Events")
+    const recentEvents = getMostRecentPastEvents(12);
+    // Display oldest -> newest
+    const eventsInRange = [...recentEvents].reverse();
 
     const eventRows = eventsInRange.map(event => {
         const attendingCount = Object.values(event.rsvps || {}).filter(s => s === 'attending').length;
@@ -1307,11 +1303,16 @@ function showMonthlyAttendanceReport() {
     const avgPlayers = eventRows.length ? (totalPlayers / eventRows.length) : 0;
 
     let html = '<h2>Monthly Attendance</h2>';
-    html += `<p class="text-muted" style="margin-bottom: 10px;">Range: <strong>${formatDateFromDateObj(start)}</strong> to <strong>${formatDateFromDateObj(end)}</strong> (excludes current month)</p>`;
-    html += `<p style="margin: 0 0 20px 0;"><strong>12-month average attendance:</strong> ${avgPlayers.toFixed(1)} players per event <span class="text-muted">(${eventRows.length} events)</span></p>`;
+    if (eventsInRange.length > 0) {
+        const oldest = eventsInRange[0];
+        const newest = eventsInRange[eventsInRange.length - 1];
+        html += `<p class="text-muted" style="margin-bottom: 10px;">Events: <strong>${eventRows.length}</strong> · <strong>${formatDateShort(oldest.date)}</strong> to <strong>${formatDateShort(newest.date)}</strong></p>`;
+    } else {
+        html += `<p class="text-muted" style="margin-bottom: 10px;">No past events found.</p>`;
+    }
+    html += `<p style="margin: 0 0 20px 0;"><strong>Average attendance:</strong> ${avgPlayers.toFixed(1)} players per event <span class="text-muted">(${eventRows.length} events)</span></p>`;
 
     if (eventRows.length === 0) {
-        html += '<p class="text-muted">No events found in this range.</p>';
         html += '<button class="btn btn-secondary back-to-reports-btn" onclick="backToReports()">← Back to Reports</button>';
         output.innerHTML = html;
         return;
