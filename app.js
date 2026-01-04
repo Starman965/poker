@@ -874,6 +874,17 @@ function formatDateFromDateObj(dateObj) {
     return formatDate(`${yyyy}-${mm}-${dd}`);
 }
 
+function getMostRecentPastEvents(limit) {
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const pastEvents = (schedule || [])
+        .filter(event => getEventLocalDate(event.date) <= endOfToday)
+        .sort((a, b) => getEventLocalDate(b.date) - getEventLocalDate(a.date));
+
+    return pastEvents.slice(0, limit);
+}
+
 function showAttendanceReport() {
     const output = document.getElementById('reportOutput');
     const attendance = {};
@@ -884,12 +895,7 @@ function showAttendanceReport() {
         output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
     
-    const { start, end } = getPast12FullMonthsRange();
-
-    const recentEvents = schedule.filter(event => {
-        const eventDate = getEventLocalDate(event.date);
-        return eventDate >= start && eventDate <= end;
-    });
+    const recentEvents = getMostRecentPastEvents(12);
     
     // Count both attended and eligible events for each member
     recentEvents.forEach(event => {
@@ -928,8 +934,14 @@ function showAttendanceReport() {
         });
     
     // Generate HTML with trophies
-    let html = '<h2>Past 12 Month Attendance Report</h2>';
-    html += `<p class="text-muted" style="margin-bottom: 20px;">Range: <strong>${formatDateFromDateObj(start)}</strong> to <strong>${formatDateFromDateObj(end)}</strong> (excludes current month) · <strong>${recentEvents.length}</strong> events</p>`;
+    let html = '<h2>Past 12 Events Attendance Report</h2>';
+    if (recentEvents.length > 0) {
+        const oldest = recentEvents[recentEvents.length - 1];
+        const newest = recentEvents[0];
+        html += `<p class="text-muted" style="margin-bottom: 20px;">Events: <strong>${recentEvents.length}</strong> · <strong>${formatDateShort(oldest.date)}</strong> to <strong>${formatDateShort(newest.date)}</strong></p>`;
+    } else {
+        html += `<p class="text-muted" style="margin-bottom: 20px;">No past events found.</p>`;
+    }
     html += `<table class="attendance-report">
         <thead>
             <tr>
