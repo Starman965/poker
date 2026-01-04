@@ -99,7 +99,10 @@ function showLoginModal() {
                     </div>
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" id="loginPassword" class="form-input" placeholder="Password">
+                        <div class="password-field">
+                            <input type="password" id="loginPassword" class="form-input password-input" placeholder="Password" autocomplete="current-password">
+                            <button type="button" id="toggleLoginPassword" class="password-toggle" aria-label="Show password" aria-pressed="false">👁</button>
+                        </div>
                     </div>
                     <div id="loginError" class="error-message" style="display: none;"></div>
                     <button class="btn btn-primary" onclick="submitLogin()" style="width: 100%;">Login</button>
@@ -110,6 +113,19 @@ function showLoginModal() {
     `;
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Password visibility toggle
+    const pwInput = document.getElementById('loginPassword');
+    const pwToggle = document.getElementById('toggleLoginPassword');
+    if (pwInput && pwToggle) {
+        pwToggle.addEventListener('click', () => {
+            const willShow = pwInput.type === 'password';
+            pwInput.type = willShow ? 'text' : 'password';
+            pwToggle.setAttribute('aria-pressed', String(willShow));
+            pwToggle.setAttribute('aria-label', willShow ? 'Hide password' : 'Show password');
+            pwToggle.textContent = willShow ? '🙈' : '👁';
+        });
+    }
     
     // Allow Enter key to submit
     document.getElementById('loginPassword').addEventListener('keypress', (e) => {

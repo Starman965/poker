@@ -523,6 +523,34 @@ body {
     border-color: var(--secondary-color);
 }
 
+/* Password input + show/hide toggle (Admin Login modal) */
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-input {
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--light-text);
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.password-toggle:hover {
+    color: var(--dark-text);
+}
+
 /* Buttons */
 .btn {
     padding: 12px 24px;
