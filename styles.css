@@ -1252,6 +1252,37 @@ body {
     gap: 8px;
 }
 
+/* Tabs (Hosting Reports) */
+.tab-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid var(--border-color);
+    background: white;
+    color: var(--dark-text);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    border-color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.tab-button.active {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+}
+
 .report-output table {
     width: 100%;
     border-collapse: collapse;

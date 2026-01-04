@@ -421,10 +421,10 @@
                             <span class="report-card-action">View Report →</span>
                         </div>
                         
-                        <div class="report-card" onclick="showHostingReport()">
+                        <div class="report-card" onclick="navigateToPage('hosting-reports')">
                             <div class="report-card-icon">🏠</div>
-                            <h3>Hosting Report</h3>
-                            <p>Event hosting breakdown by member and year</p>
+                            <h3>Hosting Reports</h3>
+                            <p>Upcoming schedule, past hostings, and hosting totals</p>
                             <span class="report-card-action">View Report →</span>
                         </div>
                         
@@ -436,6 +436,26 @@
                         </div>
                     </div>
                     <div id="reportOutput" class="report-output"></div>
+                </div>
+            </div>
+
+            <!-- Hosting Reports Page -->
+            <div id="hosting-reports-page" class="page">
+                <h1>Hosting Reports</h1>
+                <p class="page-subtitle">Upcoming schedule, past hostings, and hosting totals</p>
+
+                <div class="card" style="padding: 16px;">
+                    <div class="tab-bar" role="tablist" aria-label="Hosting reports tabs">
+                        <button class="tab-button active" id="hostingTabUpcoming" data-hosting-tab="upcoming" role="tab" aria-selected="true">Upcoming Schedule</button>
+                        <button class="tab-button" id="hostingTabPast" data-hosting-tab="past" role="tab" aria-selected="false">Past Hostings</button>
+                        <button class="tab-button" id="hostingTabTotals" data-hosting-tab="totals" role="tab" aria-selected="false">Hosting Totals</button>
+                    </div>
+                </div>
+
+                <div id="hostingReportsContent" class="report-output" style="display: block;"></div>
+
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-secondary back-to-reports-btn" onclick="navigateToPage('reports')">← Back to Reports</button>
                 </div>
             </div>
 

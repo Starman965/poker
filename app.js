@@ -342,6 +342,9 @@ function loadPageData(pageName) {
         case 'reports':
             // Reports load on demand via buttons
             break;
+        case 'hosting-reports':
+            setupHostingReportsPage();
+            break;
         case 'gallery':
             loadGallery();
             break;
@@ -358,6 +361,180 @@ function loadPageData(pageName) {
             loadAdminGallery();
             break;
     }
+}
+
+// ==================== HOSTING REPORTS (TABS) ====================
+
+let hostingReportsInitialized = false;
+let hostingReportsActiveTab = 'upcoming';
+
+function setupHostingReportsPage() {
+    if (!hostingReportsInitialized) {
+        // Attach tab click handlers once
+        document.querySelectorAll('[data-hosting-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                hostingReportsActiveTab = btn.dataset.hostingTab;
+                renderHostingReportsTab();
+            });
+        });
+        hostingReportsInitialized = true;
+    }
+    
+    // Default tab on navigation
+    hostingReportsActiveTab = 'upcoming';
+    renderHostingReportsTab();
+}
+
+function renderHostingReportsTab() {
+    const content = document.getElementById('hostingReportsContent');
+    if (!content) return;
+    
+    // Update active tab styles / aria
+    document.querySelectorAll('[data-hosting-tab]').forEach(btn => {
+        const isActive = btn.dataset.hostingTab === hostingReportsActiveTab;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    
+    if (hostingReportsActiveTab === 'upcoming') {
+        content.innerHTML = renderUpcomingHostingScheduleHTML();
+        return;
+    }
+    
+    if (hostingReportsActiveTab === 'past') {
+        content.innerHTML = renderPastHostingsHTML();
+        return;
+    }
+    
+    // totals
+    content.innerHTML = renderHostingTotalsHTML();
+}
+
+function getUpcomingEventsStrict() {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return (schedule || [])
+        .filter(event => getEventLocalDate(event.date) >= todayStart)
+        .sort((a, b) => getEventLocalDate(a.date) - getEventLocalDate(b.date));
+}
+
+function getPastEventsStrict() {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return (schedule || [])
+        .filter(event => getEventLocalDate(event.date) < todayStart)
+        .sort((a, b) => getEventLocalDate(b.date) - getEventLocalDate(a.date));
+}
+
+function renderUpcomingHostingScheduleHTML() {
+    const upcoming = getUpcomingEventsStrict();
+    
+    let html = '<h2>Upcoming Schedule</h2>';
+    html += '<p class="text-muted" style="margin-bottom: 16px;">Dates and hosts for upcoming poker nights (no RSVP info).</p>';
+    
+    if (upcoming.length === 0) {
+        html += '<p class="text-muted">No upcoming events scheduled.</p>';
+        return html;
+    }
+    
+    html += `<table class="attendance-report">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Host</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    upcoming.forEach(event => {
+        html += `
+            <tr>
+                <td><span class="member-name">${formatDateShort(event.date)}</span></td>
+                <td>${event.host}</td>
+                <td>${event.location || ''}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    return html;
+}
+
+function renderPastHostingsHTML() {
+    const past = getPastEventsStrict();
+    
+    let html = '<h2>Past Hostings</h2>';
+    html += '<p class="text-muted" style="margin-bottom: 16px;">Past events, sorted by most recent first.</p>';
+    
+    if (past.length === 0) {
+        html += '<p class="text-muted">No past events found.</p>';
+        return html;
+    }
+    
+    html += `<table class="attendance-report">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Host</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    past.forEach(event => {
+        html += `
+            <tr>
+                <td><span class="member-name">${formatDateShort(event.date)}</span></td>
+                <td>${event.host}</td>
+                <td>${event.location || ''}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    return html;
+}
+
+function renderHostingTotalsHTML() {
+    const hostingCounts = {};
+    
+    // Initialize counts to match existing report behavior/years
+    members.forEach(member => {
+        hostingCounts[member.name] = { total: 0, 2024: 0, 2025: 0, 2026: 0, 2027: 0 };
+    });
+    
+    (schedule || []).forEach(event => {
+        const year = getEventLocalDate(event.date).getFullYear();
+        if (hostingCounts[event.host]) {
+            hostingCounts[event.host].total++;
+            if (hostingCounts[event.host][year] !== undefined) {
+                hostingCounts[event.host][year]++;
+            }
+        }
+    });
+    
+    const sorted = Object.entries(hostingCounts).sort((a, b) => b[1].total - a[1].total);
+    
+    let html = '<h2>Hosting Totals</h2>';
+    html += '<p class="text-muted" style="margin-bottom: 16px;">All events hosting breakdown by member and year.</p>';
+    html += '<table><thead><tr><th>Member</th><th>Total</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th></tr></thead><tbody>';
+    
+    sorted.forEach(([member, counts]) => {
+        html += `<tr>
+            <td>${member}</td>
+            <td>${counts.total}</td>
+            <td>${counts[2024]}</td>
+            <td>${counts[2025]}</td>
+            <td>${counts[2026]}</td>
+            <td>${counts[2027]}</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    return html;
 }
 
 // ==================== DATA LOADING ====================
