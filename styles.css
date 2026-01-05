@@ -1359,18 +1359,6 @@ body {
     gap: 10px;
 }
 
-.attendance-report tbody tr:first-child {
-    background: rgba(255, 215, 0, 0.05);
-}
-
-.attendance-report tbody tr:nth-child(2) {
-    background: rgba(192, 192, 192, 0.05);
-}
-
-.attendance-report tbody tr:nth-child(3) {
-    background: rgba(205, 127, 50, 0.05);
-}
-
 /* Loading State */
 .loading {
     text-align: center;

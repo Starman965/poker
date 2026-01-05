@@ -488,7 +488,7 @@ function renderUpcomingHostingScheduleHTML() {
         return html;
     }
     
-    html += `<table class="attendance-report">
+    html += `<table>
         <thead>
             <tr>
                 <th>Date</th>
@@ -523,7 +523,7 @@ function renderPastHostingsHTML() {
         return html;
     }
     
-    html += `<table class="attendance-report">
+    html += `<table>
         <thead>
             <tr>
                 <th>Date</th>
