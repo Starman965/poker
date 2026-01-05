@@ -448,8 +448,9 @@ function formatLocationShort(location) {
         if (m) {
             const city = (m[1] || '').trim().replace(/,$/, '').trim();
             const state = (m[2] || '').toUpperCase();
+            // If the last part has a city (e.g., "Danville CA"), use it.
+            // If the last part is just the state/ZIP (e.g., "CA 94526"), fall through so we can use the previous part as the city.
             if (city) return `${city}, ${state}`;
-            return state;
         }
         
         // Otherwise fall back to city from the second-to-last part and state from the last part.
