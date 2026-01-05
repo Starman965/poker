@@ -1438,7 +1438,7 @@ function showPastEventsReport() {
                 .map(([name, _]) => name);
             
             html += `<tr>
-                <td>${formatDate(event.date)}</td>
+                <td>${formatDateShort(event.date)}</td>
                 <td>${event.host}</td>
                 <td>${attendees.length} (${attendees.join(', ')})</td>
             </tr>`;
