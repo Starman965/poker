@@ -1580,8 +1580,6 @@ function renderMemberReport(memberName, contentEl) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const { start: rangeStart, end: rangeEnd } = getPast12FullMonthsRange();
-
     const pastEvents = (schedule || [])
         .filter(event => {
             const d = new Date(event.date + 'T00:00:00');
@@ -1589,16 +1587,14 @@ function renderMemberReport(memberName, contentEl) {
         })
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    const past12moEvents = pastEvents.filter(event => {
-        const d = new Date(event.date + 'T00:00:00');
-        return d >= rangeStart && d <= rangeEnd;
-    });
+    // Use the most recent 12 completed events (not calendar months)
+    const past12Events = [...pastEvents].slice(-12);
 
     const allTime = buildMemberAttendanceBreakdown(memberName, pastEvents);
-    const last12 = buildMemberAttendanceBreakdown(memberName, past12moEvents);
+    const last12 = buildMemberAttendanceBreakdown(memberName, past12Events);
 
     const hostedAll = pastEvents.filter(e => e.host === memberName);
-    const hosted12 = past12moEvents.filter(e => e.host === memberName);
+    const hosted12 = past12Events.filter(e => e.host === memberName);
 
     const attendancePctAll = allTime.eligible > 0 ? (allTime.attending / allTime.eligible) * 100 : 0;
     const attendancePct12 = last12.eligible > 0 ? (last12.attending / last12.eligible) * 100 : 0;
@@ -1618,7 +1614,7 @@ function renderMemberReport(memberName, contentEl) {
             <h3 style="margin-top: 0;">${memberName}</h3>
 
             <div class="rsvp-category">
-                <h3 style="margin: 0 0 10px 0;">Past 12 Months</h3>
+                <h3 style="margin: 0 0 10px 0;">Past 12 Events</h3>
                 <p style="margin: 0;">
                     <strong>Attended:</strong> ${last12.attending} / ${last12.eligible}
                     ${last12.eligible ? `(<strong>${attendancePct12.toFixed(1)}%</strong>)` : ''}
