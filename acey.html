@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Acey Deucey - Standalone</title>
+  <link rel="stylesheet" href="aceystyles.css">
+</head>
+<body>
+  <div class="intro-screen" id="introScreen">
+    <div class="intro-container">
+      <h1 class="title">ACEY DEUCEY</h1>
+      <p class="subtitle">Standalone Card Betting Game</p>
+
+      <div class="section">
+        <label class="label">Number of Players (1–12):</label>
+        <input type="number" id="playerCount" min="1" max="12" value="4">
+      </div>
+
+      <div class="section">
+        <label class="label">Buy-in (per player):</label>
+        <input type="number" id="buyInAmount" min="0" max="100000" value="5">
+      </div>
+
+      <div class="section">
+        <div id="playerNames"></div>
+      </div>
+
+      <button class="btn primary" id="startGameBtn">Start Game</button>
+    </div>
+  </div>
+
+  <div class="game-wrap" id="gameWrap" style="display:none;">
+    <header>
+      <div class="brand">ACEY DEUCEY</div>
+      <div class="controls">
+        <span class="pill">Round <span id="roundNum">1</span></span>
+        <span class="pill">Pot: <span id="potDisplay">0</span></span>
+        <button class="btn danger" id="resetBtn">Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabGameBtn">Game</button>
+        <button class="tab-btn" id="tabLogBtn">Game Log</button>
+      </div>
+
+      <div class="tab-panel active" id="tabGame">
+      <div class="card-area">
+        <div class="card-slot">
+          <div class="playing-card" id="leftCard">—</div>
+        </div>
+        <div class="card-slot middle">
+          <div class="playing-card face-down" id="middleCard">?</div>
+        </div>
+        <div class="card-slot">
+          <div class="playing-card" id="rightCard">—</div>
+        </div>
+      </div>
+
+      <div class="spread-info" id="spreadInfo">Winning Numbers: —</div>
+
+      <div class="bets">
+        <div class="bet-options">
+          <button class="btn bet-btn" data-bet="0">NONE</button>
+          <button class="btn bet-btn" data-bet="1">1</button>
+          <button class="btn bet-btn" data-bet="5">5</button>
+          <button class="btn bet-btn" data-bet="10">10</button>
+          <button class="btn bet-btn" data-bet="20">20</button>
+          <button class="btn bet-btn" data-bet="25">25</button>
+          <button class="btn bet-btn" data-bet="50">50</button>
+          <button class="btn bet-btn" data-bet="ALL">ALL IN</button>
+          <input type="number" id="customBet" min="0" placeholder="Custom">
+          <button class="btn" id="setCustomBet">Set</button>
+        </div>
+
+        <button class="btn primary" id="dealBtn" disabled>Deal Card</button>
+        <span class="pot-inline">Pot: <span id="potInline">0</span></span>
+      </div>
+
+      <div class="players" id="playersList"></div>
+      </div>
+
+      <div class="tab-panel" id="tabLog">
+        <div class="log-panel">
+          <h3>Game Log</h3>
+          <div id="gameLog"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="cashoutOverlay">
+    <div class="modal">
+      <h2>Cash Out</h2>
+      <div id="cashoutList"></div>
+      <button class="btn primary" id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="resultOverlay">
+    <div class="result-text" id="resultText">YOU WIN</div>
+  </div>
+
+  <script src="acey.js"></script>
+</body>
+</html>
