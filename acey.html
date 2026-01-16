@@ -35,7 +35,6 @@
       <div class="brand">ACEY DEUCEY</div>
       <div class="controls">
         <span class="pill">Round <span id="roundNum">1</span></span>
-        <span class="pill">Pot: <span id="potDisplay">0</span></span>
         <button class="btn danger" id="resetBtn">Reset</button>
       </div>
     </header>
@@ -57,6 +56,10 @@
         <div class="card-slot">
           <div class="playing-card" id="rightCard">—</div>
         </div>
+        <div class="pot-spot">
+          <div class="pot-label">POT</div>
+          <div class="pot-value" id="potDisplay">0</div>
+        </div>
       </div>
 
       <div class="spread-info" id="spreadInfo">Winning Numbers: —</div>
@@ -76,7 +79,6 @@
         </div>
 
         <button class="btn primary" id="dealBtn" disabled>Deal Card</button>
-        <span class="pot-inline">Pot: <span id="potInline">0</span></span>
       </div>
 
       <div class="players" id="playersList"></div>

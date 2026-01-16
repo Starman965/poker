@@ -7,7 +7,6 @@ const el = {
   playerNames: document.getElementById('playerNames'),
   roundNum: document.getElementById('roundNum'),
   potDisplay: document.getElementById('potDisplay'),
-  potInline: document.getElementById('potInline'),
   resetBtn: document.getElementById('resetBtn'),
   leftCard: document.getElementById('leftCard'),
   middleCard: document.getElementById('middleCard'),
@@ -90,7 +89,6 @@ function startGame() {
 
   pot = buyIn * count;
   el.potDisplay.textContent = pot;
-  el.potInline.textContent = pot;
   round = 1;
   selectedBet = null;
   el.roundNum.textContent = round;
@@ -139,7 +137,11 @@ function dealEndCards() {
   el.middleCard.textContent = '?';
   el.middleCard.classList.add('face-down');
   el.middleCard.classList.remove('revealed');
-  el.spreadInfo.textContent = `Winning Numbers: ${leftCard.value + 1} to ${rightCard.value - 1}`;
+  const gap = rightCard.value - leftCard.value - 1;
+  const betweenCount = gap * 4;
+  const totalRemaining = 50; // 52-card deck minus two end cards
+  const oddsPct = totalRemaining > 0 ? Math.round((betweenCount / totalRemaining) * 100) : 0;
+  el.spreadInfo.textContent = `Winning Numbers: ${leftCard.value + 1} to ${rightCard.value - 1} | Odds: ${oddsPct}% | ${betweenCount}/${totalRemaining}`;
 }
 
 function resetBetting() {
@@ -199,7 +201,6 @@ function dealCard() {
     }
   }
   el.potDisplay.textContent = pot;
-  el.potInline.textContent = pot;
 
   logTurn({
     round,
@@ -306,7 +307,6 @@ function updateBetOptions() {
   if (pot <= 0) {
     el.dealBtn.disabled = true;
   }
-  el.potInline.textContent = pot;
 }
 
 function showCashout() {
