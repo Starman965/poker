@@ -448,9 +448,8 @@ function formatLocationShort(location) {
         if (m) {
             const city = (m[1] || '').trim().replace(/,$/, '').trim();
             const state = (m[2] || '').toUpperCase();
-            // If the last part has a city (e.g., "Danville CA"), use it.
-            // If the last part is just the state/ZIP (e.g., "CA 94526"), fall through so we can use the previous part as the city.
             if (city) return `${city}, ${state}`;
+            return state;
         }
         
         // Otherwise fall back to city from the second-to-last part and state from the last part.
@@ -708,7 +707,7 @@ function createEventCard(event, isCurrent = false) {
         </div>
         <div class="event-info">
             <p><strong>Host:</strong> ${event.host}</p>
-            <p><strong>Time:</strong> 7:00 PM</p>
+            <p><strong>Time:</strong> 6:30 PM</p>
         </div>
         <div class="rsvp-summary">
             <div class="rsvp-stat attending">
@@ -968,7 +967,7 @@ function showRSVPConfirmation(eventId, memberName, status) {
                     name="Danville Poker Night"
                     description="Poker night with the Danville Poker Group"
                     startDate="${event.date}"
-                    startTime="19:00"
+                    startTime="18:30"
                     endTime="23:00"
                     timeZone="America/Los_Angeles"
                     location="${event.location}"
@@ -1438,7 +1437,7 @@ function showPastEventsReport() {
                 .map(([name, _]) => name);
             
             html += `<tr>
-                <td>${formatDateShort(event.date)}</td>
+                <td>${formatDate(event.date)}</td>
                 <td>${event.host}</td>
                 <td>${attendees.length} (${attendees.join(', ')})</td>
             </tr>`;
@@ -2647,13 +2646,13 @@ function sendInvitationEmail(eventId) {
     }
     
     const rsvpLink = `https://www.danvillepokergroup.com/?event=${eventId}#rsvp`;
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 6:30pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 It's that time again for our monthly poker night!
 
 Date: ${formatDate(event.date)}
-Time: 7:00 PM
+Time: 6:30 PM
 Location: ${event.location}
 Host: ${event.host}
 
@@ -2700,13 +2699,13 @@ function sendReminderEmail(eventId) {
         }
     });
     
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 6:30pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is a reminder about our upcoming poker night:
 
 Date: ${formatDate(event.date)}
-Time: 7:00 PM
+Time: 6:30 PM
 Location: ${event.location}
 Host: ${event.host}
 
@@ -2759,13 +2758,13 @@ function sendNonRespondersEmail(eventId) {
     // Compose the email addresses string
     const toEmails = nonResponders.map(member => member.email).join(',');
     
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 6:30pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 We still haven't received your RSVP for our upcoming poker night:
 
 Date: ${formatDate(event.date)}
-Time: 7:00 PM
+Time: 6:30 PM
 Location: ${event.location}
 Host: ${event.host}
 
@@ -2812,13 +2811,13 @@ function sendFinalConfirmationEmail(eventId) {
     
     const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
     
-    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 7:00pm - Host: ${event.host}`);
+    const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 6:30pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
 
 This is the final confirmation for our upcoming poker night:
 
 Date: ${formatDate(event.date)}
-Time: 7:00 PM
+Time: 6:30 PM
 Location: ${event.location}
 Host: ${event.host}
 
