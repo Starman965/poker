@@ -2332,7 +2332,8 @@ function renderAdminRsvpEntry(event, entry, responseRank) {
         ? 'Host — attending automatically'
         : `First RSVP: ${formatRsvpTimestamp(firstResponse?.respondedAt)}`;
     const changeHistory = renderAdminRsvpChangeHistory(
-        event.rsvpChangeHistory?.[name]
+        event.rsvpChangeHistory?.[name],
+        firstResponse
     );
     const rank = responseRank
         ? `${responseRank}. `
@@ -2360,9 +2361,12 @@ function renderAdminRsvpEntry(event, entry, responseRank) {
     `;
 }
 
-function renderAdminRsvpChangeHistory(changeHistory) {
+function renderAdminRsvpChangeHistory(changeHistory, firstResponse) {
     const changes = Object.values(changeHistory || {})
-        .filter(change => typeof change?.changedAt === 'number')
+        .filter(change =>
+            typeof change?.changedAt === 'number' &&
+            !isInitialRsvpChange(change, firstResponse)
+        )
         .sort((a, b) => a.changedAt - b.changedAt);
 
     if (changes.length === 0) {
@@ -2379,6 +2383,15 @@ function renderAdminRsvpChangeHistory(changeHistory) {
             `).join('<br>')}
         </small>
     `;
+}
+
+function isInitialRsvpChange(change, firstResponse) {
+    return (
+        firstResponse &&
+        change.changedAt === firstResponse.respondedAt &&
+        change.fromStatus === 'no-response' &&
+        change.toStatus === firstResponse.status
+    );
 }
 
 function formatRsvpStatus(status) {
