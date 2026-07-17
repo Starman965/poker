@@ -922,32 +922,7 @@ async function submitRSVP() {
     const member = members[memberIndex];
     
     try {
-        // Update the RSVP and record its first response atomically. The
-        // server timestamp is the authoritative value for RSVP ordering;
-        // format it with America/Los_Angeles when displaying it.
-        await database.ref(`schedule/${eventId}`).transaction((event) => {
-            if (!event) {
-                return;
-            }
-
-            event.rsvps = event.rsvps || {};
-            const previousStatus = event.rsvps[member.name] || 'no-response';
-            event.rsvps[member.name] = status;
-
-            event.rsvpFirstResponses = event.rsvpFirstResponses || {};
-            if (
-                previousStatus === 'no-response' &&
-                !event.rsvpFirstResponses[member.name]
-            ) {
-                event.rsvpFirstResponses[member.name] = {
-                    respondedAt: firebase.database.ServerValue.TIMESTAMP,
-                    timeZone: 'America/Los_Angeles',
-                    status
-                };
-            }
-
-            return event;
-        });
+        await saveRSVPAndFirstResponse(eventId, member.name, status);
         
         // Reload data
         await loadData();
@@ -958,6 +933,53 @@ async function submitRSVP() {
     } catch (error) {
         console.error('Error submitting RSVP:', error);
         alert('Error submitting RSVP. Please try again.');
+    }
+}
+
+async function saveRSVPAndFirstResponse(eventId, memberName, status) {
+    const event = schedule.find(item => item.id === eventId);
+    if (!event) {
+        throw new Error(`Event with ID ${eventId} not found`);
+    }
+
+    const previousStatus = event.rsvps?.[memberName] || 'no-response';
+    const firstResponse = event.rsvpFirstResponses?.[memberName];
+    const shouldRecordFirstResponse =
+        memberName !== event.host &&
+        previousStatus === 'no-response' &&
+        status !== 'no-response' &&
+        !firstResponse;
+    const statusPath = `schedule/${eventId}/rsvps/${memberName}`;
+    const updates = {
+        [statusPath]: status
+    };
+
+    if (shouldRecordFirstResponse) {
+        updates[`schedule/${eventId}/rsvpFirstResponses/${memberName}`] = {
+            respondedAt: firebase.database.ServerValue.TIMESTAMP,
+            timeZone: 'America/Los_Angeles',
+            status
+        };
+    }
+
+    try {
+        // Multi-location updates are atomic and support ServerValue.TIMESTAMP,
+        // unlike Realtime Database transactions.
+        await database.ref().update(updates);
+    } catch (error) {
+        if (!shouldRecordFirstResponse) {
+            throw error;
+        }
+
+        // If another update created the immutable first-response entry first,
+        // retry only the current RSVP status.
+        const firstResponseSnapshot = await database.ref(
+            `schedule/${eventId}/rsvpFirstResponses/${memberName}`
+        ).once('value');
+        if (!firstResponseSnapshot.exists()) {
+            throw error;
+        }
+        await database.ref(statusPath).set(status);
     }
 }
 
@@ -2432,35 +2454,7 @@ async function deleteEvent() {
 
 async function updateRSVP(eventId, memberName, newStatus) {
     try {
-        // Keep status updates and the first RSVP timestamp in one atomic
-        // operation. Hosts are already attending automatically, so an admin
-        // change for a host never creates an RSVP timestamp.
-        await database.ref(`schedule/${eventId}`).transaction((event) => {
-            if (!event) {
-                return;
-            }
-
-            event.rsvps = event.rsvps || {};
-            const previousStatus = event.rsvps[memberName] || 'no-response';
-            event.rsvps[memberName] = newStatus;
-
-            const isHost = event.host === memberName;
-            event.rsvpFirstResponses = event.rsvpFirstResponses || {};
-            if (
-                !isHost &&
-                previousStatus === 'no-response' &&
-                newStatus !== 'no-response' &&
-                !event.rsvpFirstResponses[memberName]
-            ) {
-                event.rsvpFirstResponses[memberName] = {
-                    respondedAt: firebase.database.ServerValue.TIMESTAMP,
-                    timeZone: 'America/Los_Angeles',
-                    status: newStatus
-                };
-            }
-
-            return event;
-        });
+        await saveRSVPAndFirstResponse(eventId, memberName, newStatus);
         
         // Update local data
         await loadData();
