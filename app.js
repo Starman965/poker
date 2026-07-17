@@ -2328,9 +2328,9 @@ function renderAdminRsvpGroup(event, entries, status) {
 
 function renderAdminRsvpEntry(event, entry, responseRank) {
     const { name, status, firstResponse, isHost } = entry;
-    const detail = isHost
+    const firstResponseDetail = isHost
         ? 'Host — attending automatically'
-        : formatRsvpTimestamp(firstResponse?.respondedAt);
+        : `First RSVP: ${formatRsvpTimestamp(firstResponse?.respondedAt)}`;
     const changeHistory = renderAdminRsvpChangeHistory(
         event.rsvpChangeHistory?.[name]
     );
@@ -2342,7 +2342,7 @@ function renderAdminRsvpEntry(event, entry, responseRank) {
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid #eee;">
             <span style="flex: 1;">
                 <strong>${rank}${name}</strong>
-                <small style="display: block; color: #666;">${detail}</small>
+                <small style="display: block; color: #666;">${firstResponseDetail}</small>
                 ${changeHistory}
             </span>
             <select
@@ -2371,6 +2371,7 @@ function renderAdminRsvpChangeHistory(changeHistory) {
 
     return `
         <small style="display: block; margin-top: 4px; color: #666;">
+            <strong>Status change history:</strong><br>
             ${changes.map(change => `
                 ${formatRsvpTimestamp(change.changedAt)} — ${formatRsvpStatus(change.fromStatus)}
                 → ${formatRsvpStatus(change.toStatus)}
