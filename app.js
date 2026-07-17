@@ -922,7 +922,32 @@ async function submitRSVP() {
     const member = members[memberIndex];
     
     try {
-        await database.ref(`schedule/${eventId}/rsvps/${member.name}`).set(status);
+        // Update the RSVP and record its first response atomically. The
+        // server timestamp is the authoritative value for RSVP ordering;
+        // format it with America/Los_Angeles when displaying it.
+        await database.ref(`schedule/${eventId}`).transaction((event) => {
+            if (!event) {
+                return;
+            }
+
+            event.rsvps = event.rsvps || {};
+            const previousStatus = event.rsvps[member.name] || 'no-response';
+            event.rsvps[member.name] = status;
+
+            event.rsvpFirstResponses = event.rsvpFirstResponses || {};
+            if (
+                previousStatus === 'no-response' &&
+                !event.rsvpFirstResponses[member.name]
+            ) {
+                event.rsvpFirstResponses[member.name] = {
+                    respondedAt: firebase.database.ServerValue.TIMESTAMP,
+                    timeZone: 'America/Los_Angeles',
+                    status
+                };
+            }
+
+            return event;
+        });
         
         // Reload data
         await loadData();
@@ -2125,26 +2150,27 @@ function displayAdminEventsList() {
     
     let html = '';
     upcomingEvents.forEach(event => {
-        const rsvpCounts = getRSVPCounts(event.rsvps || {});
-        const rsvpList = Object.entries(event.rsvps || {})
-            .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-            .map(([name, status]) => {
-                return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
-                        <span style="flex: 1;">${name}</span>
-                        <select 
-                            class="form-select admin-rsvp-select" 
-                            style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px; color: ${getAdminRSVPTextColor(status)};"
-                            onchange="setAdminRSVPSelectColor(this); updateRSVP('${event.id}', '${name.replace(/'/g, "\\'")}', this.value)"
-                            >
-                            <option value="no-response" style="color: ${getAdminRSVPTextColor('no-response')};" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
-                            <option value="attending" style="color: ${getAdminRSVPTextColor('attending')};" ${status === 'attending' ? 'selected' : ''}>Attending</option>
-                            <option value="not-attending" style="color: ${getAdminRSVPTextColor('not-attending')};" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
-                            <option value="maybe" style="color: ${getAdminRSVPTextColor('maybe')};" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                        </select>
-                    </div>
-                `;
-            }).join('');
+        const rsvpEntries = getEventRsvpEntries(event);
+        const rsvpCounts = getRSVPCounts(
+            Object.fromEntries(rsvpEntries.map(({ name, status }) => [name, status]))
+        );
+        const rsvpGroups = {
+            attending: rsvpEntries.filter(entry => entry.status === 'attending'),
+            'not-attending': rsvpEntries.filter(entry => entry.status === 'not-attending'),
+            maybe: rsvpEntries.filter(entry => entry.status === 'maybe'),
+            'no-response': rsvpEntries.filter(entry => entry.status === 'no-response')
+        };
+        const rsvpList = [
+            ['attending', '✓ Attending'],
+            ['not-attending', '✗ Not Attending'],
+            ['maybe', '? Maybe'],
+            ['no-response', '- No Response']
+        ].map(([status, label]) => `
+            <div style="margin-bottom: 18px;">
+                <h4 style="color: ${getAdminRSVPTextColor(status)}; margin: 0 0 6px;">${label} (${rsvpGroups[status].length})</h4>
+                ${renderAdminRsvpGroup(event.id, rsvpGroups[status], status) || '<p class="text-muted" style="margin: 0;">No one yet.</p>'}
+            </div>
+        `).join('');
         
         html += `
             <div class="card" style="margin-bottom: 20px;">
@@ -2172,6 +2198,97 @@ function displayAdminEventsList() {
     });
     
     container.innerHTML = html;
+}
+
+function getEventRsvpEntries(event) {
+    const rsvps = { ...(event.rsvps || {}) };
+
+    // The host is attending automatically. Older events may still have the
+    // host saved as "no-response", so normalize that for the admin display.
+    if (event.host && (!rsvps[event.host] || rsvps[event.host] === 'no-response')) {
+        rsvps[event.host] = 'attending';
+    }
+
+    return Object.entries(rsvps)
+        .map(([name, status]) => ({
+            name,
+            status,
+            firstResponse: event.rsvpFirstResponses?.[name],
+            isHost: name === event.host
+        }))
+        .sort((a, b) => {
+            if (a.isHost !== b.isHost) return a.isHost ? -1 : 1;
+
+            const aTimestamp = a.firstResponse?.respondedAt;
+            const bTimestamp = b.firstResponse?.respondedAt;
+            if (typeof aTimestamp === 'number' && typeof bTimestamp === 'number') {
+                return aTimestamp - bTimestamp;
+            }
+            if (typeof aTimestamp === 'number') return -1;
+            if (typeof bTimestamp === 'number') return 1;
+            return a.name.localeCompare(b.name);
+        });
+}
+
+function formatRsvpTimestamp(timestamp) {
+    if (typeof timestamp !== 'number') {
+        return 'No first RSVP timestamp';
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: 'America/Los_Angeles',
+        timeZoneName: 'short'
+    }).format(new Date(timestamp));
+}
+
+function renderAdminRsvpGroup(eventId, entries, status) {
+    let responseRank = 0;
+
+    return entries.map(entry => {
+        const hasFirstResponse = !entry.isHost &&
+            status !== 'no-response' &&
+            typeof entry.firstResponse?.respondedAt === 'number';
+        return renderAdminRsvpEntry(
+            eventId,
+            entry,
+            hasFirstResponse ? ++responseRank : null
+        );
+    }).join('');
+}
+
+function renderAdminRsvpEntry(eventId, entry, responseRank) {
+    const { name, status, firstResponse, isHost } = entry;
+    const detail = isHost
+        ? 'Host — attending automatically'
+        : formatRsvpTimestamp(firstResponse?.respondedAt);
+    const rank = responseRank
+        ? `${responseRank}. `
+        : '';
+
+    return `
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid #eee;">
+            <span style="flex: 1;">
+                <strong>${rank}${name}</strong>
+                <small style="display: block; color: #666;">${detail}</small>
+            </span>
+            <select
+                class="form-select admin-rsvp-select"
+                style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px; color: ${getAdminRSVPTextColor(status)};"
+                ${isHost ? 'disabled title="The host is automatically attending."' : ''}
+                onchange="setAdminRSVPSelectColor(this); updateRSVP('${eventId}', '${name.replace(/'/g, "\\'")}', this.value)"
+                >
+                <option value="no-response" style="color: ${getAdminRSVPTextColor('no-response')};" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
+                <option value="attending" style="color: ${getAdminRSVPTextColor('attending')};" ${status === 'attending' ? 'selected' : ''}>Attending</option>
+                <option value="not-attending" style="color: ${getAdminRSVPTextColor('not-attending')};" ${status === 'not-attending' ? 'selected' : ''}>Not Attending</option>
+                <option value="maybe" style="color: ${getAdminRSVPTextColor('maybe')};" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+            </select>
+        </div>
+    `;
 }
 
 function getStatusColor(status) {
@@ -2226,6 +2343,9 @@ async function addEvent() {
     members.forEach(member => {
         newEvent.rsvps[member.name] = 'no-response';
     });
+    // A host is attending by definition; this is not a submitted RSVP and
+    // therefore deliberately has no first-response timestamp.
+    newEvent.rsvps[host] = 'attending';
     
     try {
         await database.ref('schedule').push(newEvent);
@@ -2312,8 +2432,35 @@ async function deleteEvent() {
 
 async function updateRSVP(eventId, memberName, newStatus) {
     try {
-        // Update the RSVP status in Firebase
-        await database.ref(`schedule/${eventId}/rsvps/${memberName}`).set(newStatus);
+        // Keep status updates and the first RSVP timestamp in one atomic
+        // operation. Hosts are already attending automatically, so an admin
+        // change for a host never creates an RSVP timestamp.
+        await database.ref(`schedule/${eventId}`).transaction((event) => {
+            if (!event) {
+                return;
+            }
+
+            event.rsvps = event.rsvps || {};
+            const previousStatus = event.rsvps[memberName] || 'no-response';
+            event.rsvps[memberName] = newStatus;
+
+            const isHost = event.host === memberName;
+            event.rsvpFirstResponses = event.rsvpFirstResponses || {};
+            if (
+                !isHost &&
+                previousStatus === 'no-response' &&
+                newStatus !== 'no-response' &&
+                !event.rsvpFirstResponses[memberName]
+            ) {
+                event.rsvpFirstResponses[memberName] = {
+                    respondedAt: firebase.database.ServerValue.TIMESTAMP,
+                    timeZone: 'America/Los_Angeles',
+                    status: newStatus
+                };
+            }
+
+            return event;
+        });
         
         // Update local data
         await loadData();
