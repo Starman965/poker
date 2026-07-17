@@ -949,6 +949,7 @@ async function saveRSVPAndFirstResponse(eventId, memberName, status) {
         previousStatus === 'no-response' &&
         status !== 'no-response' &&
         !firstResponse;
+    const shouldRecordStatusChange = previousStatus !== status;
     const statusPath = `schedule/${eventId}/rsvps/${memberName}`;
     const updates = {
         [statusPath]: status
@@ -959,6 +960,19 @@ async function saveRSVPAndFirstResponse(eventId, memberName, status) {
             respondedAt: firebase.database.ServerValue.TIMESTAMP,
             timeZone: 'America/Los_Angeles',
             status
+        };
+    }
+    if (shouldRecordStatusChange) {
+        const actor = getRsvpChangeActor(memberName);
+        const historyKey = database.ref(
+            `schedule/${eventId}/rsvpChangeHistory/${memberName}`
+        ).push().key;
+        updates[`schedule/${eventId}/rsvpChangeHistory/${memberName}/${historyKey}`] = {
+            fromStatus: previousStatus,
+            toStatus: status,
+            changedAt: firebase.database.ServerValue.TIMESTAMP,
+            changedBy: actor.label,
+            changedByType: actor.type
         };
     }
 
@@ -981,6 +995,20 @@ async function saveRSVPAndFirstResponse(eventId, memberName, status) {
         }
         await database.ref(statusPath).set(status);
     }
+}
+
+function getRsvpChangeActor(memberName) {
+    if (isAdmin && currentUser?.email) {
+        return {
+            type: 'admin',
+            label: currentUser.email
+        };
+    }
+
+    return {
+        type: 'member',
+        label: memberName
+    };
 }
 
 function showRSVPConfirmation(eventId, memberName, status) {
@@ -2201,7 +2229,7 @@ function displayAdminEventsList() {
         ].map(([status, label]) => `
             <div style="margin-bottom: 18px;">
                 <h4 style="color: ${getAdminRSVPTextColor(status)}; margin: 0 0 6px;">${label} (${rsvpGroups[status].length})</h4>
-                ${renderAdminRsvpGroup(event.id, rsvpGroups[status], status) || '<p class="text-muted" style="margin: 0;">No one yet.</p>'}
+                ${renderAdminRsvpGroup(event, rsvpGroups[status], status) || '<p class="text-muted" style="margin: 0;">No one yet.</p>'}
             </div>
         `).join('');
         
@@ -2279,7 +2307,7 @@ function formatRsvpTimestamp(timestamp) {
     }).format(new Date(timestamp));
 }
 
-function renderAdminRsvpGroup(eventId, entries, status) {
+function renderAdminRsvpGroup(event, entries, status) {
     let responseRank = status === 'attending' && entries.some(entry => entry.isHost) ? 1 : 0;
 
     return entries.map(entry => {
@@ -2287,7 +2315,7 @@ function renderAdminRsvpGroup(eventId, entries, status) {
             status !== 'no-response' &&
             typeof entry.firstResponse?.respondedAt === 'number';
         return renderAdminRsvpEntry(
-            eventId,
+            event,
             entry,
             entry.isHost && status === 'attending'
                 ? responseRank
@@ -2298,11 +2326,14 @@ function renderAdminRsvpGroup(eventId, entries, status) {
     }).join('');
 }
 
-function renderAdminRsvpEntry(eventId, entry, responseRank) {
+function renderAdminRsvpEntry(event, entry, responseRank) {
     const { name, status, firstResponse, isHost } = entry;
     const detail = isHost
         ? 'Host — attending automatically'
         : formatRsvpTimestamp(firstResponse?.respondedAt);
+    const changeHistory = renderAdminRsvpChangeHistory(
+        event.rsvpChangeHistory?.[name]
+    );
     const rank = responseRank
         ? `${responseRank}. `
         : '';
@@ -2312,12 +2343,13 @@ function renderAdminRsvpEntry(eventId, entry, responseRank) {
             <span style="flex: 1;">
                 <strong>${rank}${name}</strong>
                 <small style="display: block; color: #666;">${detail}</small>
+                ${changeHistory}
             </span>
             <select
                 class="form-select admin-rsvp-select"
                 style="width: auto; min-width: 150px; padding: 5px 10px; font-size: 14px; color: ${getAdminRSVPTextColor(status)};"
                 ${isHost ? 'disabled title="The host is automatically attending."' : ''}
-                onchange="setAdminRSVPSelectColor(this); updateRSVP('${eventId}', '${name.replace(/'/g, "\\'")}', this.value)"
+                onchange="setAdminRSVPSelectColor(this); updateRSVP('${event.id}', '${name.replace(/'/g, "\\'")}', this.value)"
                 >
                 <option value="no-response" style="color: ${getAdminRSVPTextColor('no-response')};" ${status === 'no-response' ? 'selected' : ''}>No Response</option>
                 <option value="attending" style="color: ${getAdminRSVPTextColor('attending')};" ${status === 'attending' ? 'selected' : ''}>Attending</option>
@@ -2326,6 +2358,35 @@ function renderAdminRsvpEntry(eventId, entry, responseRank) {
             </select>
         </div>
     `;
+}
+
+function renderAdminRsvpChangeHistory(changeHistory) {
+    const changes = Object.values(changeHistory || {})
+        .filter(change => typeof change?.changedAt === 'number')
+        .sort((a, b) => a.changedAt - b.changedAt);
+
+    if (changes.length === 0) {
+        return '';
+    }
+
+    return `
+        <small style="display: block; margin-top: 4px; color: #666;">
+            ${changes.map(change => `
+                ${formatRsvpTimestamp(change.changedAt)} — ${formatRsvpStatus(change.fromStatus)}
+                → ${formatRsvpStatus(change.toStatus)}
+                (${change.changedByType === 'admin' ? 'Admin' : 'Member'}: ${change.changedBy})
+            `).join('<br>')}
+        </small>
+    `;
+}
+
+function formatRsvpStatus(status) {
+    return {
+        attending: 'Attending',
+        'not-attending': 'Not Attending',
+        maybe: 'Maybe',
+        'no-response': 'No Response'
+    }[status] || status;
 }
 
 function getStatusColor(status) {
