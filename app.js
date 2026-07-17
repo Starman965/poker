@@ -1082,7 +1082,7 @@ function displayRSVPSummary(eventId) {
 }
 
 function renderRsvpSummaryEntries(entries, status) {
-    let responseRank = 0;
+    let responseRank = status === 'attending' && entries.some(entry => entry.isHost) ? 1 : 0;
 
     return entries.map(entry => {
         const hasFirstResponse = !entry.isHost &&
@@ -1093,7 +1093,11 @@ function renderRsvpSummaryEntries(entries, status) {
             : status === 'no-response'
                 ? ''
                 : formatRsvpTimestamp(entry.firstResponse?.respondedAt);
-        const rank = hasFirstResponse ? `${++responseRank}. ` : '';
+        const rank = entry.isHost && status === 'attending'
+            ? `${responseRank}. `
+            : hasFirstResponse
+                ? `${++responseRank}. `
+                : '';
 
         return `
             <li>
@@ -2276,7 +2280,7 @@ function formatRsvpTimestamp(timestamp) {
 }
 
 function renderAdminRsvpGroup(eventId, entries, status) {
-    let responseRank = 0;
+    let responseRank = status === 'attending' && entries.some(entry => entry.isHost) ? 1 : 0;
 
     return entries.map(entry => {
         const hasFirstResponse = !entry.isHost &&
@@ -2285,7 +2289,11 @@ function renderAdminRsvpGroup(eventId, entries, status) {
         return renderAdminRsvpEntry(
             eventId,
             entry,
-            hasFirstResponse ? ++responseRank : null
+            entry.isHost && status === 'attending'
+                ? responseRank
+                : hasFirstResponse
+                    ? ++responseRank
+                    : null
         );
     }).join('');
 }
