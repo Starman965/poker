@@ -1042,59 +1042,66 @@ function displayRSVPSummary(eventId) {
         return;
     }
     
+    const rsvpEntries = getEventRsvpEntries(event);
     const summary = {
-        attending: [],
-        notAttending: [],
-        maybe: [],
-        noResponse: []
+        attending: rsvpEntries.filter(entry => entry.status === 'attending'),
+        notAttending: rsvpEntries.filter(entry => entry.status === 'not-attending'),
+        maybe: rsvpEntries.filter(entry => entry.status === 'maybe'),
+        noResponse: rsvpEntries.filter(entry => entry.status === 'no-response')
     };
-    
-    // Categorize RSVPs
-    Object.entries(event.rsvps).forEach(([name, status]) => {
-        switch(status) {
-            case 'attending':
-                summary.attending.push(name);
-                break;
-            case 'not-attending':
-                summary.notAttending.push(name);
-                break;
-            case 'maybe':
-                summary.maybe.push(name);
-                break;
-            default:
-                summary.noResponse.push(name);
-        }
-    });
     
     // Create HTML for summary
     const summaryHTML = `
         <div class="rsvp-category">
             <h3>✓ Attending (${summary.attending.length})</h3>
             <ul class="rsvp-list">
-                ${summary.attending.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+                ${renderRsvpSummaryEntries(summary.attending, 'attending') || '<li style="color: var(--light-text);">No one yet</li>'}
             </ul>
         </div>
         <div class="rsvp-category">
             <h3>✗ Not Attending (${summary.notAttending.length})</h3>
             <ul class="rsvp-list">
-                ${summary.notAttending.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+                ${renderRsvpSummaryEntries(summary.notAttending, 'not-attending') || '<li style="color: var(--light-text);">No one yet</li>'}
             </ul>
         </div>
         <div class="rsvp-category">
             <h3>? Maybe (${summary.maybe.length})</h3>
             <ul class="rsvp-list">
-                ${summary.maybe.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">No one yet</li>'}
+                ${renderRsvpSummaryEntries(summary.maybe, 'maybe') || '<li style="color: var(--light-text);">No one yet</li>'}
             </ul>
         </div>
         <div class="rsvp-category">
             <h3>No Response (${summary.noResponse.length})</h3>
             <ul class="rsvp-list">
-                ${summary.noResponse.map(name => `<li>${name}</li>`).join('') || '<li style="color: var(--light-text);">Everyone has responded!</li>'}
+                ${renderRsvpSummaryEntries(summary.noResponse, 'no-response') || '<li style="color: var(--light-text);">Everyone has responded!</li>'}
             </ul>
         </div>
     `;
     
     document.getElementById('rsvpSummaryContent').innerHTML = summaryHTML;
+}
+
+function renderRsvpSummaryEntries(entries, status) {
+    let responseRank = 0;
+
+    return entries.map(entry => {
+        const hasFirstResponse = !entry.isHost &&
+            status !== 'no-response' &&
+            typeof entry.firstResponse?.respondedAt === 'number';
+        const detail = entry.isHost
+            ? 'Host — attending automatically'
+            : status === 'no-response'
+                ? ''
+                : formatRsvpTimestamp(entry.firstResponse?.respondedAt);
+        const rank = hasFirstResponse ? `${++responseRank}. ` : '';
+
+        return `
+            <li>
+                <strong>${rank}${entry.name}</strong>
+                ${detail ? `<small style="display: block; color: var(--light-text);">${detail}</small>` : ''}
+            </li>
+        `;
+    }).join('');
 }
 
 function resetRSVPForm() {
