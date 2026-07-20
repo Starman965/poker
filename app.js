@@ -2946,26 +2946,19 @@ function sendReminderEmail(eventId) {
     }
     
     const rsvpLink = `https://www.danvillepokergroup.com/?event=${eventId}#rsvp`;
-    const attendees = [];
-    const maybes = [];
-    const notAttending = [];
-    const noResponse = [];
-    
-    Object.entries(event.rsvps || {}).forEach(([name, status]) => {
-        switch(status) {
-            case 'attending':
-                attendees.push(name);
-                break;
-            case 'maybe':
-                maybes.push(name);
-                break;
-            case 'not-attending':
-                notAttending.push(name);
-                break;
-            default:
-                noResponse.push(name);
-        }
-    });
+    const rsvpEntries = getEventRsvpEntries(event);
+    const attendees = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'attending')
+    );
+    const maybes = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'maybe')
+    );
+    const notAttending = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'not-attending')
+    );
+    const noResponse = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'no-response')
+    );
     
     const subject = encodeURIComponent(`[DanvillePoker] Poker Night - ${formatDate(event.date)} @ 6:30pm - Host: ${event.host}`);
     const body = encodeURIComponent(`Danville Poker Group,
@@ -2979,16 +2972,16 @@ Host: ${event.host}
 
 Current RSVP Status:
 Attending (${attendees.length}):
-${attendees.join('\n')}
+${attendees.map(formatReminderRsvpEntry).join('\n')}
 
 Not Attending (${notAttending.length}):
-${notAttending.join('\n')}
+${notAttending.map(formatReminderRsvpEntry).join('\n')}
 
 Maybe (${maybes.length}):
-${maybes.join('\n')}
+${maybes.map(formatReminderRsvpEntry).join('\n')}
 
 No Response Yet (${noResponse.length}):
-${noResponse.join('\n')}
+${noResponse.map(formatReminderRsvpEntry).join('\n')}
 
 To those who haven't RSVP'd or are still in the "Maybe" category, please RSVP as soon as possible so we can get a final count. You can submit or update your RSVP here:
 ${rsvpLink}
@@ -3002,6 +2995,17 @@ P.S. Don't forget to check out www.danvillepokergroup.com for photos, event cale
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=DanvillePoker@groups.io&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
+}
+
+function formatReminderRsvpEntry(entry) {
+    if (entry.isHost) {
+        return `${entry.name} — Host (automatic attending)`;
+    }
+
+    const latestRsvpTimestamp = getLatestRsvpTimestamp(entry);
+    return typeof latestRsvpTimestamp === 'number'
+        ? `${entry.name} — Latest RSVP: ${formatRsvpTimestamp(latestRsvpTimestamp)}`
+        : `${entry.name} — No RSVP timestamp`;
 }
 
 function sendNonRespondersEmail(eventId) {
