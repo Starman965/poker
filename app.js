@@ -2240,10 +2240,18 @@ function displayAdminEventsList() {
             Object.fromEntries(rsvpEntries.map(({ name, status }) => [name, status]))
         );
         const rsvpGroups = {
-            attending: rsvpEntries.filter(entry => entry.status === 'attending'),
-            'not-attending': rsvpEntries.filter(entry => entry.status === 'not-attending'),
-            maybe: rsvpEntries.filter(entry => entry.status === 'maybe'),
-            'no-response': rsvpEntries.filter(entry => entry.status === 'no-response')
+            attending: sortRsvpEntriesByLatestResponse(
+                rsvpEntries.filter(entry => entry.status === 'attending')
+            ),
+            'not-attending': sortRsvpEntriesByLatestResponse(
+                rsvpEntries.filter(entry => entry.status === 'not-attending')
+            ),
+            maybe: sortRsvpEntriesByLatestResponse(
+                rsvpEntries.filter(entry => entry.status === 'maybe')
+            ),
+            'no-response': sortRsvpEntriesByLatestResponse(
+                rsvpEntries.filter(entry => entry.status === 'no-response')
+            )
         };
         const rsvpList = [
             ['attending', '✓ Attending'],
