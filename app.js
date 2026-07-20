@@ -2330,7 +2330,7 @@ function renderAdminRsvpEntry(event, entry, responseRank) {
     const { name, status, firstResponse, isHost } = entry;
     const firstResponseDetail = isHost
         ? 'Host — attending automatically'
-        : `First RSVP: ${formatRsvpTimestamp(firstResponse?.respondedAt)}`;
+        : `First RSVP: ${formatRsvpStatus(firstResponse?.status)} — ${formatRsvpTimestamp(firstResponse?.respondedAt)}`;
     const changeHistory = renderAdminRsvpChangeHistory(
         event.rsvpChangeHistory?.[name],
         firstResponse
