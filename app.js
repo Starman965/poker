@@ -674,29 +674,22 @@ function createEventCard(event, isCurrent = false) {
     const card = document.createElement('div');
     card.className = 'event-card' + (isCurrent ? ' current-event' : '');
     
-    const rsvpCounts = getRSVPCounts(event.rsvps || {});
-    
-    // Create RSVP lists by status
-    const attendingList = [];
-    const notAttendingList = [];
-    const maybeList = [];
-    const noResponseList = [];
-    
-    Object.entries(event.rsvps || {}).forEach(([name, status]) => {
-        switch(status) {
-            case 'attending':
-                attendingList.push(name);
-                break;
-            case 'not-attending':
-                notAttendingList.push(name);
-                break;
-            case 'maybe':
-                maybeList.push(name);
-                break;
-            default:
-                noResponseList.push(name);
-        }
-    });
+    const rsvpEntries = getEventRsvpEntries(event);
+    const rsvpCounts = getRSVPCounts(
+        Object.fromEntries(rsvpEntries.map(({ name, status }) => [name, status]))
+    );
+    const attendingList = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'attending')
+    );
+    const notAttendingList = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'not-attending')
+    );
+    const maybeList = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'maybe')
+    );
+    const noResponseList = sortRsvpEntriesByLatestResponse(
+        rsvpEntries.filter(entry => entry.status === 'no-response')
+    );
     
     card.innerHTML = `
         <div class="event-header">
@@ -732,25 +725,25 @@ function createEventCard(event, isCurrent = false) {
                 ${attendingList.length > 0 ? `
                     <div class="rsvp-list">
                         <h4 style="color: #27ae60;">✓ Attending (${attendingList.length})</h4>
-                        <p>${attendingList.join(', ')}</p>
+                        <ul>${renderRsvpSummaryEntries(attendingList, 'attending')}</ul>
                     </div>
                 ` : ''}
                 ${notAttendingList.length > 0 ? `
                     <div class="rsvp-list">
                         <h4 style="color: #e74c3c;">✗ Not Attending (${notAttendingList.length})</h4>
-                        <p>${notAttendingList.join(', ')}</p>
+                        <ul>${renderRsvpSummaryEntries(notAttendingList, 'not-attending')}</ul>
                     </div>
                 ` : ''}
                 ${maybeList.length > 0 ? `
                     <div class="rsvp-list">
                         <h4 style="color: #f39c12;">? Maybe (${maybeList.length})</h4>
-                        <p>${maybeList.join(', ')}</p>
+                        <ul>${renderRsvpSummaryEntries(maybeList, 'maybe')}</ul>
                     </div>
                 ` : ''}
                 ${noResponseList.length > 0 ? `
                     <div class="rsvp-list">
                         <h4 style="color: #95a5a6;">- No Response (${noResponseList.length})</h4>
-                        <p>${noResponseList.join(', ')}</p>
+                        <ul>${renderRsvpSummaryEntries(noResponseList, 'no-response')}</ul>
                     </div>
                 ` : ''}
             </div>
