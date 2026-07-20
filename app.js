@@ -1072,10 +1072,18 @@ function displayRSVPSummary(eventId) {
     
     const rsvpEntries = getEventRsvpEntries(event);
     const summary = {
-        attending: rsvpEntries.filter(entry => entry.status === 'attending'),
-        notAttending: rsvpEntries.filter(entry => entry.status === 'not-attending'),
-        maybe: rsvpEntries.filter(entry => entry.status === 'maybe'),
-        noResponse: rsvpEntries.filter(entry => entry.status === 'no-response')
+        attending: sortRsvpEntriesByLatestResponse(
+            rsvpEntries.filter(entry => entry.status === 'attending')
+        ),
+        notAttending: sortRsvpEntriesByLatestResponse(
+            rsvpEntries.filter(entry => entry.status === 'not-attending')
+        ),
+        maybe: sortRsvpEntriesByLatestResponse(
+            rsvpEntries.filter(entry => entry.status === 'maybe')
+        ),
+        noResponse: sortRsvpEntriesByLatestResponse(
+            rsvpEntries.filter(entry => entry.status === 'no-response')
+        )
     };
     
     // Create HTML for summary
@@ -1113,17 +1121,18 @@ function renderRsvpSummaryEntries(entries, status) {
     let responseRank = status === 'attending' && entries.some(entry => entry.isHost) ? 1 : 0;
 
     return entries.map(entry => {
-        const hasFirstResponse = !entry.isHost &&
+        const latestRsvpTimestamp = getLatestRsvpTimestamp(entry);
+        const hasLatestResponse = !entry.isHost &&
             status !== 'no-response' &&
-            typeof entry.firstResponse?.respondedAt === 'number';
+            typeof latestRsvpTimestamp === 'number';
         const detail = entry.isHost
             ? 'Host — attending automatically'
             : status === 'no-response'
                 ? ''
-                : formatRsvpTimestamp(entry.firstResponse?.respondedAt);
+                : `Latest RSVP: ${formatRsvpTimestamp(latestRsvpTimestamp)}`;
         const rank = entry.isHost && status === 'attending'
             ? `${responseRank}. `
-            : hasFirstResponse
+            : hasLatestResponse
                 ? `${++responseRank}. `
                 : '';
 
@@ -1134,6 +1143,21 @@ function renderRsvpSummaryEntries(entries, status) {
             </li>
         `;
     }).join('');
+}
+
+function sortRsvpEntriesByLatestResponse(entries) {
+    return [...entries].sort((a, b) => {
+        if (a.isHost !== b.isHost) return a.isHost ? -1 : 1;
+
+        const aTimestamp = getLatestRsvpTimestamp(a);
+        const bTimestamp = getLatestRsvpTimestamp(b);
+        if (typeof aTimestamp === 'number' && typeof bTimestamp === 'number') {
+            return aTimestamp - bTimestamp;
+        }
+        if (typeof aTimestamp === 'number') return -1;
+        if (typeof bTimestamp === 'number') return 1;
+        return a.name.localeCompare(b.name);
+    });
 }
 
 function resetRSVPForm() {
@@ -2275,6 +2299,7 @@ function getEventRsvpEntries(event) {
             name,
             status,
             firstResponse: event.rsvpFirstResponses?.[name],
+            changeHistory: event.rsvpChangeHistory?.[name],
             isHost: name === event.host
         }))
         .sort((a, b) => {
@@ -2289,6 +2314,18 @@ function getEventRsvpEntries(event) {
             if (typeof bTimestamp === 'number') return 1;
             return a.name.localeCompare(b.name);
         });
+}
+
+function getLatestRsvpTimestamp(entry) {
+    const changeTimestamps = Object.values(entry.changeHistory || {})
+        .map(change => change?.changedAt)
+        .filter(timestamp => typeof timestamp === 'number');
+
+    if (changeTimestamps.length > 0) {
+        return Math.max(...changeTimestamps);
+    }
+
+    return entry.firstResponse?.respondedAt;
 }
 
 function formatRsvpTimestamp(timestamp) {
