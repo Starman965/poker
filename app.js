@@ -3002,6 +3002,9 @@ function formatReminderRsvpEntry(entry) {
     if (entry.isHost) {
         return `${entry.name} — Host (automatic attending)`;
     }
+    if (entry.status === 'no-response') {
+        return entry.name;
+    }
 
     const latestRsvpTimestamp = getLatestRsvpTimestamp(entry);
     return typeof latestRsvpTimestamp === 'number'
